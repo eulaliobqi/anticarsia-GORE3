@@ -154,7 +154,8 @@ Com genoma de referência, o custo computacional é modesto. Índice STAR de um 
 
 | # | Risco | Prob. | Impacto | Mitigação |
 |---|---|---|---|---|
-| 1 | **Sequência do GORE3 indefinida** | Alta | 🔴 Crítico | Confirmar com supervisora/Daniel Paulo **antes** de qualquer modelagem. Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1 |
+| 1 | ~~Sequência do GORE3 indefinida~~ | — | ✅ **Resolvido** | GORE3 = `LALAY`, confirmado 18/07/2026. Risco substituído pelo #1b |
+| 1b | **Sítio de ligação do GORE3 incerto** — sem resíduo básico, não ancora no Asp189/S1 | Alta | 🟠 Médio-alto | Testar S1 **e** S'2; *blind docking* prévio. Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1.1 |
 | 2 | Atraso no sequenciamento | Média | 🔴 Alto | Avançar bloco estrutural em paralelo; reprocessar PRJNA1494060 como piloto do pipeline |
 | 3 | Anotação automática incompleta para tripsinas | Média | 🟡 Médio | Montagem Trinity paralela + busca HMMER dirigida |
 | 4 | Réplicas insuficientes para splicing | Média | 🟡 Médio | rMATS/DEXSeq exigem mais poder que DE simples. Definir n antes de sequenciar — depois é tarde |
@@ -168,7 +169,7 @@ Com genoma de referência, o custo computacional é modesto. Índice STAR de um 
 
 ### Enquanto o sequenciamento não chega
 
-1. **Resolver a pendência da sequência do GORE3** — bloqueia tudo no bloco estrutural
+1. ✅ ~~Resolver a pendência da sequência do GORE3~~ — feito: `LALAY`
 2. **Decidir o campo de força** — bloqueia todo o MD
 3. **Consolidar o docking já feito** — os `.tgz` do HADDOCK contêm resultados ainda não analisados de forma unificada
 4. **Baixar e indexar `GCF_050436995.1`**

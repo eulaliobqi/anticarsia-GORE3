@@ -39,11 +39,15 @@ Pipelines Nextflow maduros, setups GROMACS validados, estruturas de tripsina já
 
 Ver [`04_viabilidade.md`](04_viabilidade.md).
 
-### 3. A sequência do GORE3 não está confirmada documentalmente
+### 3. GORE3 = `LALAY` — e isso muda o desenho do docking
 
-Este é o ponto mais sensível. Não foi localizado nenhum documento que declare textualmente a sequência de aminoácidos do GORE3. Há evidência estrutural (`LALAY`, extraída de arquivos PDB locais), mas ela **não bate** com os peptídeos nomeados na publicação mais recente do grupo. Precisa ser resolvido com a supervisora antes de qualquer modelagem.
+**Confirmado em 18/07/2026:** GORE3 é o pentapeptídeo **`LALAY`** (Leu-Ala-Leu-Ala-Tyr).
 
-Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md), seção 1.
+A consequência é técnica e importante: `LALAY` **não tem nenhum resíduo básico**. O subsítio S1 da tripsina é ancorado no **Asp189**, que liga cadeias laterais de Lys/Arg — razão pela qual os demais peptídeos publicados da série terminam em K ou R. O GORE3 não faz essa ponte salina.
+
+Portanto o modo de ligação do GORE3 é **pergunta em aberto, não premissa**. A metodologia do `.docx`, que posiciona a caixa de docking sobre o sítio catalítico por pressuposição, precisa ser revista para testar S1 e S'2 explicitamente — e um *blind docking* prévio passa a ser recomendável.
+
+Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1.1 e [`05_lacunas_e_hipoteses.md`](05_lacunas_e_hipoteses.md) §5.
 
 ---
 

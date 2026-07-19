@@ -51,11 +51,15 @@ Pipelines Nextflow maduros, setups GROMACS validados, estruturas de tripsina já
 
 Ver [`04_viabilidade.md`](04_viabilidade.md).
 
-#### 3. A sequência do GORE3 não está confirmada documentalmente
+#### 3. GORE3 = `LALAY` — e isso muda o desenho do docking
 
-Este é o ponto mais sensível. Não foi localizado nenhum documento que declare textualmente a sequência de aminoácidos do GORE3. Há evidência estrutural (`LALAY`, extraída de arquivos PDB locais), mas ela **não bate** com os peptídeos nomeados na publicação mais recente do grupo. Precisa ser resolvido com a supervisora antes de qualquer modelagem.
+**Confirmado em 18/07/2026:** GORE3 é o pentapeptídeo **`LALAY`** (Leu-Ala-Leu-Ala-Tyr).
 
-Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md), seção 1.
+A consequência é técnica e importante: `LALAY` **não tem nenhum resíduo básico**. O subsítio S1 da tripsina é ancorado no **Asp189**, que liga cadeias laterais de Lys/Arg — razão pela qual os demais peptídeos publicados da série terminam em K ou R. O GORE3 não faz essa ponte salina.
+
+Portanto o modo de ligação do GORE3 é **pergunta em aberto, não premissa**. A metodologia do `.docx`, que posiciona a caixa de docking sobre o sítio catalítico por pressuposição, precisa ser revista para testar S1 e S'2 explicitamente — e um *blind docking* prévio passa a ser recomendável.
+
+Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1.1 e [`05_lacunas_e_hipoteses.md`](05_lacunas_e_hipoteses.md) §5.
 
 ---
 
@@ -340,6 +344,15 @@ Ressalva dos próprios autores, que vale reproduzir na discussão do projeto: es
 
 Aqui é preciso separar o que está publicado do que está em documento interno.
 
+#### Sequência
+
+> **GORE3 = `LALAY`** — Leu-Ala-Leu-Ala-Tyr, pentapeptídeo.
+> Confirmado pelo pesquisador em 18/07/2026.
+
+Composição relevante para a análise estrutural: **nenhum resíduo básico**. Dois Leu (hidrofóbicos), dois Ala (pequenos), uma Tyr (aromática, com hidroxila).
+
+Isso distingue o GORE3 dos demais peptídeos da série já publicados, que terminam em Lys ou Arg justamente para ocupar o subsítio S1 da tripsina — ancorado no Asp189. O GORE3 não pode formar essa ponte salina, o que torna seu modo de ligação uma pergunta em aberto e não uma premissa. Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1.1 e [`05_lacunas_e_hipoteses.md`](05_lacunas_e_hipoteses.md) §5.
+
 #### O que consta do resumo interno (`GORE3-abstract.docx`)
 
 > ⚠️ **Fonte não revisada por pares.** Os dados abaixo vêm do resumo do próprio projeto e de comunicação interna do grupo. Devem ser tratados como resultados preliminares até publicação.
@@ -389,14 +402,14 @@ Extraídos diretamente de arquivos PDB (leitura dos carbonos-α), portanto **seq
 
 | Sequência | Arquivo | Rótulo atribuído |
 |---|---|---|
-| `LALAY` | `analise-alosterica\data\LALAY.pdb`; `Paper-Daniel-Pablo\RE-Docking-1BTY-trypsin-GORE3\GORE3-PEPFOLD4.pdb` | GORE3 ⚠️ (por caminho de arquivo) |
+| `LALAY` | `analise-alosterica\data\LALAY.pdb`; `Paper-Daniel-Pablo\RE-Docking-1BTY-trypsin-GORE3\GORE3-PEPFOLD4.pdb` | **GORE3** ✅ confirmado |
 | `LALAK` | `Spodoptera-GORE4\...\cluster1_1.pdb`; `MD-gromacs\poses\acr157-gore4-c1\ligand.pdb` | GORE4 ⚠️ |
 | `LALAR` | `analise-alosterica\data\LALAR.pdb` | Variante ⚠️ |
 | 75-mer VLR/VLK | `Milena-MD\data\GORE12T-ligand.pdb` | GORE 1-2 T |
 
-**Problema não resolvido:** `LALAY` não aparece entre os peptídeos nomeados em Paulo et al. (2026) (`TGPCK`/`TGPCR`/`AVIMK`/`AVIMR`), embora a pasta local se chame `Paper-Daniel-Pablo` e Daniel Guimarães Silva Paulo seja o primeiro autor daquele artigo. Isso pode significar (a) que o GORE3 é uma molécula distinta das quatro publicadas, (b) que a nomenclatura interna mudou, ou (c) que os arquivos `LALAY` pertencem a outra linha de trabalho.
+**Ponto em aberto (não bloqueante):** `LALAY` não aparece entre os peptídeos nomeados em Paulo et al. (2026) (`TGPCK`/`TGPCR`/`AVIMK`/`AVIMR`). Como a sequência do GORE3 está confirmada, a leitura mais provável é que ele pertença a uma linha de trabalho distinta daquela publicação — possivelmente ainda inédita.
 
-**Não é possível resolver isso a partir dos arquivos.** Requer confirmação com a supervisora ou com Daniel Paulo antes de qualquer modelagem estrutural. Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1.
+Isso importa para a **escrita da introdução**: define se o GORE3 é apresentado como continuação direta de Paulo et al. (2026) ou como desenvolvimento paralelo. Confirmar com a supervisora. As sequências de GORE1, GORE2 e GORE5–13 seguem sem correspondência documentada.
 
 ---
 
@@ -878,7 +891,8 @@ Com genoma de referência, o custo computacional é modesto. Índice STAR de um 
 
 | # | Risco | Prob. | Impacto | Mitigação |
 |---|---|---|---|---|
-| 1 | **Sequência do GORE3 indefinida** | Alta | 🔴 Crítico | Confirmar com supervisora/Daniel Paulo **antes** de qualquer modelagem. Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1 |
+| 1 | ~~Sequência do GORE3 indefinida~~ | — | ✅ **Resolvido** | GORE3 = `LALAY`, confirmado 18/07/2026. Risco substituído pelo #1b |
+| 1b | **Sítio de ligação do GORE3 incerto** — sem resíduo básico, não ancora no Asp189/S1 | Alta | 🟠 Médio-alto | Testar S1 **e** S'2; *blind docking* prévio. Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1.1 |
 | 2 | Atraso no sequenciamento | Média | 🔴 Alto | Avançar bloco estrutural em paralelo; reprocessar PRJNA1494060 como piloto do pipeline |
 | 3 | Anotação automática incompleta para tripsinas | Média | 🟡 Médio | Montagem Trinity paralela + busca HMMER dirigida |
 | 4 | Réplicas insuficientes para splicing | Média | 🟡 Médio | rMATS/DEXSeq exigem mais poder que DE simples. Definir n antes de sequenciar — depois é tarde |
@@ -892,7 +906,7 @@ Com genoma de referência, o custo computacional é modesto. Índice STAR de um 
 
 #### Enquanto o sequenciamento não chega
 
-1. **Resolver a pendência da sequência do GORE3** — bloqueia tudo no bloco estrutural
+1. ✅ ~~Resolver a pendência da sequência do GORE3~~ — feito: `LALAY`
 2. **Decidir o campo de força** — bloqueia todo o MD
 3. **Consolidar o docking já feito** — os `.tgz` do HADDOCK contêm resultados ainda não analisados de forma unificada
 4. **Baixar e indexar `GCF_050436995.1`**
@@ -1042,7 +1056,27 @@ A cinética publicada indica **inibição competitiva** para GORE1, GORE2, GORE 
 
 Mas a metodologia do projeto **assume** S1 ao posicionar a caixa de docking manualmente sobre o sítio catalítico. Isso não testa a hipótese; pressupõe-a.
 
-**Recomendação:** testar ambos explicitamente. Um resultado negativo para S'2 é informativo e fecha a questão; um positivo seria um achado mecanístico relevante.
+#### A composição do GORE3 torna essa pergunta urgente
+
+Com a sequência confirmada — **`LALAY`** = Leu-Ala-Leu-Ala-Tyr — a questão deixa de ser especulativa.
+
+`LALAY` **não contém nenhum resíduo básico**. E o subsítio S1 da tripsina é definido pelo **Asp189** no fundo do bolsão, que ancora cadeias laterais de Lys/Arg por interação eletrostática. É exatamente por isso que os peptídeos de Paulo et al. (2026) terminam em **K** ou **R** (`TGPCK`, `TGPCR`, `AVIMK`, `AVIMR`) — eles reproduzem o resíduo P1 de um substrato canônico de tripsina.
+
+**O GORE3 não pode fazer isso.**
+
+Se a inibição competitiva do GORE3 se confirmar, restam duas explicações:
+
+- **(a) Ocupação da fenda por subsítios não-S1** — S2/S3, via contatos hidrofóbicos (dois Leu) e empilhamento aromático (Tyr). Competitivo sem P1 canônico.
+- **(b) Ligação em sítio distinto**, com efeito competitivo indireto — o que traria o **S'2** para o centro da explicação.
+
+Nos dois casos, o mecanismo do GORE3 seria **diferente** do dos demais peptídeos da série. Isso não é um problema: é potencialmente o achado mais interessante do projeto, e explicaria por que o GORE3 se comporta de forma distinta de GORE1/GORE2 nos ensaios do grupo.
+
+**Recomendação revisada:**
+
+1. ***Blind docking*** sobre a superfície inteira da enzima, **antes** do docking dirigido — para não impor o resultado
+2. Docking dirigido comparativo **S1 × S'2**
+3. MD a partir das poses de ambos os sítios; a estabilidade decide
+4. Comparar com um peptídeo da série que **tenha** resíduo básico, como controle interno de mecanismo
 
 ---
 
@@ -1080,6 +1114,13 @@ Formuladas para serem falsificáveis, cada uma com o teste correspondente.
 
 **Teste:** rMATS/DEXSeq sobre alinhamento genômico.
 **Nota:** é objetivo declarado do projeto e **nunca foi executado** em nenhum trabalho da série.
+
+#### H6 — Modo de ligação não canônico
+> O GORE3 (`LALAY`), por não possuir resíduo básico, inibe as tripsinas de *A. gemmatalis* por um modo de ligação distinto do P1-Asp189 canônico usado pelos demais peptídeos da série.
+
+**Teste:** *blind docking* → docking dirigido S1 × S'2 → MD comparativa; análise de contatos por resíduo e decomposição de energia livre por resíduo.
+**Falsificação:** se o GORE3 ocupar S1 de forma estável e com energia comparável à de um peptídeo com Lys/Arg em P1, H6 cai.
+**Por que importa:** se confirmada, é a explicação mecanística para o GORE3 se comportar de modo diferente de GORE1/GORE2 — e abre uma rota de otimização independente da química de P1.
 
 ---
 
@@ -1361,11 +1402,33 @@ Este arquivo existe para que nada nesta base teórica seja tomado como fato sem 
 
 ---
 
-### 1. 🔴 A sequência do GORE3 NÃO está confirmada
+### 1. ✅ RESOLVIDO — sequência do GORE3
 
-**Esta é a pendência mais importante do projeto. Bloqueia toda a modelagem estrutural.**
+> **GORE3 = `LALAY`** (Leu-Ala-Leu-Ala-Tyr), pentapeptídeo.
+> **Confirmado pelo pesquisador (Eulálio) em 18/07/2026.**
 
-#### O que foi encontrado
+A confirmação bate com a evidência estrutural independente extraída dos arquivos PDB locais (abaixo), o que fecha a questão para efeito de modelagem.
+
+**Fica em aberto, e não é bloqueante:** `LALAY` não consta dos peptídeos nomeados em Paulo et al. (2026) — `TGPCK`, `TGPCR`, `AVIMK`, `AVIMR`. Isso indica que o GORE3 pertence a uma linha de trabalho distinta daquela publicação, provavelmente ainda não publicada. Vale confirmar antes de escrever a introdução, porque muda como o GORE3 é posicionado em relação à literatura do grupo.
+
+**Continua pendente:** a correspondência nome ↔ sequência do restante da série (GORE1, GORE2, GORE5–GORE13). Ver §1.1.
+
+#### 1.1 Consequência estrutural — atenção antes do docking
+
+`LALAY` **não possui nenhum resíduo básico** (sem Lys, Arg ou His).
+
+Isso importa: o bolsão de especificidade **S1** da tripsina tem o **Asp189** no fundo, e é ele que ancora cadeias laterais de Lys/Arg por ponte salina. É essa a razão de os pentapeptídeos de Paulo et al. (2026) terminarem em K ou R — eles reproduzem o P1 canônico de um substrato de tripsina.
+
+O GORE3 não pode formar essa interação. Se a cinética indica inibição competitiva (documento interno ⚠️), então uma de duas coisas:
+
+- **(a)** ocupa a fenda catalítica por **outros subsítios** (S2/S3), via contatos hidrofóbicos — plausível, dados os dois resíduos de Leu e a Tyr aromática
+- **(b)** liga-se a um **sítio distinto**, e o efeito competitivo é indireto
+
+Isso dá sustentação concreta à investigação do sítio **S'2** conduzida na linha `analise-alosterica` — e reforça a recomendação de [`03_metodologia_padrao_ouro.md`](03_metodologia_padrao_ouro.md) §5 de **testar S1 e S'2 explicitamente**, em vez de posicionar a caixa de docking sobre o sítio catalítico por pressuposição, como o `.docx` propõe.
+
+Um docking cego (*blind docking*) sobre a superfície inteira da enzima, antes do docking dirigido, passa a ser recomendável neste caso específico.
+
+#### O que havia sido encontrado nos arquivos (evidência independente)
 
 Nenhum documento localizado declara textualmente a sequência de aminoácidos do GORE3. O que existe é evidência **estrutural indireta**: extração dos carbonos-α de arquivos PDB locais.
 
@@ -1378,20 +1441,6 @@ Nenhum documento localizado declara textualmente a sequência de aminoácidos do
 
 A extração da sequência a partir dos PDB é confiável — são os resíduos reais dos modelos. **O que não é confiável é o mapeamento nome → sequência**, que se apoia apenas em nomes de pasta.
 
-#### Por que isso é problemático
-
-A publicação mais recente do grupo (Paulo et al., 2026 — PMID 41510779), cujo primeiro autor é **Daniel Guimarães Silva Paulo** — o mesmo "Daniel" da pasta local `Paper-Daniel-Pablo` — nomeia quatro pentapeptídeos:
-
-`TGPCK` · `TGPCR` · `AVIMK` · `AVIMR`
-
-**`LALAY` não está entre eles.**
-
-Três explicações possíveis, e não há como escolher entre elas a partir dos arquivos:
-
-1. GORE3 é uma molécula distinta das quatro publicadas
-2. A nomenclatura interna mudou entre o trabalho e a publicação
-3. Os arquivos `LALAY` pertencem a outra linha de trabalho (possivelmente a investigação do sítio S'2)
-
 #### Observação adicional
 
 Há uma inconsistência de escala na série:
@@ -1402,17 +1451,16 @@ Há uma inconsistência de escala na série:
 - `LALAY`, `LALAK`, `LALAR` são **pentapeptídeos**
 - Os peptídeos de Paulo et al. (2026) também são **pentapeptídeos**
 
-Ou seja, a série migrou de tri- para pentapeptídeos em algum momento. Isso torna plausível que `LALAY` seja de fato GORE3 — mas plausível não é confirmado.
+Ou seja, a série migrou de tri- para pentapeptídeos em algum momento — o que é consistente com GORE3 = `LALAY` (5 resíduos), agora confirmado.
 
-#### ⚠️ Ação requerida
+#### Ação ainda requerida (não bloqueante)
 
-**Confirmar com a Profa. Maria Goreti ou com Daniel Paulo, antes de qualquer modelagem:**
+1. ✅ ~~Sequência do GORE3~~ — confirmada: `LALAY`
+2. ⬜ Correspondência nome ↔ sequência do restante da série (GORE1, GORE2, GORE5–GORE13)
+3. ⬜ `LALAK` corresponde a GORE4? (evidência local aponta nessa direção)
+4. ⬜ O GORE3 já foi publicado em algum trabalho, ou é inédito?
 
-1. Qual a sequência exata do GORE3?
-2. Qual a correspondência nome ↔ sequência de toda a série (GORE1 a GORE13)?
-3. `LALAY`/`LALAK` correspondem a quais moléculas?
-
-**Fontes locais ainda não abertas que podem conter a resposta:**
+**Fontes locais ainda não abertas que podem conter as respostas:**
 - `Desktop\LEBPP\Pós-doc-eulalio\Lab-meeting-GORE3.pptx`
 - `Desktop\LEBPP\Pós-doc-eulalio\GORE3-GORE4-GORE5....jpeg` (imagem — pode conter tabela da série)
 - `Desktop\LEBPP\GORE4-ate-GORE13\` (pasta dedicada à série)

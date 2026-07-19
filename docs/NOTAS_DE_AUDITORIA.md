@@ -8,11 +8,33 @@ Este arquivo existe para que nada nesta base teórica seja tomado como fato sem 
 
 ---
 
-## 1. 🔴 A sequência do GORE3 NÃO está confirmada
+## 1. ✅ RESOLVIDO — sequência do GORE3
 
-**Esta é a pendência mais importante do projeto. Bloqueia toda a modelagem estrutural.**
+> **GORE3 = `LALAY`** (Leu-Ala-Leu-Ala-Tyr), pentapeptídeo.
+> **Confirmado pelo pesquisador (Eulálio) em 18/07/2026.**
 
-### O que foi encontrado
+A confirmação bate com a evidência estrutural independente extraída dos arquivos PDB locais (abaixo), o que fecha a questão para efeito de modelagem.
+
+**Fica em aberto, e não é bloqueante:** `LALAY` não consta dos peptídeos nomeados em Paulo et al. (2026) — `TGPCK`, `TGPCR`, `AVIMK`, `AVIMR`. Isso indica que o GORE3 pertence a uma linha de trabalho distinta daquela publicação, provavelmente ainda não publicada. Vale confirmar antes de escrever a introdução, porque muda como o GORE3 é posicionado em relação à literatura do grupo.
+
+**Continua pendente:** a correspondência nome ↔ sequência do restante da série (GORE1, GORE2, GORE5–GORE13). Ver §1.1.
+
+### 1.1 Consequência estrutural — atenção antes do docking
+
+`LALAY` **não possui nenhum resíduo básico** (sem Lys, Arg ou His).
+
+Isso importa: o bolsão de especificidade **S1** da tripsina tem o **Asp189** no fundo, e é ele que ancora cadeias laterais de Lys/Arg por ponte salina. É essa a razão de os pentapeptídeos de Paulo et al. (2026) terminarem em K ou R — eles reproduzem o P1 canônico de um substrato de tripsina.
+
+O GORE3 não pode formar essa interação. Se a cinética indica inibição competitiva (documento interno ⚠️), então uma de duas coisas:
+
+- **(a)** ocupa a fenda catalítica por **outros subsítios** (S2/S3), via contatos hidrofóbicos — plausível, dados os dois resíduos de Leu e a Tyr aromática
+- **(b)** liga-se a um **sítio distinto**, e o efeito competitivo é indireto
+
+Isso dá sustentação concreta à investigação do sítio **S'2** conduzida na linha `analise-alosterica` — e reforça a recomendação de [`03_metodologia_padrao_ouro.md`](03_metodologia_padrao_ouro.md) §5 de **testar S1 e S'2 explicitamente**, em vez de posicionar a caixa de docking sobre o sítio catalítico por pressuposição, como o `.docx` propõe.
+
+Um docking cego (*blind docking*) sobre a superfície inteira da enzima, antes do docking dirigido, passa a ser recomendável neste caso específico.
+
+### O que havia sido encontrado nos arquivos (evidência independente)
 
 Nenhum documento localizado declara textualmente a sequência de aminoácidos do GORE3. O que existe é evidência **estrutural indireta**: extração dos carbonos-α de arquivos PDB locais.
 
@@ -25,20 +47,6 @@ Nenhum documento localizado declara textualmente a sequência de aminoácidos do
 
 A extração da sequência a partir dos PDB é confiável — são os resíduos reais dos modelos. **O que não é confiável é o mapeamento nome → sequência**, que se apoia apenas em nomes de pasta.
 
-### Por que isso é problemático
-
-A publicação mais recente do grupo (Paulo et al., 2026 — PMID 41510779), cujo primeiro autor é **Daniel Guimarães Silva Paulo** — o mesmo "Daniel" da pasta local `Paper-Daniel-Pablo` — nomeia quatro pentapeptídeos:
-
-`TGPCK` · `TGPCR` · `AVIMK` · `AVIMR`
-
-**`LALAY` não está entre eles.**
-
-Três explicações possíveis, e não há como escolher entre elas a partir dos arquivos:
-
-1. GORE3 é uma molécula distinta das quatro publicadas
-2. A nomenclatura interna mudou entre o trabalho e a publicação
-3. Os arquivos `LALAY` pertencem a outra linha de trabalho (possivelmente a investigação do sítio S'2)
-
 ### Observação adicional
 
 Há uma inconsistência de escala na série:
@@ -49,17 +57,16 @@ Há uma inconsistência de escala na série:
 - `LALAY`, `LALAK`, `LALAR` são **pentapeptídeos**
 - Os peptídeos de Paulo et al. (2026) também são **pentapeptídeos**
 
-Ou seja, a série migrou de tri- para pentapeptídeos em algum momento. Isso torna plausível que `LALAY` seja de fato GORE3 — mas plausível não é confirmado.
+Ou seja, a série migrou de tri- para pentapeptídeos em algum momento — o que é consistente com GORE3 = `LALAY` (5 resíduos), agora confirmado.
 
-### ⚠️ Ação requerida
+### Ação ainda requerida (não bloqueante)
 
-**Confirmar com a Profa. Maria Goreti ou com Daniel Paulo, antes de qualquer modelagem:**
+1. ✅ ~~Sequência do GORE3~~ — confirmada: `LALAY`
+2. ⬜ Correspondência nome ↔ sequência do restante da série (GORE1, GORE2, GORE5–GORE13)
+3. ⬜ `LALAK` corresponde a GORE4? (evidência local aponta nessa direção)
+4. ⬜ O GORE3 já foi publicado em algum trabalho, ou é inédito?
 
-1. Qual a sequência exata do GORE3?
-2. Qual a correspondência nome ↔ sequência de toda a série (GORE1 a GORE13)?
-3. `LALAY`/`LALAK` correspondem a quais moléculas?
-
-**Fontes locais ainda não abertas que podem conter a resposta:**
+**Fontes locais ainda não abertas que podem conter as respostas:**
 - `Desktop\LEBPP\Pós-doc-eulalio\Lab-meeting-GORE3.pptx`
 - `Desktop\LEBPP\Pós-doc-eulalio\GORE3-GORE4-GORE5....jpeg` (imagem — pode conter tabela da série)
 - `Desktop\LEBPP\GORE4-ate-GORE13\` (pasta dedicada à série)

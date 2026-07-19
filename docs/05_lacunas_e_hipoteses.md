@@ -112,7 +112,27 @@ A cinética publicada indica **inibição competitiva** para GORE1, GORE2, GORE 
 
 Mas a metodologia do projeto **assume** S1 ao posicionar a caixa de docking manualmente sobre o sítio catalítico. Isso não testa a hipótese; pressupõe-a.
 
-**Recomendação:** testar ambos explicitamente. Um resultado negativo para S'2 é informativo e fecha a questão; um positivo seria um achado mecanístico relevante.
+### A composição do GORE3 torna essa pergunta urgente
+
+Com a sequência confirmada — **`LALAY`** = Leu-Ala-Leu-Ala-Tyr — a questão deixa de ser especulativa.
+
+`LALAY` **não contém nenhum resíduo básico**. E o subsítio S1 da tripsina é definido pelo **Asp189** no fundo do bolsão, que ancora cadeias laterais de Lys/Arg por interação eletrostática. É exatamente por isso que os peptídeos de Paulo et al. (2026) terminam em **K** ou **R** (`TGPCK`, `TGPCR`, `AVIMK`, `AVIMR`) — eles reproduzem o resíduo P1 de um substrato canônico de tripsina.
+
+**O GORE3 não pode fazer isso.**
+
+Se a inibição competitiva do GORE3 se confirmar, restam duas explicações:
+
+- **(a) Ocupação da fenda por subsítios não-S1** — S2/S3, via contatos hidrofóbicos (dois Leu) e empilhamento aromático (Tyr). Competitivo sem P1 canônico.
+- **(b) Ligação em sítio distinto**, com efeito competitivo indireto — o que traria o **S'2** para o centro da explicação.
+
+Nos dois casos, o mecanismo do GORE3 seria **diferente** do dos demais peptídeos da série. Isso não é um problema: é potencialmente o achado mais interessante do projeto, e explicaria por que o GORE3 se comporta de forma distinta de GORE1/GORE2 nos ensaios do grupo.
+
+**Recomendação revisada:**
+
+1. ***Blind docking*** sobre a superfície inteira da enzima, **antes** do docking dirigido — para não impor o resultado
+2. Docking dirigido comparativo **S1 × S'2**
+3. MD a partir das poses de ambos os sítios; a estabilidade decide
+4. Comparar com um peptídeo da série que **tenha** resíduo básico, como controle interno de mecanismo
 
 ---
 
@@ -150,6 +170,13 @@ Formuladas para serem falsificáveis, cada uma com o teste correspondente.
 
 **Teste:** rMATS/DEXSeq sobre alinhamento genômico.
 **Nota:** é objetivo declarado do projeto e **nunca foi executado** em nenhum trabalho da série.
+
+### H6 — Modo de ligação não canônico
+> O GORE3 (`LALAY`), por não possuir resíduo básico, inibe as tripsinas de *A. gemmatalis* por um modo de ligação distinto do P1-Asp189 canônico usado pelos demais peptídeos da série.
+
+**Teste:** *blind docking* → docking dirigido S1 × S'2 → MD comparativa; análise de contatos por resíduo e decomposição de energia livre por resíduo.
+**Falsificação:** se o GORE3 ocupar S1 de forma estável e com energia comparável à de um peptídeo com Lys/Arg em P1, H6 cai.
+**Por que importa:** se confirmada, é a explicação mecanística para o GORE3 se comportar de modo diferente de GORE1/GORE2 — e abre uma rota de otimização independente da química de P1.
 
 ---
 

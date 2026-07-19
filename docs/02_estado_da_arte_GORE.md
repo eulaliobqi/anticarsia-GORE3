@@ -100,6 +100,15 @@ Ressalva dos próprios autores, que vale reproduzir na discussão do projeto: es
 
 Aqui é preciso separar o que está publicado do que está em documento interno.
 
+### Sequência
+
+> **GORE3 = `LALAY`** — Leu-Ala-Leu-Ala-Tyr, pentapeptídeo.
+> Confirmado pelo pesquisador em 18/07/2026.
+
+Composição relevante para a análise estrutural: **nenhum resíduo básico**. Dois Leu (hidrofóbicos), dois Ala (pequenos), uma Tyr (aromática, com hidroxila).
+
+Isso distingue o GORE3 dos demais peptídeos da série já publicados, que terminam em Lys ou Arg justamente para ocupar o subsítio S1 da tripsina — ancorado no Asp189. O GORE3 não pode formar essa ponte salina, o que torna seu modo de ligação uma pergunta em aberto e não uma premissa. Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1.1 e [`05_lacunas_e_hipoteses.md`](05_lacunas_e_hipoteses.md) §5.
+
 ### O que consta do resumo interno (`GORE3-abstract.docx`)
 
 > ⚠️ **Fonte não revisada por pares.** Os dados abaixo vêm do resumo do próprio projeto e de comunicação interna do grupo. Devem ser tratados como resultados preliminares até publicação.
@@ -149,14 +158,14 @@ Extraídos diretamente de arquivos PDB (leitura dos carbonos-α), portanto **seq
 
 | Sequência | Arquivo | Rótulo atribuído |
 |---|---|---|
-| `LALAY` | `analise-alosterica\data\LALAY.pdb`; `Paper-Daniel-Pablo\RE-Docking-1BTY-trypsin-GORE3\GORE3-PEPFOLD4.pdb` | GORE3 ⚠️ (por caminho de arquivo) |
+| `LALAY` | `analise-alosterica\data\LALAY.pdb`; `Paper-Daniel-Pablo\RE-Docking-1BTY-trypsin-GORE3\GORE3-PEPFOLD4.pdb` | **GORE3** ✅ confirmado |
 | `LALAK` | `Spodoptera-GORE4\...\cluster1_1.pdb`; `MD-gromacs\poses\acr157-gore4-c1\ligand.pdb` | GORE4 ⚠️ |
 | `LALAR` | `analise-alosterica\data\LALAR.pdb` | Variante ⚠️ |
 | 75-mer VLR/VLK | `Milena-MD\data\GORE12T-ligand.pdb` | GORE 1-2 T |
 
-**Problema não resolvido:** `LALAY` não aparece entre os peptídeos nomeados em Paulo et al. (2026) (`TGPCK`/`TGPCR`/`AVIMK`/`AVIMR`), embora a pasta local se chame `Paper-Daniel-Pablo` e Daniel Guimarães Silva Paulo seja o primeiro autor daquele artigo. Isso pode significar (a) que o GORE3 é uma molécula distinta das quatro publicadas, (b) que a nomenclatura interna mudou, ou (c) que os arquivos `LALAY` pertencem a outra linha de trabalho.
+**Ponto em aberto (não bloqueante):** `LALAY` não aparece entre os peptídeos nomeados em Paulo et al. (2026) (`TGPCK`/`TGPCR`/`AVIMK`/`AVIMR`). Como a sequência do GORE3 está confirmada, a leitura mais provável é que ele pertença a uma linha de trabalho distinta daquela publicação — possivelmente ainda inédita.
 
-**Não é possível resolver isso a partir dos arquivos.** Requer confirmação com a supervisora ou com Daniel Paulo antes de qualquer modelagem estrutural. Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §1.
+Isso importa para a **escrita da introdução**: define se o GORE3 é apresentado como continuação direta de Paulo et al. (2026) ou como desenvolvimento paralelo. Confirmar com a supervisora. As sequências de GORE1, GORE2 e GORE5–13 seguem sem correspondência documentada.
 
 ---
 
