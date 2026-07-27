@@ -17,7 +17,7 @@ Revisão crítica da metodologia proposta em `Projeto-Eulalio-Pós-doc2.docx` (�
 | 5 | AutoDock Vina / PyRx para peptídeo | **HADDOCK** e/ou co-folding; Vina só como triagem | 🔴 Crítica |
 | 6 | GORE3 parametrizado por **CGenFF** | **Campo de força de proteína** | 🔴 Erro conceitual |
 | 7 | CHARMM36m | Decisão consciente vs. AMBER99SB-ILDN (legado local) | 🟠 Decisão |
-| 8 | 3 réplicas técnicas + 3 biológicas | **≥ 4 réplicas biológicas**, zero técnicas | 🟡 Média |
+| 8 | 3 réplicas técnicas + 3 biológicas | Zero técnicas; **≥6 biológicas recomendado, ≥12 para capturar DEGs de fold-change pequeno** (Schurch et al. 2016) — o desenho confirmado usa **3**, ver ressalva §8 | 🔴 Real, já em execução |
 | 9 | (ausente) | **BUSCO**, análise de splicing, controle de lote | 🟡 Lacuna |
 | 10 | MM-PBSA sem ressalva | MM/GBSA **com limitações declaradas** | 🟡 Média |
 
@@ -175,12 +175,40 @@ Um projeto do grupo (Tatiana-MD) já roda CHARMM36 no servidor, então a infraes
 
 O projeto (§2.3) propõe "**três réplicas técnicas e três réplicas biológicas**".
 
-**Réplicas técnicas são desnecessárias em RNA-Seq Illumina moderno.** A variabilidade técnica da plataforma é baixa e bem modelada pela distribuição binomial negativa que o DESeq2 já assume. O poder estatístico vem de **réplicas biológicas** — e réplicas técnicas consomem orçamento de sequenciamento sem contribuir para ele.
+**Réplicas técnicas são desnecessárias em RNA-Seq Illumina moderno.** A variabilidade técnica da plataforma é baixa e bem modelada pela distribuição binomial negativa que o DESeq2 já assume. O poder estatístico vem de **réplicas biológicas** — e réplicas técnicas consomem orçamento de sequenciamento sem contribuir para ele. Isso já estava correto na versão anterior deste documento.
 
-**Recomendado:**
-- Eliminar réplicas técnicas
-- **Mínimo 3, preferencialmente 4–5 réplicas biológicas** por tratamento
-- Realocar o orçamento economizado para mais réplicas biológicas ou para um segundo ponto temporal (ver [`05_lacunas_e_hipoteses.md`](05_lacunas_e_hipoteses.md) §3)
+> ⚠️ **Atualizado em 27/07/2026, com número real e desenho já confirmado.**
+> O desenho definido é **3 réplicas biológicas por grupo** (controle,
+> benzamidina, SKTI, GORE3 — 12 amostras), zero técnicas. A recomendação
+> "3, preferencialmente 4–5" desta versão anterior do documento **estava
+> otimista**: Schurch et al. (2016, `schurch2016many`, experimento
+> controlado com 48 réplicas em duas condições) encontrou que **com 3
+> réplicas, só 20–40% dos genes diferencialmente expressos reais são
+> recuperados** (>85% apenas para os de variação acima de 4×), e formaliza a
+> recomendação em **≥6 réplicas biológicas**, subindo a **≥12** quando
+> capturar a maioria dos DEGs — incluindo os de fold-change pequeno —
+> importa. Froussios et al. (2019, `froussios2019well`) confirma o mesmo
+> padrão em *Arabidopsis*, eucarioto complexo, não só em levedura.
+>
+> **Isto não é hipotético — é o desenho já em execução na Macrogen.** Registrar
+> como limitação declarada, não descoberta na revisão por pares:
+> - A hipótese **H1** (troca de isoforma de tripsina) é tipicamente um efeito
+>   de fold-change pequeno a moderado — a faixa em que 3 réplicas tem menor
+>   poder.
+> - Usar **DESeq2 ou edgeR (exact)**, que têm o melhor desempenho combinado
+>   de verdadeiro/falso-positivo abaixo de 12 réplicas segundo a própria
+>   Schurch et al.
+> - Aplicar limiar de fold-change **compatível com n=3** (a referência sugere
+>   0,1 ≤ T ≤ 0,5 em log2 escalonado pelo número de réplicas), não
+>   |log2FC| ≥ 1 sem qualificação.
+> - Declarar explicitamente, ao reportar ausência de DEG em H1, que pode ser
+>   falta de poder estatístico, não ausência de efeito biológico.
+>
+> Ver `04_viabilidade.md` §1.1 para o desenho completo e as mitigações, e
+> [`07_analise_rnaseq.md`](07_analise_rnaseq.md) para o pipeline calibrado a
+> este n específico.
+
+**Recomendado, além do desenho já fixado:**
 - Registrar explicitamente o que constitui uma réplica biológica (número de intestinos agrupados por réplica) — o projeto não define isso, e é informação exigida na publicação
 - **Randomizar** a alocação de amostras às lanes/posições para não confundir lote com tratamento
 
