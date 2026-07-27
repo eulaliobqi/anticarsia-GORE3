@@ -59,11 +59,17 @@ nível de acesso por artigo.
 
 Metadados: **completos e verificados** para os 125.
 
-Interpretação: **16 artigos fichados**, de 19 Tier 1 com texto completo em
-disco. Cinco foram lidos no texto completo (resultados e discussão), onze pelo
-abstract. Os três restantes (`abramson2024accurate`, `lanzaro2024toxin`,
-`assis2026insect`) seguem marcados `⚠️ PENDENTE DE FICHAMENTO` — têm o texto em
-disco, mas não foram lidos.
+Interpretação: **50 artigos fichados**. Cinco foram lidos no texto completo
+(seções de resultados e discussão), 45 pelo abstract.
+
+**Todo artigo com conteúdo integral em disco está fichado** — os 47 com texto
+completo e os 3 com PDF. Os 75 restantes só têm abstract salvo porque são de
+acesso fechado; estão listados em `PDFS_PENDENTES.md` e seguem marcados
+`⚠️ PENDENTE DE FICHAMENTO`.
+
+Cobertura por tema: 9 no Tema 1, 21 no Tema 2, 7 no Tema 3, 13 no Tema 4.
+Dos 56 artigos Tier 1, 21 estão fichados — os outros 35 dependem de download
+manual via CAFe.
 
 O texto interpretativo vive em `scripts/fichas_tier1.py`, separado do gerador
 de propósito: `gerar_artefatos.py` emite metadados verificados e **nunca**
@@ -86,9 +92,22 @@ Três achados foram promovidos para os documentos do projeto:
    3 × 100 ns previstos. Registrado em `NOTAS_DE_AUDITORIA.md` §9 e como
    ressalva em `docs/03_metodologia_padrao_ouro.md`.
 
-E um achado que reforça H6: em `paulo2026peptides`, o ganho de afinidade dos
-pentapeptídeos depende de **lisina em P1** (mais ligações pi-sigma) — e o
-LALAY não tem resíduo básico.
+E dois achados sobre a H6, em direções opostas:
+
+- **Contra a premissa de ancoragem canônica:** em `paulo2026peptides`, o ganho
+  de afinidade dos pentapeptídeos depende de **lisina em P1** (mais ligações
+  pi-sigma) — e o LALAY não tem resíduo básico.
+- **A favor de um modo alternativo plausível:** `jiang2018halogen` mostra que o
+  bolsão S1 de serino-proteases tipo tripsina admite grupo P1 **não básico**
+  (halogenado), por ligação de halogênio em vez de ponte salina com o Asp189.
+  O mecanismo específico não se transfere ao LALAY, mas o princípio sim: S1
+  não exige carga positiva.
+
+Também apareceu um alerta para a hipótese H1: `lokya2020response` já
+demonstrou, por zimografia e qRT-PCR, que um inibidor Bowman-Birk faz
+**isoformas de protease desaparecerem** e modula sua expressão — é o desenho
+análogo ao que este projeto quer fazer por RNA-Seq, e portanto o precedente
+contra o qual a originalidade da H1 será julgada.
 
 ## Regras
 

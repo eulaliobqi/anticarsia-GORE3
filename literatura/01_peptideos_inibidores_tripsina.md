@@ -1,6 +1,6 @@
 # Tema 1 — Peptideos inibidores de tripsina
 
-41 referências | 8 com texto completo em disco | **5 fichadas** | busca de 27/07/2026
+41 referências | 8 com texto completo em disco | **9 fichadas** | busca de 27/07/2026
 
 Todos os metadados (DOI, volume, páginas) foram verificados no
 Europe PMC. O campo **Lido de** declara o que foi efetivamente lido
@@ -143,10 +143,13 @@ DOI: [10.1016/j.ibmb.2020.103390](https://doi.org/10.1016/j.ibmb.2020.103390) ·
 **Yadav NK, Saikhedkar NS, Giri AP.** (2021). PINIR: a comprehensive information resource for Pin-II type protease inhibitors. `BMC Plant Biol` 2021;21(1):267.
 
 DOI: [10.1186/s12870-021-03027-0](https://doi.org/10.1186/s12870-021-03027-0) · PMID: [34107869](https://pubmed.ncbi.nlm.nih.gov/34107869/) · PMC: PMC8188708
-**Lido de:** nada ainda (texto completo disponível) · arquivo: `fulltext/yadav2021pinir.txt`
+**Lido de:** **abstract** · arquivo: `fulltext/yadav2021pinir.txt`
 
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
+**O que estabelece:** Base de dados PINIR, com **415 sequências** de inibidores de protease tipo Pin-II (família do inibidor tipo II de batata) anotadas manualmente, mapeando **695 domínios, 75 ligantes, 63 reactive center loops e 10 padrões de ponte dissulfeto**. A característica estrutural declarada da família é ter múltiplos domínios repetidos de inibição, padrão conservado de dissulfeto e um **reactive center loop tripeptídico**. A análise revelou subcategorias novas e ocorrência de domínios, RCLs e padrões de dissulfeto correlacionada com espécie.
+
+**Onde entra:** Introdução, eixo 1A — é o recurso que sustenta a afirmação de que o RCL da família Pin-II é tripeptídico, que é a base conceitual da série de tripeptídeos de Saikhedkar e, por extensão, da lógica de peptídeos curtos derivados de RCL.
+
+**Ressalva:** Base de dados e análise de sequência; não traz dado funcional de inibição. Verificar se o recurso segue online antes de citá-lo como ferramenta utilizável.
 
 ## 1B — Tripsinas digestivas de Lepidoptera: isoformas e especificidade
 
@@ -190,10 +193,13 @@ DOI: [10.1002/arch.21324](https://doi.org/10.1002/arch.21324) · PMID: [26988941
 **Liu S, Wang S, Wu S, Wu Y, Yang Y.** (2020). Proteolysis activation of Cry1Ac and Cry2Ab protoxins by larval midgut juice proteases from Helicoverpa armigera. `PLoS One` 2020;15(1):e0228159.
 
 DOI: [10.1371/journal.pone.0228159](https://doi.org/10.1371/journal.pone.0228159) · PMID: [32004347](https://pubmed.ncbi.nlm.nih.gov/32004347/) · PMC: PMC6994024
-**Lido de:** nada ainda (texto completo disponível) · arquivo: `fulltext/liu2020proteolysis.txt`
+**Lido de:** **abstract** · arquivo: `fulltext/liu2020proteolysis.txt`
 
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
+**O que estabelece:** Determina os sítios de clivagem das protoxinas Cry1Ac e Cry2Ab por proteases do suco intestinal de *H. armigera*. Cry1Ac gera fragmento de ~65 kDa por clivagem em **Arg28**, na porção anterior da hélice α-1 do domínio I; Cry2Ab gera fragmento de ~50 kDa por clivagem em **Arg139**, entre as hélices α-3 e α-4 do domínio I. Ambos os resíduos foram preditos como **sítios de clivagem de tripsina**. As toxicidades (CL₅₀) das protoxinas foram equivalentes às das toxinas ativadas na cepa suscetível SCD.
+
+**Onde entra:** Tema 1, eixo 1B — demonstra que a tripsina intestinal é o agente de **ativação** da toxina Bt, não só de digestão. Isso é o argumento mecanístico para a interação inibidor de tripsina × Bt explorada em `fonseca2023soybean`, e um alerta: inibir tripsina pode reduzir a ativação do Bt.
+
+**Ressalva:** *H. armigera*, não *A. gemmatalis*. Só o abstract foi lido; os valores de CL₅₀ não foram extraídos.
 
 ### `vatanparast2021knockdown` — Tier 2
 **Vatanparast M, Kazzazi M, Sajjadian SM, Park Y.** (2021). Knockdown of Helicoverpa armigera protease genes affects its growth and mortality via RNA interference. `Arch Insect Biochem Physiol` 2021;108(3):e21840.
@@ -294,10 +300,13 @@ DOI: [10.1111/j.1365-2583.2008.00854.x](https://doi.org/10.1111/j.1365-2583.2008
 **Lokya V, Swathi M, Mallikarjuna N, Padmasree K.** (2020). Response of Midgut Trypsin- and Chymotrypsin-Like Proteases of <i>Helicoverpa armigera</i> Larvae Upon Feeding With Peanut BBI: Biochemical and Biophysical Characterization of PnBBI. `Front Plant Sci` 2020;11:266.
 
 DOI: [10.3389/fpls.2020.00266](https://doi.org/10.3389/fpls.2020.00266) · PMID: [32265951](https://pubmed.ncbi.nlm.nih.gov/32265951/) · PMC: PMC7105688
-**Lido de:** nada ainda (texto completo disponível) · arquivo: `fulltext/lokya2020response.txt`
+**Lido de:** **abstract** · arquivo: `fulltext/lokya2020response.txt`
 
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
+**O que estabelece:** Purifica e caracteriza um inibidor Bowman-Birk de amendoim (PnBBI) de variedade híbrida interespecífica. Caracterização biofísica: baixa massa molecular, vários isoinibidores, formas diméricas/tetraméricas de ordem superior, predomínio de folhas-β antiparalelas e alças aleatórias, sítios reativos contra tripsina e quimotripsina, estabilidade ampla a pH e temperatura extremos (dados de MALDI TOF-TOF em ProteomeXchange PXD016933). Por ressonância plasmônica de superfície, é bifuncional mas **específico para tripsina, com estequiometria 1:2** frente à quimotripsina. Em bioensaio reduziu a massa larval, com queda da atividade de proteases tipo tripsina do intestino; zimografia uni e bidimensional mostrou **desaparecimento de várias isoformas**, e qRT-PCR indicou que o inibidor modula também a expressão dessas proteases.
+
+**Onde entra:** **Hipótese H1** — é evidência publicada de que um inibidor de protease altera o *perfil de isoformas* e não só a atividade total, medido por zimografia mais qRT-PCR. É o desenho experimental análogo ao que este projeto propõe fazer por RNA-Seq.
+
+**Ressalva:** A espécie-alvo do bioensaio está truncada no abstract salvo (aparece como texto vazio); pelo contexto e pelo título é *Helicoverpa armigera*, **mas isso não foi verificado** — conferir no texto completo antes de citar a espécie.
 
 ### `kuwar2020effects` — Tier 2
 **Kuwar SS, Pauchet Y, Heckel DG.** (2020). Effects of class-specific, synthetic, and natural proteinase inhibitors on life-history traits of the cotton bollworm Helicoverpa armigera. `Arch Insect Biochem Physiol` 2020;103(4):e21647.
@@ -350,10 +359,13 @@ DOI: [10.1016/s0167-4838(99)00284-8](https://doi.org/10.1016/s0167-4838(99)00284
 **Patarroyo-Vargas AM, Cordeiro G, Silva CRD, Silva CRD, Mendonça EG, Visôtto LE, Zanuncio JC, Campos WG, Oliveira MGA.** (2020). Inhibition kinetics of digestive proteases for Anticarsia gemmatalis. `An Acad Bras Cienc` 2020;92 Suppl 1:e20180477.
 
 DOI: [10.1590/0001-3765202020180477](https://doi.org/10.1590/0001-3765202020180477) · PMID: [32491140](https://pubmed.ncbi.nlm.nih.gov/32491140/)
-**Lido de:** nada ainda (PDF disponível) · arquivo: `pdfs/patarroyovargas2020inhibition.pdf`
+**Lido de:** **abstract** · arquivo: `pdfs/patarroyovargas2020inhibition.pdf`
 
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
+**O que estabelece:** Caracterização cinética das tripsinas intestinais de *A. gemmatalis*, purificadas em coluna de p-aminobenzamidina agarose. Para o substrato L-BApNA: **KM = 0,503 mM**, Vmax = 46,650 nM·s⁻¹. Ki dos inibidores, **todos com inibição competitiva linear**: benzamidina 11,2 µM, berenil 32,4 µM, **SKTI 0,25 nM** e SBBI 1,4 nM. O SKTI foi o mais potente, e os autores concluem apontando-o como ponto de partida para a fabricação de **peptídeos miméticos** — que é exatamente a linha que originou a série GORE.
+
+**Onde entra:** Introdução — é a linha de base cinética contra a qual todo Ki da série GORE deve ser comparado, e a justificativa publicada da estratégia de peptídeos miméticos. Metodologia — o KM de 0,503 mM é o parâmetro do ensaio a reproduzir.
+
+**Ressalva:** O Ki da benzamidina aqui (11,2 µM) difere do de Schultz et al. 2026 (16,70 µM) e do de Paulo et al. 2026 (16,49 µM), mas essas duas medidas são em *S. frugiperda* e esta é em *A. gemmatalis* — espécies diferentes, não é discrepância. Só o abstract foi lido; o PDF está em `pdfs/patarroyovargas2020inhibition.pdf`.
 
 ### `almeida2021small` — Tier 1 ✅ ja em docs/referencias.bib
 **de Almeida Barros R, Meriño-Cabrera Y, Vital CE, da Silva Júnior NR, de Oliveira CN, Lessa Barbosa S, Marques Gonçalves Assis JV, Ramos HJ, de Almeida Oliveira MG.** (2021). Small peptides inhibit gut trypsin-like proteases and impair Anticarsia gemmatalis (Lepidoptera: Noctuidae) survival and development. `Pest Manag Sci` 2021;77(4):1714-1723.

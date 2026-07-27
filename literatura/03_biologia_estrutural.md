@@ -1,6 +1,6 @@
 # Tema 3 — Biologia estrutural
 
-30 referências | 7 com texto completo em disco | **2 fichadas** | busca de 27/07/2026
+30 referências | 7 com texto completo em disco | **7 fichadas** | busca de 27/07/2026
 
 Todos os metadados (DOI, volume, páginas) foram verificados no
 Europe PMC. O campo **Lido de** declara o que foi efetivamente lido
@@ -20,28 +20,37 @@ Ver [protocolo de busca](00_PROTOCOLO_BUSCA.md) e
 **Abramson J, Adler J, Dunger J, Evans R, Green T, Pritzel A, Ronneberger O, Willmore L, Ballard AJ, Bambrick J, Bodenstein SW, Evans DA, Hung CC, O'Neill M, Reiman D, Tunyasuvunakool K, Wu Z, Žemgulytė A, Arvaniti E, Beattie C, Bertolli O, Bridgland A, Cherepanov A, Congreve M, Cowen-Rivers AI, Cowie A, Figurnov M, Fuchs FB, Gladman H, Jain R, Khan YA, Low CMR, Perlin K, Potapenko A, Savy P, Singh S, Stecula A, Thillaisundaram A, Tong C, Yakneen S, Zhong ED, Zielinski M, Žídek A, Bapst V, Kohli P, Jaderberg M, Hassabis D, Jumper JM.** (2024). Accurate structure prediction of biomolecular interactions with AlphaFold 3. `Nature` 2024;630(8016):493-500.
 
 DOI: [10.1038/s41586-024-07487-w](https://doi.org/10.1038/s41586-024-07487-w) · PMID: [38718835](https://pubmed.ncbi.nlm.nih.gov/38718835/) · PMC: PMC11168924
-**Lido de:** nada ainda (texto completo disponível) · arquivo: `fulltext/abramson2024accurate.txt`
+**Lido de:** **abstract** · arquivo: `fulltext/abramson2024accurate.txt`
 
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
+**O que estabelece:** AlphaFold 3, com arquitetura substancialmente atualizada baseada em difusão, capaz de predizer a estrutura conjunta de complexos incluindo proteínas, ácidos nucleicos, moléculas pequenas, íons e resíduos modificados. Reporta **acurácia muito maior em interações proteína-ligante do que ferramentas de docking do estado da arte**, acurácia muito maior em interações proteína-ácido nucleico do que preditores específicos, e acurácia substancialmente maior em anticorpo-antígeno do que o AlphaFold-Multimer v2.3.
+
+**Onde entra:** Metodologia §11 — é a citação da opção de co-folding proteína-peptídeo que substitui o AutoDock Vina para o ligante peptídico (correção C5), junto com `tsaban2022harnessing`.
+
+**Ressalva:** A comparação favorável é contra ferramentas de docking para **proteína-ligante** (molécula pequena); o abstract **não reporta métrica específica para complexo proteína-peptídeo**, que é o caso do GORE3. Não citar como evidência de superioridade nessa tarefa sem ler os resultados. Considerar também a restrição de acesso ao servidor e as alternativas abertas (Boltz, Chai, Protenix), não cobertas por este levantamento.
 
 ### `omidi2024alphafold` — Tier 2
 **Omidi A, Møller MH, Malhis N, Bui JM, Gsponer J.** (2024). AlphaFold-Multimer accurately captures interactions and dynamics of intrinsically disordered protein regions. `Proc Natl Acad Sci U S A` 2024;121(44):e2406407121.
 
 DOI: [10.1073/pnas.2406407121](https://doi.org/10.1073/pnas.2406407121) · PMID: [39446390](https://pubmed.ncbi.nlm.nih.gov/39446390/) · PMC: PMC11536093
-**Lido de:** nada ainda (texto completo disponível) · arquivo: `fulltext/omidi2024alphafold.txt`
+**Lido de:** **abstract** · arquivo: `fulltext/omidi2024alphafold.txt`
 
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
+**O que estabelece:** Avalia quão bem o AlphaFold-Multimer reproduz interações mediadas por **regiões intrinsecamente desordenadas (IDRs)**, reunindo conjuntos que cobrem o espectro de modos de ligação de IDR. Conclui que o AlphaFold-Multimer prediz diversos tipos de estrutura de IDR ligada **com alta taxa de sucesso**.
+
+**Onde entra:** Metodologia, bloco estrutural — um pentapeptídeo livre é, na prática, um segmento desordenado; este é o dado mais próximo disponível sobre o desempenho de co-folding nesse regime.
+
+**Ressalva:** IDR em contexto de proteína, não peptídeo sintético curto isolado. Só o abstract foi lido; a frase sobre distinguir predições verdadeiras está truncada no abstract salvo e **não foi extraída**.
 
 ### `varadi2024alphafold` — Tier 2
 **Varadi M, Bertoni D, Magana P, Paramval U, Pidruchna I, Radhakrishnan M, Tsenkov M, Nair S, Mirdita M, Yeo J, Kovalevskiy O, Tunyasuvunakool K, Laydon A, Žídek A, Tomlinson H, Hariharan D, Abrahamson J, Green T, Jumper J, Birney E, Steinegger M, Hassabis D, Velankar S.** (2024). AlphaFold Protein Structure Database in 2024: providing structure coverage for over 214 million protein sequences. `Nucleic Acids Res` 2024;52(D1):D368-D375.
 
 DOI: [10.1093/nar/gkad1011](https://doi.org/10.1093/nar/gkad1011) · PMID: [37933859](https://pubmed.ncbi.nlm.nih.gov/37933859/) · PMC: PMC10767828
-**Lido de:** nada ainda (texto completo disponível) · arquivo: `fulltext/varadi2024alphafold.txt`
+**Lido de:** **abstract** · arquivo: `fulltext/varadi2024alphafold.txt`
 
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
+**O que estabelece:** O AlphaFold DB passou de 300 mil estruturas em 2021 para **mais de 214 milhões** de estruturas preditas, integradas a PDB, UniProt, Ensembl, InterPro e MobiDB, com releases cobrindo organismos modelo, proteomas de saúde global e integração com Swiss-Prot.
+
+**Onde entra:** Metodologia — é onde checar se as tripsinas de *A. gemmatalis* já têm modelo depositado antes de rodar predição própria.
+
+**Ressalva:** Cobertura por proteoma; **não verificado** se *A. gemmatalis* está incluída — o genoma é recente (2025). Conferir antes de assumir.
 
 ### `stecula2025rise` — Tier 2
 **Stecula A, Paul R, Litchfield K, Dalton SE, Low CMR, Reis CR, Congreve M.** (2025). The rise of AlphaFold in drug design. `Prog Med Chem` 2025;64:99-147.
@@ -115,10 +124,13 @@ DOI: [10.1039/d1cp02098f](https://doi.org/10.1039/d1cp02098f) · PMID: [34596658
 **Zalewski M, Wallner B, Kmiecik S.** (2025). Protein-Peptide Docking with ESMFold Language Model. `J Chem Theory Comput` 2025;21(6):2817-2821.
 
 DOI: [10.1021/acs.jctc.4c01585](https://doi.org/10.1021/acs.jctc.4c01585) · PMID: [40053869](https://pubmed.ncbi.nlm.nih.gov/40053869/) · PMC: PMC11948316
-**Lido de:** nada ainda (texto completo disponível) · arquivo: `fulltext/zalewski2025protein.txt`
+**Lido de:** **abstract** · arquivo: `fulltext/zalewski2025protein.txt`
 
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
+**O que estabelece:** Avalia o modelo de linguagem **ESMFold** para docking proteína-peptídeo, explorando estratégias como ligantes poliglicina e modificações que aumentam a amostragem. Resultado honesto: o número de modelos de qualidade aceitável entre os melhores ranqueados é **comparável ao de métodos tradicionais e geralmente inferior ao do AlphaFold-Multimer ou AlphaFold 3**, embora supere em alguns casos. O valor apontado é a combinação de qualidade com eficiência computacional, como componente de uma **abordagem de consenso**.
+
+**Onde entra:** Metodologia — sustenta a estratégia de consenso entre métodos de docking em vez de confiar numa ferramenta só, e ancora expectativas realistas sobre modelos de linguagem nessa tarefa.
+
+**Ressalva:** Contexto de desenho de peptídeos terapêuticos. Não testa peptídeo em sítio ativo de serino-protease especificamente.
 
 ## 3C — Campos de forca e dinamica molecular
 
@@ -286,10 +298,13 @@ DOI: [10.1128/jvi.00045-17](https://doi.org/10.1128/jvi.00045-17) · PMID: [2829
 **Jiang L, Zhang X, Zhou Y, Chen Y, Luo Z, Li J, Yuan C, Huang M.** (2018). Halogen bonding for the design of inhibitors by targeting the S1 pocket of serine proteases. `RSC Adv` 2018;8(49):28189-28197.
 
 DOI: [10.1039/c8ra03145b](https://doi.org/10.1039/c8ra03145b) · PMID: [35542712](https://pubmed.ncbi.nlm.nih.gov/35542712/) · PMC: PMC9083945
-**Lido de:** nada ainda (texto completo disponível) · arquivo: `fulltext/jiang2018halogen.txt`
+**Lido de:** **abstract** · arquivo: `fulltext/jiang2018halogen.txt`
 
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
+**O que estabelece:** Testa se compostos halogenados podem servir como **grupo P1 para ligar ao bolsão de especificidade S1** de serino-proteases tipo tripsina, evitando a baixa biodisponibilidade dos grupos amidina ou guanidina tipicamente usados. Usa 4-clorobenzilamina, 4-bromobenzilamina e 4-iodobenzilamina como sondas do modo de ligação.
+
+**Onde entra:** **Hipótese H6** — é o precedente publicado de que o S1 de uma tripsina pode ser ocupado por um grupo P1 **não básico**, por ligação de halogênio em vez de ponte salina com o Asp189. Amplia o espaço de modos de ligação plausíveis para o LALAY, que também não tem resíduo básico.
+
+**Ressalva:** Halogênio não é resíduo de aminoácido: o LALAY não tem grupo halogenado, então o mecanismo específico **não se transfere**. O que transfere é o princípio de que S1 admite ancoragem sem carga positiva. Só o abstract foi lido.
 
 ### `ngo2020protein` — Tier 2
 **Ngo K, Collins-Kautz C, Gerstenecker S, Wagner B, Heine A, Klebe G.** (2020). Protein-Induced Change in Ligand Protonation during Trypsin and Thrombin Binding: Hint on Differences in Selectivity Determinants of Both Proteins?. `J Med Chem` 2020;63(6):3274-3289.
