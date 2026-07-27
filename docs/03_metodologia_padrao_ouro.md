@@ -213,6 +213,20 @@ O projeto menciona MM-PBSA para energia de ligação. É prática comum e aceit�
 
 **Recomendado:** 3 réplicas × 100 ns por complexo, em vez de 1 × 300 ns. O ganho em estimativa de incerteza compensa.
 
+> ⚠️ **Ressalva de amostragem, aberta em 27/07/2026.** Esta recomendação vale
+> para estimar energia de ligação com barra de erro numa pose estável. Ela
+> **não** é suficiente para testar a hipótese H6, que é sobre *qual* é o modo
+> de ligação. Kahler et al. (2018, PMID 29210603, `kahler2018unexpected`)
+> observaram um peptídeo trocar espontaneamente para o lado *prime* de uma
+> serino-protease com rotação de 180° em torno do P1 — mas o evento só
+> apareceu **depois de 2 µs**, vinte vezes acima da janela aqui prevista.
+>
+> Consequência: se a MD de 100 ns mostrar o complexo estável na pose docada,
+> isso **não distingue** estabilidade real de amostragem insuficiente. Declarar
+> a limitação ao interpretar, e avaliar se alguma estratégia de amostragem
+> melhorada cabe no orçamento de GPU antes de tratar o resultado como teste de
+> H6. Ver [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) §9.
+
 Ferramenta: **gmx_MMPBSA**. O usuário já tem ambiente funcional (`mmgbsa-env`) e conhece as armadilhas operacionais (correção de PBC antes da análise).
 
 ---

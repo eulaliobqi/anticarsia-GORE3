@@ -15,6 +15,8 @@ import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from fichas_tier1 import FICHAS
+
 BASE = Path(__file__).resolve().parent.parent
 META = json.loads((BASE / "metadata.json").read_text(encoding="utf-8"))
 
@@ -133,17 +135,19 @@ def gerar_fichas(regs):
             porx[r["eixo"]].append(r)
 
         n_full = sum(1 for r in doreg if r["nivel_acesso"] == "fulltext")
-        n_pdf = sum(1 for r in doreg if r["nivel_acesso"] == "pdf")
+        n_fich = sum(1 for r in doreg if r["chave"] in FICHAS)
         L = [
             f"# {titulo}",
             "",
-            f"{len(doreg)} referencias | {n_full} com texto completo | "
-            f"{n_pdf} com PDF | busca de 27/07/2026",
+            f"{len(doreg)} referências | {n_full} com texto completo em disco | "
+            f"**{n_fich} fichadas** | busca de 27/07/2026",
             "",
-            "Todos os metadados abaixo (DOI, volume, paginas) foram verificados",
-            "no Europe PMC. O campo **Lido de** declara o que foi efetivamente",
-            "lido: uma ficha marcada `abstract` nao pode conter numero ou detalhe",
-            "de protocolo que so apareceria no corpo do artigo.",
+            "Todos os metadados (DOI, volume, páginas) foram verificados no",
+            "Europe PMC. O campo **Lido de** declara o que foi efetivamente lido",
+            "**ao escrever a ficha** — ter o texto completo salvo em disco não",
+            "significa tê-lo lido. Ficha marcada `abstract` não contém número ou",
+            "detalhe de protocolo que só apareceria no corpo do artigo; onde o",
+            "dado falta e importa, a ressalva diz isso em vez de preencher.",
             "",
             "Ver [protocolo de busca](00_PROTOCOLO_BUSCA.md) e",
             "[PDFs pendentes](PDFS_PENDENTES.md).",
@@ -162,11 +166,21 @@ def gerar_fichas(regs):
                 if r["pmcid"]:
                     ident.append(f"PMC: {r['pmcid']}")
 
-                lido = {"fulltext": "texto completo (Europe PMC)",
-                        "pdf": "PDF (Unpaywall)"}.get(
-                            r["nivel_acesso"],
-                            "abstract (Europe PMC)" if r["tem_abstract"]
-                            else "so metadados")
+                # O que foi efetivamente LIDO ao escrever a ficha — nao o que
+                # esta disponivel em disco. Ter o texto completo salvo nao
+                # significa te-lo lido.
+                ficha = FICHAS.get(r["chave"])
+                if ficha:
+                    lido = {"fulltext": "**texto completo** — seções de "
+                                        "resultados/discussão",
+                            "abstract": "**abstract**"}[ficha["lido"]]
+                else:
+                    disp = {"fulltext": "texto completo disponível",
+                            "pdf": "PDF disponível"}.get(
+                                r["nivel_acesso"],
+                                "abstract disponível" if r["tem_abstract"]
+                                else "só metadados")
+                    lido = f"nada ainda ({disp})"
 
                 loc = (f"`{r['revista_abrev'] or r['revista']}` "
                        f"{r['ano']}")
@@ -186,10 +200,14 @@ def gerar_fichas(regs):
                     f"**Lido de:** {lido}"
                     + (f" · arquivo: `{r['arquivo']}`" if r["arquivo"] else ""),
                     "",
-                    "**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO",
-                    "**Onde entra:** ⚠️ PENDENTE",
-                    "",
                 ]
+                if ficha:
+                    L += [f"**O que estabelece:** {ficha['estabelece']}", "",
+                          f"**Onde entra:** {ficha['onde_entra']}", "",
+                          f"**Ressalva:** {ficha['ressalva']}", ""]
+                else:
+                    L += ["**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO",
+                          "**Onde entra:** ⚠️ PENDENTE", ""]
         (BASE / arquivo).write_text("\n".join(L), encoding="utf-8")
         print(f"  {arquivo}: {len(doreg)} refs")
 

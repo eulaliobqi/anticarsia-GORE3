@@ -203,7 +203,7 @@ Em ordem de prioridade:
 | # | Ação | Bloqueia |
 |---|---|---|
 | 1 | Confirmar sequência do GORE3 com a supervisora | Toda a modelagem estrutural |
-| 2 | Obter IC₅₀/Kᵢ quantificado do GORE3 | Escrita da introdução |
+| ~~2~~ | ~~Obter IC₅₀/Kᵢ quantificado do GORE3~~ | ✅ **Publicado**: IC₅₀ = 433,98 µM e Kᵢ = 4,00 mM (competitivo), Paulo et al. 2026 — mas em *S. frugiperda*. Para *A. gemmatalis* segue pendente |
 | 3 | Ler texto completo de de Andrade et al. (2026) para o campo de força | Decisão de MD |
 | 4 | Conferir métricas do assembly `GCF_050436995.1` | Escrita da metodologia |
 | 5 | Verificar as 49 citações restantes do `.docx` | Submissão |
@@ -260,3 +260,53 @@ cindível; S′2 é outro. Três ressalvas antes de reescrever qualquer coisa:
 Ou seja: a hipótese H6 **não** foi refutada, mas o enunciado "S1 × S′2" está
 desatualizado em relação à literatura publicada e precisa ser reescrito como
 "S1/S1′ × sítio alternativo", com o teste de *blind docking* mantido.
+
+### 8.1 Duas inconsistências internas no artigo — não citar sem sinalizar
+
+Detectadas ao ler o texto completo em 27/07/2026.
+
+**(a) O Kᵢ da benzamidina não fecha.** O abstract dá **1,64 mM**; a seção de
+resultados dá **16,49 µM**. São cem vezes de diferença, sem nota de
+reconciliação no artigo. O valor do GORE3 (4,00 mM) é o mesmo nos dois lugares.
+Note que 16,70 µM é também o valor que Schultz et al. (2026, PMID 41849700)
+reportam para benzamidina na mesma espécie — o que sugere que o número do
+abstract é que está errado, mas isso é inferência, não verificação.
+
+**(b) A mortalidade não é monotônica com a dose.** Cerca de 47% a 0,00241% e a
+0,04873% (m/v), mas apenas **6,7% e 26%** nas concentrações maiores 0,1216% e
+0,2432%. A mesma frase ainda reporta *"resulting in a mortality percentage of
+0.000067%"*, repetindo a concentração no lugar da mortalidade.
+
+**Consequência prática:** o valor "mortalidade de até 46,66%" já registrado na
+base teórica a partir do abstract continua correto como citação, mas **não pode
+ser apresentado como resposta dose-dependente**. E o Kᵢ da benzamidina não deve
+ser citado a partir deste artigo sem escolher uma das duas versões e declarar a
+escolha.
+
+---
+
+## 9. Impacto na duração planejada da dinâmica molecular
+
+Aberto em 27/07/2026 a partir de Kahler et al. (2018), PMID 29210603,
+*J Biomol Struct Dyn* 36(15):4072-4084.
+
+Simulação de MD de **10 µs** de um complexo peptidase-relacionada-a-calicreína
+7 com peptídeo. Depois de **mais de 2 µs** de amostragem irrestrita, o peptídeo
+sofre transição espontânea de modo de ligação, com rotação de 180° em torno do
+resíduo P1, passando a ocupar a região do **lado prime** de forma estável.
+
+**Por que isso é um problema para este projeto.** A metodologia prevê
+**3 × 100 ns** ([`03_metodologia_padrao_ouro.md`](03_metodologia_padrao_ouro.md)
+§11). Isso é vinte vezes menos do que o tempo em que o evento apareceu naquele
+sistema. Se o GORE3 tiver comportamento análogo — e a hipótese H6 é exatamente
+a de que o modo de ligação não é o canônico —, **uma janela de 100 ns não
+detectaria a transição**, e o resultado seria interpretado como "complexo
+estável no modo docado" por falta de amostragem, não por estabilidade real.
+
+Ressalva de transferência: é calicreína humana, não tripsina digestiva de
+inseto, e um único sistema.
+
+**Não é recomendação de rodar 10 µs.** É motivo para (i) declarar
+explicitamente a limitação de amostragem ao interpretar a MD, e (ii) avaliar se
+alguma estratégia de amostragem melhorada cabe no orçamento de GPU antes de
+tratar 3 × 100 ns como suficiente para testar H6.
