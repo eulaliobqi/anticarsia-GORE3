@@ -186,6 +186,209 @@ FICHAS = {
 
     # ---------------- TEMA 2 ----------------
 
+    "schurch2016many": dict(
+        lido="fulltext",
+        estabelece=(
+            "Experimento com **48 réplicas biológicas** em cada uma de duas "
+            "condições em *S. cerevisiae*, para responder objetivamente quantas "
+            "réplicas uma análise de RNA-Seq precisa. Com 3 réplicas, nove de 11 "
+            "ferramentas testadas encontraram só 20–40% dos genes "
+            "diferencialmente expressos identificados com o conjunto completo "
+            "de 42 réplicas limpas — sobe para >85% só no subconjunto de genes "
+            "com variação acima de 4×. **Recomendações formais dos autores:** "
+            "(1) pelo menos **6 réplicas biológicas** por condição em qualquer "
+            "experimento; (2) pelo menos **12** quando é importante identificar "
+            "a maioria dos genes DE, incluindo os de fold-change pequeno; (3) "
+            "com menos de 12 réplicas, usar **edgeR (exact)** ou **DESeq2**; "
+            "com mais de 12, o **DESeq** original supera marginalmente os "
+            "demais."
+        ),
+        onde_entra=(
+            "Metodologia §11, item de réplicas — **contradiz diretamente a "
+            "recomendação atual do projeto** ('≥4 biológicas, zero técnicas'). "
+            "O número correto segundo esta referência é ≥6, subindo a ≥12 se "
+            "o objetivo incluir capturar DEGs de fold-change pequeno — que é "
+            "precisamente o caso de isoformas de tripsina com troca sutil "
+            "(hipótese H1). Ação: **revisar `03_metodologia_padrao_ouro.md` "
+            "para citar 6–12 réplicas, não 4**, e conversar com a Macrogen "
+            "sobre viabilidade/custo antes de fechar o desenho."
+        ),
+        ressalva=(
+            "É levedura, organismo unicelular com baixa variância biológica "
+            "inter-réplica comparado a um inseto criado em condições "
+            "semi-controladas — a variância real em *A. gemmatalis* pode ser "
+            "maior, o que tornaria a recomendação ainda mais conservadora, não "
+            "menos. Não é garantia de que 6 réplicas bastem aqui; é o piso "
+            "empírico mínimo publicado."
+        ),
+    ),
+
+    "froussios2019well": dict(
+        lido="fulltext",
+        estabelece=(
+            "Estende o resultado de Schurch et al. (2016) de levedura para "
+            "*Arabidopsis thaliana*, eucarioto complexo. Confirma que as "
+            "medidas de expressão gênica são mais consistentes com uma "
+            "**distribuição binomial negativa** do que log-normal ou normal, e "
+            "que o **tamanho e a complexidade do transcriptoma não alteram a "
+            "taxa de falsos positivos** das nove ferramentas de DGE testadas."
+        ),
+        onde_entra=(
+            "Metodologia §11 — generaliza a recomendação de Schurch para além "
+            "de levedura, o que é relevante porque *A. gemmatalis* é "
+            "certamente mais complexo que levedura. Reforça a escolha de "
+            "DESeq2/edgeR (ambos baseados em binomial negativa) sobre "
+            "alternativas paramétricas gaussianas."
+        ),
+        ressalva=(
+            "Planta, não inseto — mas o ponto (robustez da NB independente da "
+            "complexidade do transcriptoma) é justamente o que generaliza a "
+            "recomendação para organismos não testados diretamente."
+        ),
+    ),
+
+    "zhang2020combat": dict(
+        lido="fulltext",
+        estabelece=(
+            "Apresenta o ComBat-seq, correção de efeito de lote baseada em "
+            "**regressão binomial negativa**, que mantém a natureza inteira das "
+            "contagens (compatível com DESeq2/edgeR, ao contrário de métodos "
+            "gaussianos que geram valores negativos artificiais). Em simulação "
+            "com efeito de lote realista (1,5× de diferença de média, 2× de "
+            "dispersão), ComBat-seq atinge **TPR = 0,89**, superior a incluir "
+            "lote como covariável (0,87), ComBat original em logCPM (0,85), "
+            "RUV-seq (0,83) e SVA-seq (0,87). Em cenário mais extremo (3× "
+            "média, 4× dispersão), a vantagem cresce para **≥6 pontos "
+            "percentuais de TPR** sobre as demais. Mantém FPR sob controle na "
+            "maioria dos cenários testados."
+        ),
+        onde_entra=(
+            "Metodologia §11 — preenche a lacuna explícita 'falta correção de "
+            "lote', e é a ferramenta correspondente ao script já existente "
+            "`RNA-Seq-not-model/scripts/05_batch_correction.R`. Se o "
+            "sequenciamento da Macrogen sair em mais de uma corrida, esta é a "
+            "citação para justificar a correção."
+        ),
+        ressalva=(
+            "Em um cenário específico (sem diferença de dispersão entre "
+            "lotes), o próprio ComBat-seq fica **redundante e mais "
+            "conservador** que simplesmente incluir lote como covariável no "
+            "modelo — não aplicar cegamente sem antes verificar se o desenho "
+            "realmente tem lotes heterogêneos."
+        ),
+    ),
+
+    "sergio2024comprehensive": dict(
+        lido="fulltext",
+        estabelece=(
+            "Simula dados de RNA-Seq com complexidade controlada para testar o "
+            "que mais afeta a montagem *de novo* de transcriptoma. **O grau de "
+            "splicing alternativo teve o maior impacto negativo** na "
+            "reconstrução de transcritos — sem splicing alternativo, "
+            "reconstrução de 62,8–96,3%; no grau máximo de splicing, cai para "
+            "11,6–48,7%. O tamanho do fragmento também importa: em fragmentos "
+            "de 400 pb, nenhum montador reconstruiu transcritos até o 10º "
+            "percentil de tamanho; subindo para 500–600 pb, o limiar melhora "
+            "para o 15º percentil. Comprimento de leitura e tamanho de "
+            "fragmento afetam a reconstrução de transcritos longos e curtos de "
+            "forma **diferente**."
+        ),
+        onde_entra=(
+            "Metodologia §11 — justifica tecnicamente por que a via Trinity "
+            "*de novo* secundária (para transcritos ausentes da anotação) é "
+            "estrutural e previsivelmente mais fraca justamente nos genes com "
+            "mais isoformas — que são exatamente as famílias de interesse "
+            "(serino-proteases). É argumento a favor do genoma-guiado como via "
+            "primária, com números, não só afirmação qualitativa."
+        ),
+        ressalva=(
+            "Dado inteiramente simulado, a partir do genoma humano. Os números "
+            "percentuais não se transferem para *A. gemmatalis*; a direção do "
+            "efeito (splicing prejudica montagem *de novo*) é o que generaliza."
+        ),
+    ),
+
+    "vaquerogarcia2016view": dict(
+        lido="fulltext",
+        estabelece=(
+            "Artigo original do **MAJIQ**, que define e quantifica splicing "
+            "alternativo em unidades de *local splicing variations* (LSVs), "
+            "capazes de capturar tanto os tipos clássicos de splicing quanto "
+            "variações mais complexas. Em mapa de 12 tecidos de camundongo, "
+            "**LSVs complexas constituem mais de 30%** das variações "
+            "dependentes de tecido e afetam famílias de proteínas específicas; "
+            "a prevalência de LSVs complexas é conservada em humanos."
+        ),
+        onde_entra=(
+            "Metodologia §11 — alternativa ao par rMATS/DEXSeq para a "
+            "**hipótese H5** (splicing alternativo). É a citação canônica do "
+            "MAJIQ, cuja vantagem declarada é capturar eventos complexos além "
+            "dos tipos clássicos (skipped exon, intron retention etc.), "
+            "relevante se a resposta ao GORE3 envolver splicing não-canônico."
+        ),
+        ressalva=(
+            "Demonstrado em camundongo, não em inseto. O ganho de LSVs "
+            "complexas depende de profundidade e desenho — não avaliado aqui "
+            "se compensa a curva de aprendizado extra frente a rMATS/DEXSeq, "
+            "que já têm scripts documentados no grupo."
+        ),
+    ),
+
+    "ferrerbonsoms2022identifiability": dict(
+        lido="abstract",
+        estabelece=(
+            "Formaliza quando o problema de deconvolução de isoformas é "
+            "identificável a partir de reads pareadas, e propõe método "
+            "objetivo para escolher o comprimento de fragmento. Achado central: "
+            "o comprimento de fragmento ótimo é **dependente do gene**, e para "
+            "o transcriptoma humano o comprimento médio ótimo fica em "
+            "**400–600 nt para genes codificantes** (150–200 nt para lncRNAs). "
+            "O comprimento de leitura ótimo é o maior que couber dentro do "
+            "fragmento. Combinar duas bibliotecas de fragmentos muito "
+            "diferentes melhora significativamente a identificabilidade "
+            "gênica."
+        ),
+        onde_entra=(
+            "**Ponto crítico para o desenho real do sequenciamento.** "
+            "'Paired-end, 150 nt' é o **comprimento de leitura**, não o "
+            "comprimento de fragmento (inserto) — são parâmetros distintos, e "
+            "este artigo é o que formaliza por que a distinção importa para "
+            "quantificação de isoforma. **Ação concreta: confirmar com a "
+            "Macrogen o tamanho médio do fragmento/inserto da biblioteca**, "
+            "não só o comprimento de leitura. Se o inserto for menor que "
+            "~250–300 nt (frequente em preparações padrão), a identificação "
+            "de isoformas fica prejudicada mesmo com boa profundidade."
+        ),
+        ressalva=(
+            "Só o abstract foi lido; valores calculados para transcriptoma "
+            "humano, não para *A. gemmatalis*. A direção do argumento "
+            "(fragmento maior ajuda deconvolução de isoforma) generaliza; os "
+            "números de 400–600 nt não devem ser citados como alvo direto para "
+            "este projeto."
+        ),
+    ),
+
+    "norton2018outlier": dict(
+        lido="abstract",
+        estabelece=(
+            "Desenvolve modelo de probabilidade para ponderar cada réplica de "
+            "RNA-Seq como representativa de sua condição experimental na "
+            "análise de splicing alternativo, detectando **amostras "
+            "outlier** consistentemente diferentes das demais da mesma "
+            "condição. Em vez de descartar essas amostras, propõe "
+            "**down-weighting** — generalização do algoritmo MAJIQ que ganha "
+            "poder estatístico em vez de perder dado."
+        ),
+        onde_entra=(
+            "Metodologia — controle de qualidade para a **hipótese H5**. Com "
+            "poucas réplicas (o padrão do projeto, mesmo revisado para 6), "
+            "uma única réplica ruim pode dominar o resultado de splicing "
+            "diferencial; este é o método declarado para lidar com isso sem "
+            "simplesmente descartar dado caro."
+        ),
+        ressalva="Só o abstract foi lido; específico ao ecossistema MAJIQ.",
+    ),
+
     "yadav2021pinir": dict(
         lido="abstract",
         estabelece=(
@@ -320,52 +523,76 @@ FICHAS = {
     ),
 
     "sarantopoulou2021comparative": dict(
-        lido="abstract",
+        lido="fulltext",
         estabelece=(
-            "Benchmark de quantificação de isoformas de comprimento completo "
-            "com dado simulado que reproduz propriedades do dado real "
-            "(polimorfismo, sinal de íntron, cobertura não uniforme), cobrindo "
-            "métodos baseados em genoma, em transcriptoma e em pseudoalinhamento, "
-            "com uma abordagem simples como controle. Salmon, kallisto, RSEM e "
-            "Cufflinks têm a maior acurácia em dado idealizado, mas **em dado "
-            "realista não superam dramaticamente a abordagem simples**. Os "
-            "parâmetros estruturais de maior impacto na acurácia são "
-            "comprimento e complexidade de compressão da sequência, **não o "
-            "número de isoformas**."
+            "Benchmark de quantificação de isoformas com dado real e simulado, "
+            "cobrindo Salmon, kallisto, RSEM, Cufflinks, HTSeq, featureCounts e "
+            "NRP. **Achado central e o mais importante para este projeto:** ao "
+            "remover a isoforma mais expressa de um gene (simulando o "
+            "cenário em que uma isoforma domina e outra é rara — exatamente "
+            "o que a hipótese H1 propõe existir entre isoformas de tripsina "
+            "sensíveis e insensíveis), **a acurácia de todos os métodos cai "
+            "drasticamente, exceto HTSeq e featureCounts** — que por sua vez "
+            "não resolvem isoforma nenhuma, só contam por gene. Na análise de "
+            "expressão diferencial em nível de isoforma com genes sem "
+            "expressão real em nenhuma réplica (controle negativo interno), "
+            "**a FDR real ficou muito acima da reportada para todos os "
+            "métodos** — a 0,01 de FDR nominal, houve ≥1.000 isoformas "
+            "chamadas como DE indevidamente. Sleuth teve a menor taxa de "
+            "falso positivo entre os métodos aplicáveis. **DESeq2 não foi "
+            "desenhado para DE em nível de transcrito** e tem desempenho "
+            "inferior a EBSeq/Sleuth nessa tarefa especificamente — mas ainda "
+            "assim superou-os em manter especificidade em alguns cortes."
         ),
         onde_entra=(
-            "Metodologia — calibra a expectativa sobre quantificação por "
-            "isoforma, que é a base operacional da H1, e é a ressalva honesta a "
-            "declarar junto com a escolha do Salmon."
+            "**Advertência direta para a hipótese H1.** O cenário mais "
+            "problemático do benchmark — isoforma dominante que desaparece — "
+            "é estruturalmente o cenário que H1 propõe testar. Duas "
+            "consequências para a metodologia: (1) **quantificação por "
+            "isoforma via Salmon/tximport alimentando DESeq2 mede expressão "
+            "de gene com sensibilidade a troca de isoforma, não substitui "
+            "uma ferramenta de DE em nível de transcrito de verdade**; (2) se "
+            "for reportar DE em nível de isoforma (não só de gene), usar "
+            "método desenhado para isso (EBSeq, Sleuth) e **declarar "
+            "explicitamente que a FDR real pode exceder a nominal**, com "
+            "controle negativo (genes de expressão nula) quando possível."
         ),
         ressalva=(
-            "Dado simulado. O efeito de anotação incompleta é investigado no "
-            "artigo, mas não extraí a conclusão específica sobre esse ponto — "
-            "que é justamente o mais relevante aqui. Requer leitura do texto "
-            "completo antes de citar como justificativa nesse aspecto."
+            "Dado majoritariamente simulado a partir de anotação humana "
+            "(hipocampo × fígado), com validação em dado real das mesmas "
+            "amostras. Os métodos testados são de 2014-2016; ferramentas mais "
+            "recentes (Salmon com bootstrap, tximport) podem ter corrigido "
+            "parte do problema — não testado aqui."
         ),
     ),
 
     "coxe2024benchmarking": dict(
-        lido="abstract",
+        lido="fulltext",
         estabelece=(
-            "Benchmark de cinco alinhadores de RNA-Seq muito usados, com dado "
-            "simulado de *Arabidopsis thaliana* e SNPs anotados do TAIR, "
-            "medindo acurácia em resolução de base e de base de junção. A "
-            "motivação declarada é que as ferramentas são tipicamente "
-            "pré-ajustadas com dados humanos ou procarióticos e **podem não ser "
-            "adequadas a outros organismos**."
+            "Benchmark de HISAT2, STAR, Subread e BBMap com dado simulado de "
+            "*Arabidopsis thaliana* e SNPs anotados do TAIR, em parâmetros "
+            "padrão, sem referência, e permissivos, medindo acurácia em "
+            "resolução de base e de **base de junção** (a que importa para "
+            "detecção correta de splicing). Conclusão dos autores: **os "
+            "alinhadores populares têm desempenho parecido em resolução de "
+            "base**, mas na resolução de junção — que é o que decide se um "
+            "evento de splicing é atribuído corretamente — **o Subread é o "
+            "mais promissor**, recomendado quando alta acurácia de junção "
+            "importa. STAR e HISAT2 permanecem adequados para uso geral."
         ),
         onde_entra=(
-            "Metodologia — é o argumento publicado de que benchmark feito em "
-            "humano não transfere automaticamente para outro clado, que "
-            "sustenta declarar a escolha de alinhador como decisão e não como "
-            "padrão herdado."
+            "Metodologia §11 — é o argumento com número real para escolher "
+            "**Subread como alinhador, e não STAR/HISAT2 por padrão**, "
+            "especificamente para a **hipótese H5** (splicing alternativo). "
+            "Para expressão gênica geral sem foco em junção, STAR/HISAT2 "
+            "seguem adequados."
         ),
         ressalva=(
-            "É planta, não inseto. O argumento sobre transferência entre clados "
-            "vale; o ranking numérico específico não se transfere para "
-            "*A. gemmatalis*. Não extraí qual alinhador venceu."
+            "É *Arabidopsis*, planta diploide, os próprios autores dizem que é "
+            "'talvez menos complexa' que outros genomas vegetais, e não "
+            "testam inseto. O ranking não se transfere automaticamente para "
+            "*A. gemmatalis*; a lição estrutural — que ferramentas diferentes "
+            "podem empatar em base mas divergir muito em junção — sim."
         ),
     ),
 

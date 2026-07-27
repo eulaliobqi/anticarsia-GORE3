@@ -1,6 +1,6 @@
 # Tema 2 — RNA-Seq
 
-31 referências | 21 com texto completo em disco | **21 fichadas** | busca de 27/07/2026
+38 referências | 26 com texto completo em disco | **28 fichadas** | busca de 27/07/2026
 
 Todos os metadados (DOI, volume, páginas) foram verificados no
 Europe PMC. O campo **Lido de** declara o que foi efetivamente lido
@@ -27,6 +27,18 @@ DOI: [10.12688/f1000research.7563.2](https://doi.org/10.12688/f1000research.7563
 **Onde entra:** Metodologia §11 — é a justificativa formal do `tximport` entre Salmon e DESeq2, etapa que o `.docx` omite. E é o argumento metodológico da **hipótese H1**: se a troca de isoformas de tripsina existe, a análise só em nível de gene distorce o resultado.
 
 **Ressalva:** O próprio artigo registra que o problema é relativamente pequeno em vários conjuntos de dados reais — não presumir que será grande aqui sem verificar.
+
+### `zhang2020combat` — Tier 1
+**Zhang Y, Parmigiani G, Johnson WE.** (2020). <i>ComBat-seq</i>: batch effect adjustment for RNA-seq count data. `NAR Genom Bioinform` 2020;2(3):lqaa078.
+
+DOI: [10.1093/nargab/lqaa078](https://doi.org/10.1093/nargab/lqaa078) · PMID: [33015620](https://pubmed.ncbi.nlm.nih.gov/33015620/) · PMC: PMC7518324
+**Lido de:** **texto completo** — seções de resultados/discussão · arquivo: `fulltext/zhang2020combat.txt`
+
+**O que estabelece:** Apresenta o ComBat-seq, correção de efeito de lote baseada em **regressão binomial negativa**, que mantém a natureza inteira das contagens (compatível com DESeq2/edgeR, ao contrário de métodos gaussianos que geram valores negativos artificiais). Em simulação com efeito de lote realista (1,5× de diferença de média, 2× de dispersão), ComBat-seq atinge **TPR = 0,89**, superior a incluir lote como covariável (0,87), ComBat original em logCPM (0,85), RUV-seq (0,83) e SVA-seq (0,87). Em cenário mais extremo (3× média, 4× dispersão), a vantagem cresce para **≥6 pontos percentuais de TPR** sobre as demais. Mantém FPR sob controle na maioria dos cenários testados.
+
+**Onde entra:** Metodologia §11 — preenche a lacuna explícita 'falta correção de lote', e é a ferramenta correspondente ao script já existente `RNA-Seq-not-model/scripts/05_batch_correction.R`. Se o sequenciamento da Macrogen sair em mais de uma corrida, esta é a citação para justificar a correção.
+
+**Ressalva:** Em um cenário específico (sem diferença de dispersão entre lotes), o próprio ComBat-seq fica **redundante e mais conservador** que simplesmente incluir lote como covariável no modelo — não aplicar cegamente sem antes verificar se o desenho realmente tem lotes heterogêneos.
 
 ### `wang2024rmats` — Tier 1
 **Wang Y, Xie Z, Kutschera E, Adams JI, Kadash-Edmondson KE, Xing Y.** (2024). rMATS-turbo: an efficient and flexible computational tool for alternative splicing analysis of large-scale RNA-seq data. `Nat Protoc` 2024;19(4):1083-1104.
@@ -114,6 +126,18 @@ DOI: [10.1093/bioinformatics/btw354](https://doi.org/10.1093/bioinformatics/btw3
 **Onde entra:** Metodologia §11 — etapa de QC agregado.
 
 **Ressalva:** Ferramenta de relatório; não substitui inspeção do QC por amostra.
+
+### `vaquerogarcia2016view` — Tier 2
+**Vaquero-Garcia J, Barrera A, Gazzara MR, González-Vallinas J, Lahens NF, Hogenesch JB, Lynch KW, Barash Y.** (2016). A new view of transcriptome complexity and regulation through the lens of local splicing variations. `Elife` 2016;5:e11752.
+
+DOI: [10.7554/elife.11752](https://doi.org/10.7554/elife.11752) · PMID: [26829591](https://pubmed.ncbi.nlm.nih.gov/26829591/) · PMC: PMC4801060
+**Lido de:** **texto completo** — seções de resultados/discussão · arquivo: `fulltext/vaquerogarcia2016view.txt`
+
+**O que estabelece:** Artigo original do **MAJIQ**, que define e quantifica splicing alternativo em unidades de *local splicing variations* (LSVs), capazes de capturar tanto os tipos clássicos de splicing quanto variações mais complexas. Em mapa de 12 tecidos de camundongo, **LSVs complexas constituem mais de 30%** das variações dependentes de tecido e afetam famílias de proteínas específicas; a prevalência de LSVs complexas é conservada em humanos.
+
+**Onde entra:** Metodologia §11 — alternativa ao par rMATS/DEXSeq para a **hipótese H5** (splicing alternativo). É a citação canônica do MAJIQ, cuja vantagem declarada é capturar eventos complexos além dos tipos clássicos (skipped exon, intron retention etc.), relevante se a resposta ao GORE3 envolver splicing não-canônico.
+
+**Ressalva:** Demonstrado em camundongo, não em inseto. O ganho de LSVs complexas depende de profundidade e desenho — não avaliado aqui se compensa a curva de aprendizado extra frente a rMATS/DEXSeq, que já têm scripts documentados no grupo.
 
 ### `patro2017salmon` — Tier 2
 **Patro R, Duggal G, Love MI, Irizarry RA, Kingsford C.** (2017). Salmon provides fast and bias-aware quantification of transcript expression. `Nat Methods` 2017;14(4):417-419.
@@ -216,17 +240,29 @@ DOI: [10.1186/s13059-025-03673-9](https://doi.org/10.1186/s13059-025-03673-9) ·
 
 ## 2B — Benchmarks e boas praticas (recencia exigida: 2023+)
 
+### `schurch2016many` — Tier 1
+**Schurch NJ, Schofield P, Gierliński M, Cole C, Sherstnev A, Singh V, Wrobel N, Gharbi K, Simpson GG, Owen-Hughes T, Blaxter M, Barton GJ.** (2016). How many biological replicates are needed in an RNA-seq experiment and which differential expression tool should you use?. `RNA` 2016;22(6):839-851.
+
+DOI: [10.1261/rna.053959.115](https://doi.org/10.1261/rna.053959.115) · PMID: [27022035](https://pubmed.ncbi.nlm.nih.gov/27022035/) · PMC: PMC4878611
+**Lido de:** **texto completo** — seções de resultados/discussão · arquivo: `fulltext/schurch2016many.txt`
+
+**O que estabelece:** Experimento com **48 réplicas biológicas** em cada uma de duas condições em *S. cerevisiae*, para responder objetivamente quantas réplicas uma análise de RNA-Seq precisa. Com 3 réplicas, nove de 11 ferramentas testadas encontraram só 20–40% dos genes diferencialmente expressos identificados com o conjunto completo de 42 réplicas limpas — sobe para >85% só no subconjunto de genes com variação acima de 4×. **Recomendações formais dos autores:** (1) pelo menos **6 réplicas biológicas** por condição em qualquer experimento; (2) pelo menos **12** quando é importante identificar a maioria dos genes DE, incluindo os de fold-change pequeno; (3) com menos de 12 réplicas, usar **edgeR (exact)** ou **DESeq2**; com mais de 12, o **DESeq** original supera marginalmente os demais.
+
+**Onde entra:** Metodologia §11, item de réplicas — **contradiz diretamente a recomendação atual do projeto** ('≥4 biológicas, zero técnicas'). O número correto segundo esta referência é ≥6, subindo a ≥12 se o objetivo incluir capturar DEGs de fold-change pequeno — que é precisamente o caso de isoformas de tripsina com troca sutil (hipótese H1). Ação: **revisar `03_metodologia_padrao_ouro.md` para citar 6–12 réplicas, não 4**, e conversar com a Macrogen sobre viabilidade/custo antes de fechar o desenho.
+
+**Ressalva:** É levedura, organismo unicelular com baixa variância biológica inter-réplica comparado a um inseto criado em condições semi-controladas — a variância real em *A. gemmatalis* pode ser maior, o que tornaria a recomendação ainda mais conservadora, não menos. Não é garantia de que 6 réplicas bastem aqui; é o piso empírico mínimo publicado.
+
 ### `sarantopoulou2021comparative` — Tier 1
 **Sarantopoulou D, Brooks TG, Nayak S, Mrčela A, Lahens NF, Grant GR.** (2021). Comparative evaluation of full-length isoform quantification from RNA-Seq. `BMC Bioinformatics` 2021;22(1):266.
 
 DOI: [10.1186/s12859-021-04198-1](https://doi.org/10.1186/s12859-021-04198-1) · PMID: [34034652](https://pubmed.ncbi.nlm.nih.gov/34034652/) · PMC: PMC8145802
-**Lido de:** **abstract** · arquivo: `fulltext/sarantopoulou2021comparative.txt`
+**Lido de:** **texto completo** — seções de resultados/discussão · arquivo: `fulltext/sarantopoulou2021comparative.txt`
 
-**O que estabelece:** Benchmark de quantificação de isoformas de comprimento completo com dado simulado que reproduz propriedades do dado real (polimorfismo, sinal de íntron, cobertura não uniforme), cobrindo métodos baseados em genoma, em transcriptoma e em pseudoalinhamento, com uma abordagem simples como controle. Salmon, kallisto, RSEM e Cufflinks têm a maior acurácia em dado idealizado, mas **em dado realista não superam dramaticamente a abordagem simples**. Os parâmetros estruturais de maior impacto na acurácia são comprimento e complexidade de compressão da sequência, **não o número de isoformas**.
+**O que estabelece:** Benchmark de quantificação de isoformas com dado real e simulado, cobrindo Salmon, kallisto, RSEM, Cufflinks, HTSeq, featureCounts e NRP. **Achado central e o mais importante para este projeto:** ao remover a isoforma mais expressa de um gene (simulando o cenário em que uma isoforma domina e outra é rara — exatamente o que a hipótese H1 propõe existir entre isoformas de tripsina sensíveis e insensíveis), **a acurácia de todos os métodos cai drasticamente, exceto HTSeq e featureCounts** — que por sua vez não resolvem isoforma nenhuma, só contam por gene. Na análise de expressão diferencial em nível de isoforma com genes sem expressão real em nenhuma réplica (controle negativo interno), **a FDR real ficou muito acima da reportada para todos os métodos** — a 0,01 de FDR nominal, houve ≥1.000 isoformas chamadas como DE indevidamente. Sleuth teve a menor taxa de falso positivo entre os métodos aplicáveis. **DESeq2 não foi desenhado para DE em nível de transcrito** e tem desempenho inferior a EBSeq/Sleuth nessa tarefa especificamente — mas ainda assim superou-os em manter especificidade em alguns cortes.
 
-**Onde entra:** Metodologia — calibra a expectativa sobre quantificação por isoforma, que é a base operacional da H1, e é a ressalva honesta a declarar junto com a escolha do Salmon.
+**Onde entra:** **Advertência direta para a hipótese H1.** O cenário mais problemático do benchmark — isoforma dominante que desaparece — é estruturalmente o cenário que H1 propõe testar. Duas consequências para a metodologia: (1) **quantificação por isoforma via Salmon/tximport alimentando DESeq2 mede expressão de gene com sensibilidade a troca de isoforma, não substitui uma ferramenta de DE em nível de transcrito de verdade**; (2) se for reportar DE em nível de isoforma (não só de gene), usar método desenhado para isso (EBSeq, Sleuth) e **declarar explicitamente que a FDR real pode exceder a nominal**, com controle negativo (genes de expressão nula) quando possível.
 
-**Ressalva:** Dado simulado. O efeito de anotação incompleta é investigado no artigo, mas não extraí a conclusão específica sobre esse ponto — que é justamente o mais relevante aqui. Requer leitura do texto completo antes de citar como justificativa nesse aspecto.
+**Ressalva:** Dado majoritariamente simulado a partir de anotação humana (hipocampo × fígado), com validação em dado real das mesmas amostras. Os métodos testados são de 2014-2016; ferramentas mais recentes (Salmon com bootstrap, tximport) podem ter corrigido parte do problema — não testado aqui.
 
 ### `chisanga2022impact` — Tier 1
 **Chisanga D, Liao Y, Shi W.** (2022). Impact of gene annotation choice on the quantification of RNA-seq data. `BMC Bioinformatics` 2022;23(1):107.
@@ -240,17 +276,41 @@ DOI: [10.1186/s12859-022-04644-8](https://doi.org/10.1186/s12859-022-04644-8) ·
 
 **Ressalva:** Dados humanos, com anotação madura e curada nas duas bases. **Não testa o caso deste projeto**, que é anotação automática de um genoma de não-modelo depositado há pouco — o risco de erro em famílias multigênicas como as serino-proteases permanece, e a curadoria manual segue necessária.
 
+### `ferrerbonsoms2022identifiability` — Tier 1
+**Ferrer-Bonsoms JA, Morales X, Afshar PT, Wong WH, Rubio A.** (2022). On the identifiability of the isoform deconvolution problem: application to select the proper fragment length in an RNA-seq library. `Bioinformatics` 2022;38(6):1491-1496.
+
+DOI: [10.1093/bioinformatics/btab873](https://doi.org/10.1093/bioinformatics/btab873) · PMID: [34978563](https://pubmed.ncbi.nlm.nih.gov/34978563/) · PMC: PMC8896638
+**Lido de:** **abstract**
+
+**O que estabelece:** Formaliza quando o problema de deconvolução de isoformas é identificável a partir de reads pareadas, e propõe método objetivo para escolher o comprimento de fragmento. Achado central: o comprimento de fragmento ótimo é **dependente do gene**, e para o transcriptoma humano o comprimento médio ótimo fica em **400–600 nt para genes codificantes** (150–200 nt para lncRNAs). O comprimento de leitura ótimo é o maior que couber dentro do fragmento. Combinar duas bibliotecas de fragmentos muito diferentes melhora significativamente a identificabilidade gênica.
+
+**Onde entra:** **Ponto crítico para o desenho real do sequenciamento.** 'Paired-end, 150 nt' é o **comprimento de leitura**, não o comprimento de fragmento (inserto) — são parâmetros distintos, e este artigo é o que formaliza por que a distinção importa para quantificação de isoforma. **Ação concreta: confirmar com a Macrogen o tamanho médio do fragmento/inserto da biblioteca**, não só o comprimento de leitura. Se o inserto for menor que ~250–300 nt (frequente em preparações padrão), a identificação de isoformas fica prejudicada mesmo com boa profundidade.
+
+**Ressalva:** Só o abstract foi lido; valores calculados para transcriptoma humano, não para *A. gemmatalis*. A direção do argumento (fragmento maior ajuda deconvolução de isoforma) generaliza; os números de 400–600 nt não devem ser citados como alvo direto para este projeto.
+
 ### `coxe2024benchmarking` — Tier 1
 **Coxe T, Burks DJ, Singh U, Mittler R, Azad RK.** (2024). Benchmarking RNA-Seq Aligners at Base-Level and Junction Base-Level Resolution Using the <i>Arabidopsis thaliana</i> Genome. `Plants (Basel)` 2024;13(5):582.
 
 DOI: [10.3390/plants13050582](https://doi.org/10.3390/plants13050582) · PMID: [38475429](https://pubmed.ncbi.nlm.nih.gov/38475429/) · PMC: PMC10935055
-**Lido de:** **abstract** · arquivo: `fulltext/coxe2024benchmarking.txt`
+**Lido de:** **texto completo** — seções de resultados/discussão · arquivo: `fulltext/coxe2024benchmarking.txt`
 
-**O que estabelece:** Benchmark de cinco alinhadores de RNA-Seq muito usados, com dado simulado de *Arabidopsis thaliana* e SNPs anotados do TAIR, medindo acurácia em resolução de base e de base de junção. A motivação declarada é que as ferramentas são tipicamente pré-ajustadas com dados humanos ou procarióticos e **podem não ser adequadas a outros organismos**.
+**O que estabelece:** Benchmark de HISAT2, STAR, Subread e BBMap com dado simulado de *Arabidopsis thaliana* e SNPs anotados do TAIR, em parâmetros padrão, sem referência, e permissivos, medindo acurácia em resolução de base e de **base de junção** (a que importa para detecção correta de splicing). Conclusão dos autores: **os alinhadores populares têm desempenho parecido em resolução de base**, mas na resolução de junção — que é o que decide se um evento de splicing é atribuído corretamente — **o Subread é o mais promissor**, recomendado quando alta acurácia de junção importa. STAR e HISAT2 permanecem adequados para uso geral.
 
-**Onde entra:** Metodologia — é o argumento publicado de que benchmark feito em humano não transfere automaticamente para outro clado, que sustenta declarar a escolha de alinhador como decisão e não como padrão herdado.
+**Onde entra:** Metodologia §11 — é o argumento com número real para escolher **Subread como alinhador, e não STAR/HISAT2 por padrão**, especificamente para a **hipótese H5** (splicing alternativo). Para expressão gênica geral sem foco em junção, STAR/HISAT2 seguem adequados.
 
-**Ressalva:** É planta, não inseto. O argumento sobre transferência entre clados vale; o ranking numérico específico não se transfere para *A. gemmatalis*. Não extraí qual alinhador venceu.
+**Ressalva:** É *Arabidopsis*, planta diploide, os próprios autores dizem que é 'talvez menos complexa' que outros genomas vegetais, e não testam inseto. O ranking não se transfere automaticamente para *A. gemmatalis*; a lição estrutural — que ferramentas diferentes podem empatar em base mas divergir muito em junção — sim.
+
+### `froussios2019well` — Tier 2
+**Froussios K, Schurch NJ, Mackinnon K, Gierliński M, Duc C, Simpson GG, Barton GJ.** (2019). How well do RNA-Seq differential gene expression tools perform in a complex eukaryote? A case study in Arabidopsis thaliana. `Bioinformatics` 2019;35(18):3372-3377.
+
+DOI: [10.1093/bioinformatics/btz089](https://doi.org/10.1093/bioinformatics/btz089) · PMID: [30726870](https://pubmed.ncbi.nlm.nih.gov/30726870/) · PMC: PMC6748783
+**Lido de:** **texto completo** — seções de resultados/discussão · arquivo: `fulltext/froussios2019well.txt`
+
+**O que estabelece:** Estende o resultado de Schurch et al. (2016) de levedura para *Arabidopsis thaliana*, eucarioto complexo. Confirma que as medidas de expressão gênica são mais consistentes com uma **distribuição binomial negativa** do que log-normal ou normal, e que o **tamanho e a complexidade do transcriptoma não alteram a taxa de falsos positivos** das nove ferramentas de DGE testadas.
+
+**Onde entra:** Metodologia §11 — generaliza a recomendação de Schurch para além de levedura, o que é relevante porque *A. gemmatalis* é certamente mais complexo que levedura. Reforça a escolha de DESeq2/edgeR (ambos baseados em binomial negativa) sobre alternativas paramétricas gaussianas.
+
+**Ressalva:** Planta, não inseto — mas o ponto (robustez da NB independente da complexidade do transcriptoma) é justamente o que generaliza a recomendação para organismos não testados diretamente.
 
 ### `jauhal2021assessing` — Tier 2
 **Jauhal AA, Newcomb RD.** (2021). Assessing genome assembly quality prior to downstream analysis: N50 versus BUSCO. `Mol Ecol Resour` 2021;21(5):1416-1421.
@@ -272,6 +332,18 @@ DOI: [10.1093/nargab/lqad044](https://doi.org/10.1093/nargab/lqad044) · PMID: [
 **Onde entra:** Metodologia §11 — sustenta a escolha de STAR ou HISAT2 para o alinhamento genoma-guiado, e é a ressalva honesta a declarar ao escolher rMATS ou DEXSeq para a **hipótese H5** (splicing alternativo): a escolha de ferramenta não é neutra e nenhuma domina.
 
 **Ressalva:** Dado humano (sangue total) e simulado. A conclusão sobre variabilidade entre ferramentas transfere como cautela; o ranking específico não.
+
+### `sergio2024comprehensive` — Tier 2
+**Sergio Alberto G, Maximo R, Andres R, Sergio L, Norma P.** (2024). Comprehensive Analysis of the Influence of Technical and Biological Variations on De Novo Assembly of RNA-Seq Datasets. `Bioinform Biol Insights` 2024;18:11779322241274957.
+
+DOI: [10.1177/11779322241274957](https://doi.org/10.1177/11779322241274957) · PMID: [39649541](https://pubmed.ncbi.nlm.nih.gov/39649541/) · PMC: PMC11622296
+**Lido de:** **texto completo** — seções de resultados/discussão · arquivo: `fulltext/sergio2024comprehensive.txt`
+
+**O que estabelece:** Simula dados de RNA-Seq com complexidade controlada para testar o que mais afeta a montagem *de novo* de transcriptoma. **O grau de splicing alternativo teve o maior impacto negativo** na reconstrução de transcritos — sem splicing alternativo, reconstrução de 62,8–96,3%; no grau máximo de splicing, cai para 11,6–48,7%. O tamanho do fragmento também importa: em fragmentos de 400 pb, nenhum montador reconstruiu transcritos até o 10º percentil de tamanho; subindo para 500–600 pb, o limiar melhora para o 15º percentil. Comprimento de leitura e tamanho de fragmento afetam a reconstrução de transcritos longos e curtos de forma **diferente**.
+
+**Onde entra:** Metodologia §11 — justifica tecnicamente por que a via Trinity *de novo* secundária (para transcritos ausentes da anotação) é estrutural e previsivelmente mais fraca justamente nos genes com mais isoformas — que são exatamente as famílias de interesse (serino-proteases). É argumento a favor do genoma-guiado como via primária, com números, não só afirmação qualitativa.
+
+**Ressalva:** Dado inteiramente simulado, a partir do genoma humano. Os números percentuais não se transferem para *A. gemmatalis*; a direção do efeito (splicing prejudica montagem *de novo*) é o que generaliza.
 
 ## 2C — Transcriptomica de intestino de inseto sob estresse
 
@@ -339,6 +411,18 @@ DOI: [10.1186/s13059-026-04001-5](https://doi.org/10.1186/s13059-026-04001-5) ·
 **Onde entra:** Metodologia — informa se a via Trinity secundária, prevista para transcritos ausentes da anotação, deveria migrar para long-read.
 
 **Ressalva:** ⚠️ Li apenas objetivos e desenho no abstract. **Não extraí qual ferramenta teve melhor desempenho nem sob quais condições** — não citar como justificativa de escolha antes de ler os resultados. O texto completo está em `fulltext/yan2026comprehensive.txt`.
+
+### `norton2018outlier` — Tier 2
+**Norton SS, Vaquero-Garcia J, Lahens NF, Grant GR, Barash Y.** (2018). Outlier detection for improved differential splicing quantification from RNA-Seq experiments with replicates. `Bioinformatics` 2018;34(9):1488-1497.
+
+DOI: [10.1093/bioinformatics/btx790](https://doi.org/10.1093/bioinformatics/btx790) · PMID: [29236961](https://pubmed.ncbi.nlm.nih.gov/29236961/) · PMC: PMC6454425
+**Lido de:** **abstract**
+
+**O que estabelece:** Desenvolve modelo de probabilidade para ponderar cada réplica de RNA-Seq como representativa de sua condição experimental na análise de splicing alternativo, detectando **amostras outlier** consistentemente diferentes das demais da mesma condição. Em vez de descartar essas amostras, propõe **down-weighting** — generalização do algoritmo MAJIQ que ganha poder estatístico em vez de perder dado.
+
+**Onde entra:** Metodologia — controle de qualidade para a **hipótese H5**. Com poucas réplicas (o padrão do projeto, mesmo revisado para 6), uma única réplica ruim pode dominar o resultado de splicing diferencial; este é o método declarado para lidar com isso sem simplesmente descartar dado caro.
+
+**Ressalva:** Só o abstract foi lido; específico ao ecossistema MAJIQ.
 
 ### `morabito2023hdwgcna` — Tier 2
 **Morabito S, Reese F, Rahimzadeh N, Miyoshi E, Swarup V.** (2023). hdWGCNA identifies co-expression networks in high-dimensional transcriptomics data. `Cell Rep Methods` 2023;3(6):100498.

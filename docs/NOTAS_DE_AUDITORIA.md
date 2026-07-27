@@ -170,7 +170,7 @@ permanecem no bloco comentado do arquivo, com o motivo.
 
 Declarado para que ninguém assuma cobertura que não existe:
 
-1. **Métricas do genoma** — N50, tamanho, nível de montagem, BUSCO de `GCF_050436995.1`. Nenhum número foi reproduzido nesta base teórica justamente por isso. **Conferir na página do assembly antes de escrever a metodologia.**
+1. ~~**Métricas do genoma**~~ — ✅ **Verificado em 27/07/2026** via NCBI Datasets API (`api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_050436995.1/dataset_report`, fonte primária, não WebSearch). Ver §10.
 2. **Campo de força usado no MD de GORE 1-2 T** — o resumo de de Andrade et al. (2026) menciona 100 ns de MD mas não especifica o campo de força. Essa informação é necessária para a decisão CHARMM36m × AMBER ([`03_metodologia_padrao_ouro.md`](03_metodologia_padrao_ouro.md) §7). **Requer leitura do texto completo.**
 3. **Conteúdo dos arquivos HADDOCK** (`.tgz`) — confirmada apenas a existência, não os resultados
 4. **Valores da cotação Macrogen** — não abertos, não reproduzidos
@@ -181,6 +181,52 @@ Declarado para que ninguém assuma cobertura que não existe:
    por decisão explícita de escopo.
 6. **Dados de *S. frugiperda*** — fora do escopo definido; não auditados
 7. **Se o experimento GORE3 já foi coletado** — só se sabe que o sequenciamento está contratado
+
+---
+
+## 10. Métricas verificadas do genoma `GCF_050436995.1`
+
+Verificado em 27/07/2026 via NCBI Datasets API (fonte primária, JSON
+estruturado — não WebSearch, não inferido).
+
+| Métrica | Valor |
+|---|---|
+| Nível de montagem | **Chromosome** — 32 cromossomos |
+| Tamanho total | 391.691.109 pb (391.689.209 pb sem gaps) |
+| Contigs / Scaffolds | 60 / 41 |
+| N50 de contig | **12.188.377 pb** (L50 = 14) |
+| N50 de scaffold | **13.315.026 pb** (L50 = 14) |
+| GC | 35,5% |
+| Cobertura de sequenciamento | 218× |
+| Tecnologia | PacBio Revio (HiFi) |
+| Montador | HiFiASM v. 0.19.3-r572 |
+| Amostra | pupa fêmea, linhagem Stoneville (Benzon Research), *Ag100Pest* USDA-ARS |
+| Data de release do assembly | 2025-05-19 |
+
+### ⚠️ A anotação mudou — corrigir em todos os documentos
+
+A anotação atual é **`GCF_050436995.1-RS_2026_04`** (release 2026-04-29),
+**não** `RS_2025_08` como registrado em `04_viabilidade.md`,
+`03_metodologia_padrao_ouro.md`, `05_lacunas_e_hipoteses.md`,
+`06_correcoes_projeto.md` e `referencias.bib`. A RS_2025_08 foi substituída —
+`04_viabilidade.md` já foi corrigido nesta rodada; **os demais arquivos
+precisam da mesma correção antes da escrita final**.
+
+| Anotação RS_2026_04 | Valor |
+|---|---|
+| Genes totais | **15.773** |
+| Codificantes de proteína | 14.238 |
+| Não-codificantes | 1.417 |
+| Pseudogenes | 118 |
+| Pipeline | NCBI Eukaryotic Genome Annotation Pipeline (EGAP) v10.5 — Gnomon, cmsearch, tRNAscan-SE |
+| **BUSCO** (lepidoptera_odb10, v5.7.1, n=5286) | **Completo 99,36%** (single-copy 98,73% + duplicado 0,62%) · fragmentado 0,26% · ausente 0,38% |
+
+**Leitura para o projeto:** BUSCO de 99,36% é excelente — a montagem não é
+gargalo de qualidade. O nível cromossomo com N50 de 12+ Mb sustenta
+plenamente a abordagem genoma-guiada. A ressalva que permanece é outra: **é a
+qualidade da montagem, não da anotação automática por família multigênica**
+— a curadoria manual das serino-proteases continua necessária, como já
+registrado em `05_lacunas_e_hipoteses.md` §8.
 
 ---
 

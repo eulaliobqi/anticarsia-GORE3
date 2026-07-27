@@ -36,7 +36,7 @@ O projeto propõe Trinity → CD-HIT → TransDecoder, o fluxo correto para orga
 | Assembly RefSeq | **`GCF_050436995.1`** |
 | Nome | **ilAntGemm2** (primary haplotype) |
 | BioProject (genoma) | PRJNA1225766 |
-| Anotação | NCBI Eukaryotic Genome Annotation Pipeline, release **RS_2025_08** |
+| Anotação | NCBI Eukaryotic Genome Annotation Pipeline, release **RS_2026_04** (atualizada 29/04/2026; substitui a RS_2025_08 citada em versões anteriores). 15.773 genes, 14.238 codificantes de proteína. BUSCO 99,36% completo (lepidoptera_odb10) — ver `NOTAS_DE_AUDITORIA.md` §10 |
 
 *(Verificar métricas de contiguidade — N50, BUSCO, nível de montagem — na página do assembly antes de finalizar a metodologia escrita. Não reproduzir números não conferidos.)*
 

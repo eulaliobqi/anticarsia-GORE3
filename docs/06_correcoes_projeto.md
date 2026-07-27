@@ -55,7 +55,7 @@ A justificativa dada ("garantindo compatibilidade") é o oposto do que ocorre: u
 
 **Onde:** §2.5 (Controle de qualidade, trimagem e montagem *De novo*)
 
-**Problema:** o projeto foi redigido em Set/2025, quando *A. gemmatalis* não tinha genoma de referência. Isso mudou: `GCF_050436995.1` (ilAntGemm2), com anotação NCBI RS_2025_08.
+**Problema:** o projeto foi redigido em Set/2025, quando *A. gemmatalis* não tinha genoma de referência. Isso mudou: `GCF_050436995.1` (ilAntGemm2), nível cromossomo (32 cromossomos, N50 12,2 Mb, BUSCO 99,36%), com anotação NCBI **RS_2026_04** (15.773 genes; substitui a RS_2025_08 citada anteriormente).
 
 Manter montagem *de novo* como estratégia principal compromete diretamente dois objetivos declarados — análise de **isoformas** e de **splicing alternativo** — que não são resolvíveis sem coordenadas genômicas.
 

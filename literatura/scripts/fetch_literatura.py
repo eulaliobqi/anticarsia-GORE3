@@ -130,6 +130,15 @@ CURADOS = {
     "34034652": (2, "2B", 1),
     "37260511": (2, "2B", 2),
     "33629477": (2, "2B", 2),
+    # 2B (cont.) desenho experimental — resolvidos apos o pedido do usuario
+    # de calibrar a literatura ao desenho real (PE, 150nt, ~40M reads)
+    "27022035": (2, "2B", 1),  # Schurch 2016: quantas replicas biologicas
+    "30726870": (2, "2B", 2),  # Froussios 2019: NB em eucarioto complexo
+    "34978563": (2, "2B", 1),  # comprimento de fragmento x identificabilidade de isoforma
+    "39649541": (2, "2B", 2),  # variaveis que mais afetam assembly de novo
+    "33015620": (2, "2A", 1),  # ComBat-seq: correcao de lote
+    "26829591": (2, "2A", 2),  # MAJIQ original
+    "29236961": (2, "2D", 2),  # deteccao de outlier em splicing diferencial
     # 2C transcriptomica de intestino de inseto sob estresse
     "34022342": (2, "2C", 1),
     "32928099": (2, "2C", 2),

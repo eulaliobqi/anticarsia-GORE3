@@ -117,18 +117,6 @@ DOI: [10.1016/j.chemosphere.2018.08.088](https://doi.org/10.1016/j.chemosphere.2
 **O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
 **Onde entra:** ⚠️ PENDENTE
 
-### `castro2019toxicity` — Tier 2
-**Castro BMCE, Martinez LC, Barbosa SG, Serrão JE, Wilcken CF, Soares MA, da Silva AA, de Carvalho AG, Zanuncio JC.** (2019). Toxicity and cytopathology mediated by Bacillus thuringiensis in the midgut of Anticarsia gemmatalis (Lepidoptera: Noctuidae). `Sci Rep` 2019;9(1):6667.
-
-DOI: [10.1038/s41598-019-43074-0](https://doi.org/10.1038/s41598-019-43074-0) · PMID: [31040309](https://pubmed.ncbi.nlm.nih.gov/31040309/) · PMC: PMC6491604
-**Lido de:** **abstract** · arquivo: `fulltext/castro2019toxicity.txt`
-
-**O que estabelece:** Avalia a toxicidade de *B. thuringiensis* subsp. *kurstaki* cepa HD-1 e as alterações citopatológicas no intestino médio de *A. gemmatalis*, calculando concentrações letais (CL₂₅, CL₅₀, CL₇₅, CL₉₀ e CL₉₉) e examinando fragmentos de intestino após ingestão bacteriana.
-
-**Onde entra:** Introdução — táticas atuais de controle e o alvo intestinal comum entre Bt e inibidores de protease. Também é referência de histopatologia de intestino médio da espécie, que conversa com `coura2022isoforms`.
-
-**Ressalva:** Só o abstract foi lido; **os valores de CL não foram extraídos**. Classifica *A. gemmatalis* como Noctuidae, divergindo de `murua2018defoliation` e `ongaratto2021resistance` (Erebidae) — mais um caso da divergência taxonômica já registrada nas notas.
-
 ### `bel2019specific` — Tier 2
 **Bel Y, Zack M, Narva K, Escriche B.** (2019). Specific binding of Bacillus thuringiensis Cry1Ea toxin, and Cry1Ac and Cry1Fa competition analyses in Anticarsia gemmatalis and Chrysodeixis includens. `Sci Rep` 2019;9(1):18201.
 
@@ -149,6 +137,18 @@ DOI: [10.1016/j.jip.2019.03.008](https://doi.org/10.1016/j.jip.2019.03.008) · P
 
 **O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
 **Onde entra:** ⚠️ PENDENTE
+
+### `castro2019toxicity` — Tier 2
+**Castro BMCE, Martinez LC, Barbosa SG, Serrão JE, Wilcken CF, Soares MA, da Silva AA, de Carvalho AG, Zanuncio JC.** (2019). Toxicity and cytopathology mediated by Bacillus thuringiensis in the midgut of Anticarsia gemmatalis (Lepidoptera: Noctuidae). `Sci Rep` 2019;9(1):6667.
+
+DOI: [10.1038/s41598-019-43074-0](https://doi.org/10.1038/s41598-019-43074-0) · PMID: [31040309](https://pubmed.ncbi.nlm.nih.gov/31040309/) · PMC: PMC6491604
+**Lido de:** **abstract** · arquivo: `fulltext/castro2019toxicity.txt`
+
+**O que estabelece:** Avalia a toxicidade de *B. thuringiensis* subsp. *kurstaki* cepa HD-1 e as alterações citopatológicas no intestino médio de *A. gemmatalis*, calculando concentrações letais (CL₂₅, CL₅₀, CL₇₅, CL₉₀ e CL₉₉) e examinando fragmentos de intestino após ingestão bacteriana.
+
+**Onde entra:** Introdução — táticas atuais de controle e o alvo intestinal comum entre Bt e inibidores de protease. Também é referência de histopatologia de intestino médio da espécie, que conversa com `coura2022isoforms`.
+
+**Ressalva:** Só o abstract foi lido; **os valores de CL não foram extraídos**. Classifica *A. gemmatalis* como Noctuidae, divergindo de `murua2018defoliation` e `ongaratto2021resistance` (Erebidae) — mais um caso da divergência taxonômica já registrada nas notas.
 
 ### `parsza2021evaluation` — Tier 2
 **Parsza CN, Gómez DLM, Simonin JA, Belaich MN, Ghiringhelli PD.** (2021). Evaluation of the Nucleopolyhedrovirus of Anticarsia gemmatalis as a Vector for Gene Therapy in Mammals. `Curr Gene Ther` 2021;21(2):177-189.

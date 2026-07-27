@@ -14,7 +14,7 @@ Avaliação honesta do que é executável, com que recursos e em que prazo.
 
 | Item | Onde | Situação |
 |---|---|---|
-| Genoma de referência | `GCF_050436995.1` (NCBI) | ✅ Público, anotado (RS_2025_08) |
+| Genoma de referência | `GCF_050436995.1` (NCBI) | ✅ Nível **cromossomo** (32 cromossomos), anotação **RS_2026_04** (atualizada — a versão RS_2025_08 antes citada foi substituída) |
 | RNA-Seq anterior (controle / SKTI / GORE2) | BioProject **PRJNA1494060**, SRA SRP717437 | ✅ Depositado, 8 SRR |
 | Montagem Trinity de *A. gemmatalis* | `C:\Users\eulal\.claude\caracterization-trypsin\data\raw\trinity_assembly.fasta` | ✅ Local |
 | Sequências de tripsina de *A. gemmatalis* | `C:\Users\eulal\Desktop\LEBPP\Dsign-racional-peptid-inib\anticarsia_gemmatalis_trypsins.fasta` | ✅ Local |
@@ -31,6 +31,60 @@ Avaliação honesta do que é executável, com que recursos e em que prazo.
 | Dados de *S. frugiperda* | ⚪ Fora do escopo atual | — |
 
 **O caminho crítico é o sequenciamento.** Enquanto os FASTQ não chegam, todo o bloco estrutural pode avançar em paralelo — e boa parte dele já está feita.
+
+### 1.1 Desenho experimental confirmado (27/07/2026)
+
+| Parâmetro | Valor |
+|---|---|
+| Grupos | Controle · Benzamidina (controle positivo) · SKTI (inibidor natural) · GORE3 |
+| Réplicas biológicas | **3 por grupo** |
+| Total de amostras | **12** |
+| Leitura | Paired-end, **150 nt** |
+| Profundidade alvo | **~40 milhões de reads/amostra** |
+| Espécie | *A. gemmatalis* |
+
+⚠️ **Tensão real com a literatura, não suavizar.** Schurch et al. (2016,
+PMID 27022035, `schurch2016many` — experimento controlado com 48 réplicas)
+recomenda **no mínimo 6 réplicas biológicas por condição**, subindo a **12**
+quando capturar a maioria dos DEGs — incluindo os de fold-change pequeno —
+importa. Com 3 réplicas, a mesma referência mostra que só 20–40% dos DEGs reais
+são recuperados (>85% apenas para os de variação acima de 4×). Froussios et
+al. (2019, `froussios2019well`) estende esse resultado a um eucarioto
+complexo (*A. thaliana*), então "levedura, não vale aqui" não é mitigação
+válida.
+
+**Por que isso pesa mais neste projeto do que em geral:** a hipótese H1 é
+sobre troca de isoforma de tripsina — tipicamente um efeito de fold-change
+**pequeno a moderado**, exatamente a faixa que 3 réplicas tem menor poder para
+detectar. Não é um defeito silencioso: **com 3 réplicas, esperar que a análise
+detecte a maioria dos DEGs sutis não é realista**, e isso precisa estar
+declarado na metodologia, não descoberto na revisão.
+
+**Mitigações parciais, não substitutas de mais réplica:**
+1. Usar **DESeq2 ou edgeR (exact)** — são as ferramentas de melhor desempenho
+   combinado de verdadeiro-positivo/falso-positivo abaixo de 12 réplicas,
+   segundo a própria Schurch et al.
+2. Aplicar limiar de fold-change **compatível com o n** (a referência sugere
+   0,1 ≤ T ≤ 0,5 em log2, escalonado pelo número de réplicas) em vez de usar
+   |log2FC| ≥ 1 sem qualificação.
+3. Priorizar a hipótese **H2** (vias de detoxificação, tipicamente
+   fold-change grande) e a análise dirigida da família de serino-proteases
+   (poucos genes, correção de múltiplos testes mais branda) como as análises
+   com maior poder real neste n.
+4. Registrar explicitamente, ao reportar H1, que a ausência de DEG
+   significativo pode ser falta de poder, não ausência de efeito biológico.
+
+**Divergência do precedente do grupo:** o BioProject PRJNA1494060 (controle,
+SKTI, GORE2) tem 8 SRR — não é 3 grupos × réplicas iguais. Este desenho novo
+troca GORE2 por benzamidina como controle positivo farmacológico e mantém
+GORE3 como tratamento de interesse.
+
+**Se ainda houver janela para negociar com a Macrogen:** aumentar réplicas
+biológicas tem retorno maior que aumentar profundidade — 40M reads/amostra já
+é generoso (nf-core/rnaseq recomenda 20–30M para DE em nível de gene; a
+profundidade extra aqui favorece detecção de isoforma, não poder estatístico
+entre grupos). Entre "mais profundo com 3 réplicas" e "menos profundo com 6",
+a segunda opção tem mais poder para H1.
 
 ---
 

@@ -73,6 +73,15 @@ DOI: [10.1016/j.pestbp.2022.105107](https://doi.org/10.1016/j.pestbp.2022.105107
 **O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
 **Onde entra:** ⚠️ PENDENTE
 
+### `andrade2026expression` — Tier 1 ✅ ja em docs/referencias.bib
+**de Andrade RJ, Meriño-Cabrera Y, Castro JS, Paulo DGS, Lima MG, Schultz H, Mariano GA, Rodriges MCNG, Santos ILB, Fietto LG, de Oliveira Ramos HJ, de Almeida Oliveira MG.** (2026). Expression of a recombinant peptide with bioinsecticidal potential for the control of agricultural pests. `Int J Biol Macromol` 2026;359:151886.
+
+DOI: [10.1016/j.ijbiomac.2026.151886](https://doi.org/10.1016/j.ijbiomac.2026.151886) · PMID: [41956187](https://pubmed.ncbi.nlm.nih.gov/41956187/)
+**Lido de:** nada ainda (abstract disponível)
+
+**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
+**Onde entra:** ⚠️ PENDENTE
+
 ### `paulo2026peptides` — Tier 1 ✅ ja em docs/referencias.bib
 **Paulo DGS, Schneider JR, Meriño-Cabrera Y, Wurlitzer WB, de Andrade RJ, Santos ILB, Rodrigues MCNG, de Almeida Barros R, da Silva Júnior NR, Lima MG, Vilela CC, Ferla NJ, de Oliveira HJR, de Almeida Oliveira MG.** (2026). Peptides Derived From Reactive Center Loops Inhibit Digestive Trypsin-Like Enzymes in Lepidopteran Pests. `Arch Insect Biochem Physiol` 2026;121(1):e70123.
 
@@ -84,15 +93,6 @@ DOI: [10.1002/arch.70123](https://doi.org/10.1002/arch.70123) · PMID: [41510779
 **Onde entra:** Introdução — a série de pentapeptídeos que antecede o GORE3. **Hipótese H6** — é o dado publicado mais direto contra a premissa de que o LALAY se ancora como os demais peptídeos da série: o ganho de afinidade descrito depende de Lys em P1, e o LALAY não tem resíduo básico algum.
 
 **Ressalva:** Docking mais cinética, sem estrutura experimental do complexo. Todos os Ki estão na faixa milimolar. A correlação com resíduos catalíticos é observacional sobre poses preditas, não medida.
-
-### `andrade2026expression` — Tier 1 ✅ ja em docs/referencias.bib
-**de Andrade RJ, Meriño-Cabrera Y, Castro JS, Paulo DGS, Lima MG, Schultz H, Mariano GA, Rodriges MCNG, Santos ILB, Fietto LG, de Oliveira Ramos HJ, de Almeida Oliveira MG.** (2026). Expression of a recombinant peptide with bioinsecticidal potential for the control of agricultural pests. `Int J Biol Macromol` 2026;359:151886.
-
-DOI: [10.1016/j.ijbiomac.2026.151886](https://doi.org/10.1016/j.ijbiomac.2026.151886) · PMID: [41956187](https://pubmed.ncbi.nlm.nih.gov/41956187/)
-**Lido de:** nada ainda (abstract disponível)
-
-**O que estabelece:** ⚠️ PENDENTE DE FICHAMENTO
-**Onde entra:** ⚠️ PENDENTE
 
 ### `ambadapadi2016reactive` — Tier 2
 **Ambadapadi S, Munuswamy-Ramanujam G, Zheng D, Sullivan C, Dai E, Morshed S, McFadden B, Feldman E, Pinard M, McKenna R, Tibbetts S, Lucas A.** (2016). Reactive Center Loop (RCL) Peptides Derived from Serpins Display Independent Coagulation and Immune Modulating Activities. `J Biol Chem` 2016;291(6):2874-2887.

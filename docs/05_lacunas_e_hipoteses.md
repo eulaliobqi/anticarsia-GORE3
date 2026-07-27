@@ -208,7 +208,7 @@ Honestidade sobre o que o desenho **não** resolve:
 2. **Correlação ≠ causalidade.** Expressão diferencial não prova papel funcional. RNAi ou expressão heteróloga seriam a validação — fora do escopo, mas mencionáveis como perspectiva.
 3. **MD não é experimento.** Estabilidade *in silico* sustenta hipótese, não substitui cinética.
 4. **Ponto único de tempo** (se mantido) limita conclusões sobre adaptação.
-5. **Anotação automática.** RS_2025_08 é pipeline automático; famílias multigênicas como tripsinas podem ter erros de anotação. Curadoria manual das tripsinas é necessária.
+5. **Anotação automática.** RS_2026_04 (atualizada; substitui a RS_2025_08 antes citada) é pipeline automático — BUSCO 99,36% completo, mas isso mede completude da montagem, não acerto por gene; famílias multigênicas como tripsinas podem ter erros de anotação. Curadoria manual das tripsinas é necessária.
 6. **Do laboratório à planta.** Paulo et al. (2026) alertam explicitamente para a necessidade de avaliar interações metabólicas e fitotoxicidade em planta. O projeto não chega lá, e não deve prometer que chega.
 
 ---

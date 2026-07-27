@@ -1,6 +1,6 @@
 # PDFs pendentes de download manual
 
-75 de 125 artigos nao tem versao de acesso aberto
+77 de 132 artigos nao tem versao de acesso aberto
 recuperavel automaticamente. Para estes, so o abstract foi salvo.
 
 Baixar manualmente via CAFe/UFV (o link do DOI resolve para a pagina do
@@ -24,8 +24,8 @@ Europe PMC `fullTextXML` e Unpaywall `best_oa_location`.
 | `merinocabrera2020rational` | 1A | 2 | 2020 | Insect Biochem Mol Biol | [DOI](https://doi.org/10.1016/j.ibmb.2020.103390) |
 | `saikhedkar2019phyto` | 1A | 2 | 2019 | Biochim Biophys Acta Gen Subj | [DOI](https://doi.org/10.1016/j.bbagen.2019.05.003) |
 | `silva2020intestinal` | 1B | 1 | 2020 | Arch Insect Biochem Physiol | [DOI](https://doi.org/10.1002/arch.21631) |
-| `pilon2017purification` | 1B | 1 | 2017 | Arch Insect Biochem Physiol | [DOI](https://doi.org/10.1002/arch.21407) |
 | `silvajunior2021intestinal` | 1B | 1 | 2021 | Arch Insect Biochem Physiol | [DOI](https://doi.org/10.1002/arch.21792) |
+| `pilon2017purification` | 1B | 1 | 2017 | Arch Insect Biochem Physiol | [DOI](https://doi.org/10.1002/arch.21407) |
 | `vatanparast2021knockdown` | 1B | 2 | 2021 | Arch Insect Biochem Physiol | [DOI](https://doi.org/10.1002/arch.21840) |
 | `zhou2016characterization` | 1B | 2 | 2016 | Arch Insect Biochem Physiol | [DOI](https://doi.org/10.1002/arch.21324) |
 | `almeida2022bovine` | 1C | 1 | 2022 | Pestic Biochem Physiol | [DOI](https://doi.org/10.1016/j.pestbp.2022.105188) |
@@ -50,10 +50,12 @@ Europe PMC `fullTextXML` e Unpaywall `best_oa_location`.
 | `manni2021busco` | 2A | 2 | 2021 | Curr Protoc | [DOI](https://doi.org/10.1002/cpz1.323) |
 | `ewels2020core` | 2A | 2 | 2020 | Nat Biotechnol | [DOI](https://doi.org/10.1038/s41587-020-0439-x) |
 | `liao2014featurecounts` | 2A | 2 | 2014 | Bioinformatics | [DOI](https://doi.org/10.1093/bioinformatics/btt656) |
+| `ferrerbonsoms2022identifiability` | 2B | 1 | 2022 | Bioinformatics | [DOI](https://doi.org/10.1093/bioinformatics/btab873) |
 | `jauhal2021assessing` | 2B | 2 | 2021 | Mol Ecol Resour | [DOI](https://doi.org/10.1111/1755-0998.13364) |
 | `pezenti2021transcriptional` | 2C | 1 | 2021 | Genomics | [DOI](https://doi.org/10.1016/j.ygeno.2021.05.012) |
 | `pejendino2026expression` | 2C | 2 | 2026 | BioTech (Basel) | [DOI](https://doi.org/10.3390/biotech15030053) |
 | `pezenti2023transposable` | 2C | 2 | 2023 | Genome | [DOI](https://doi.org/10.1139/gen-2022-0066) |
+| `norton2018outlier` | 2D | 2 | 2018 | Bioinformatics | [DOI](https://doi.org/10.1093/bioinformatics/btx790) |
 | `stecula2025rise` | 3A | 2 | 2025 | Prog Med Chem | [DOI](https://doi.org/10.1016/bs.pmch.2025.09.002) |
 | `honorato2024haddock` | 3B | 1 | 2024 | Nat Protoc | [DOI](https://doi.org/10.1038/s41596-024-01011-0) |
 | `yang2024current` | 3B | 1 | 2024 | Curr Med Chem | [DOI](https://doi.org/10.2174/0109298673263447230920151524) |
@@ -64,10 +66,10 @@ Europe PMC `fullTextXML` e Unpaywall `best_oa_location`.
 | `rahman2020comparison` | 3C | 1 | 2020 | J Chem Inf Model | [DOI](https://doi.org/10.1021/acs.jcim.0c00762) |
 | `paul2024dimerization` | 3C | 2 | 2024 | Chemphyschem | [DOI](https://doi.org/10.1002/cphc.202400502) |
 | `mu2021recent` | 3C | 2 | 2021 | J Chem Inf Model | [DOI](https://doi.org/10.1021/acs.jcim.0c01175) |
-| `valdestresanco2021mmpbsa` | 3D | 1 | 2021 | J Chem Theory Comput | [DOI](https://doi.org/10.1021/acs.jctc.1c00645) |
 | `xu2025sampling` | 3D | 1 | 2025 | J Phys Chem B | [DOI](https://doi.org/10.1021/acs.jpcb.5c04908) |
 | `yau2024head` | 3D | 1 | 2024 | J Mol Model | [DOI](https://doi.org/10.1007/s00894-024-06189-4) |
 | `jiang2024assessing` | 3D | 1 | 2024 | Phys Chem Chem Phys | [DOI](https://doi.org/10.1039/d3cp04366e) |
+| `valdestresanco2021mmpbsa` | 3D | 1 | 2021 | J Chem Theory Comput | [DOI](https://doi.org/10.1021/acs.jctc.1c00645) |
 | `wei2026integrating` | 3D | 2 | 2026 | J Phys Chem B | [DOI](https://doi.org/10.1021/acs.jpcb.6c00306) |
 | `lima2023assessing` | 3D | 2 | 2023 | J Comput Aided Mol Des | [DOI](https://doi.org/10.1007/s10822-023-00515-3) |
 | `chen2025advances` | 3E | 1 | 2025 | Int J Biol Macromol | [DOI](https://doi.org/10.1016/j.ijbiomac.2025.148996) |
@@ -88,4 +90,4 @@ Europe PMC `fullTextXML` e Unpaywall `best_oa_location`.
 | `gomez2020leaf` | 4C | 2 | 2020 | Plant Physiol Biochem | [DOI](https://doi.org/10.1016/j.plaphy.2020.07.010) |
 | `dias2022transcriptional` | 4D | 2 | 2022 | Cytogenet Genome Res | [DOI](https://doi.org/10.1159/000527049) |
 
-Prioridade: os 35 itens Tier 1 primeiro — sao os que precisam de leitura integral.
+Prioridade: os 36 itens Tier 1 primeiro — sao os que precisam de leitura integral.
