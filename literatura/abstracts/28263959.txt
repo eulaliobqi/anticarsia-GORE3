@@ -1,0 +1,3 @@
+PMID 28263959 | Salmon provides fast and bias-aware quantification of transcript expression.
+
+We introduce Salmon, a lightweight method for quantifying transcript abundance from RNA-seq reads. Salmon combines a new dual-phase parallel inference algorithm and feature-rich bias models with an ultra-fast read mapping procedure. It is the first transcriptome-wide quantifier to correct for fragment GC-content bias, which, as we demonstrate here, substantially improves the accuracy of abundance estimates and the sensitivity of subsequent differential expression analysis.

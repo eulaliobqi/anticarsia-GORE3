@@ -95,28 +95,60 @@ Os dados abaixo vêm de `GORE3-abstract.docx` e `Abstract-projeto-eulalio.docx` 
 
 ## 3. Referências do projeto original ainda não verificadas
 
-O projeto lista ~60 referências. Nesta auditoria foram verificadas **18** (as que constam de `referencias.bib`). As demais **não** foram conferidas.
+> **Atualizado em 27/07/2026** pelo levantamento bibliográfico. Auditoria
+> completa em [`../literatura/05_AUDITORIA_REFS_DOCX.md`](../literatura/05_AUDITORIA_REFS_DOCX.md).
 
-### Prioritárias para verificar (citadas em pontos centrais do argumento)
+**Correção da contagem registrada aqui antes.** A extração via `python-docx`
+mostrou que o `.docx` **não tem lista de referências ao final** — nenhum
+cabeçalho "REFERÊNCIAS"/"BIBLIOGRAFIA" nos 109 parágrafos, e apenas **7**
+entradas bibliográficas formais dispersas no corpo. Já as citações no corpo
+somam **72 distintas**. Portanto o número correto é 72 citadas × 7 listadas, e
+não "~60 referências". A ausência de lista de referências é, por si, uma
+pendência de submissão que não estava registrada.
+
+`referencias.bib` passou de 17 para **131 entradas verificadas** (DOI ou PMID
+resolvido). Das 72 citações do `.docx`, **23 receberam veredito**; 49 seguem
+sem verificação.
+
+### Prioritárias — situação após 27/07/2026
 
 | Referência | Por que importa | Situação |
 |---|---|---|
-| ~~Coura et al. (2022), *Ann Appl Biol*~~ | Reprogramação de isoformas + histopatologia | ✅ **Verificada via Crossref** — 180(3):383-397, doi:10.1111/aab.12740. Já no `.bib` |
-| ~~Silva-Júnior et al. (2021), *Arch Insect Biochem Physiol*~~ | Perfil de proteases e ligação a inibidores | ✅ **Verificada via Crossref** — 107(3), doi:10.1002/arch.21792. Já no `.bib` |
-| Saikhedkar et al. (2018) | Origem conceitual dos tripeptídeos de RCL | ⬜ conferir |
-| Meriño-Cabrera et al. (2018, 2019) | Cinética de inibição | ⬜ conferir |
-| Laskowski & Kato (1980); Laskowski & Qasim (2000) | Base do modelo mecanístico | ⬜ conferir |
+| ~~Coura et al. (2022), *Ann Appl Biol*~~ | Reprogramação de isoformas + histopatologia | ✅ Verificada via Crossref — 180(3):383-397, doi:10.1111/aab.12740 |
+| ~~Silva-Júnior et al. (2021), *Arch Insect Biochem Physiol*~~ | Perfil de proteases e ligação a inibidores | ✅ Verificada; **PMID 33948994** acrescentado ao `.bib` |
+| ~~Saikhedkar et al. (2018)~~ | Origem conceitual dos tripeptídeos de RCL | ✅ **PMID 29486250** — tripeptídeos de RCL de inibidores Pin-II vs. *H. armigera* |
+| ~~Laskowski & Kato (1980)~~ | Base do modelo mecanístico | ✅ **PMID 6996568**, *Annu Rev Biochem* |
+| ~~Laskowski & Qasim (2000)~~ | Base do modelo mecanístico | ✅ **PMID 10708867** — citado no `.docx` como "Jr e Qasim 2000" |
+| ~~Barros et al. (2022)~~ | Era a referência ambígua | ✅ **PMID 36127063** — BPTI × SKTI em *A. gemmatalis* |
+| **Meriño-Cabrera et al. (2018, 2019)** | Cinética de inibição | ❌ **Não localizada.** Busca dirigida por autor (`Merino-Cabrera[au]`, 15 resultados) não retornou publicação de 2018. Vizinhos: 2017 (PMID 28925864) e 2020 (PMID 32342573, 32360954) |
 
-### Problemas específicos detectados
+### Achado que altera o argumento
 
-- **"Berliner, 1911"** — citado no texto (§19) mas **sem entrada correspondente na lista de referências**
-- **"Barros et al., 2022"** — ambíguo; há vários trabalhos de Barros, e a lista não permite desambiguar
-- **"FREIRES (2022)"** — sem tipo de obra, instituição ou veículo
-- **Duas referências são links de notícia** (`agrourbano.com.br`, `cnabrasil.org.br`) usados para sustentar dados econômicos — ver [`06_correcoes_projeto.md`](06_correcoes_projeto.md) C13
-- **"Greene (1976)"** — protocolo de criação; conferir dados completos
-- **"Cepas et al., 2016, 2017"** (eggNOG) — a grafia correta do sobrenome é provavelmente **Huerta-Cepas**
+O `.docx` cita **"Jogsma et al. 2011"**. É **Jongsma et al. 1995**, PNAS,
+PMID 7644535 — *"Adaptation of Spodoptera exigua larvae to plant proteinase
+inhibitors by induction of gut proteinase activity insensitive to
+inhibition"*. Grafia e ano errados no clássico fundacional do mecanismo de
+escape por protease insensível, que é exatamente o mecanismo que a hipótese
+**H1** testa. Já incorporado ao `.bib` como `jongsma1995adaptation`.
 
-**Nenhuma dessas foi incluída em `referencias.bib`.** Só entram após verificação.
+### Problemas específicos — situação
+
+- **"Berliner, 1911"**, **"Greene (1976)"**, **"Shukla et al. (2024)"** — não
+  localizadas. Ressalva: a busca foi incidental, não dirigida; não é possível
+  afirmar que não existem.
+- **"FREIRES (2022)"** — sem tipo de obra, instituição ou veículo. Não verificada.
+- **"Cepas et al., 2016, 2017"** — a suspeita de **Huerta-Cepas** permanece
+  plausível, mas plausibilidade não é verificação. Segue não confirmada.
+- **"Srinivasan et al. 2006"** — a busca retornou PMID 16140320, mas de
+  **2005**. Ambíguo; não decidível sem o usuário.
+- **Duas referências são links de notícia** (`agrourbano.com.br`,
+  `cnabrasil.org.br`) — ver [`06_correcoes_projeto.md`](06_correcoes_projeto.md) C13.
+  **Substitutos com fonte primária já disponíveis**: PMID 36520803 (dano por
+  lepidópteros na soja na América do Sul), PMID 30071611 (desfolha em soja
+  Cry1Ac) e PMID 34545402 (praga × desfolha × NDVI).
+
+**Nada entra em `referencias.bib` sem verificação.** As não confirmadas
+permanecem no bloco comentado do arquivo, com o motivo.
 
 ---
 
@@ -142,7 +174,11 @@ Declarado para que ninguém assuma cobertura que não existe:
 2. **Campo de força usado no MD de GORE 1-2 T** — o resumo de de Andrade et al. (2026) menciona 100 ns de MD mas não especifica o campo de força. Essa informação é necessária para a decisão CHARMM36m × AMBER ([`03_metodologia_padrao_ouro.md`](03_metodologia_padrao_ouro.md) §7). **Requer leitura do texto completo.**
 3. **Conteúdo dos arquivos HADDOCK** (`.tgz`) — confirmada apenas a existência, não os resultados
 4. **Valores da cotação Macrogen** — não abertos, não reproduzidos
-5. **~42 referências** do projeto original (ver §3)
+5. **49 das 72 citações** do projeto original seguem sem veredito (ver §3 e
+   [`../literatura/05_AUDITORIA_REFS_DOCX.md`](../literatura/05_AUDITORIA_REFS_DOCX.md)).
+   Inclui as 17 citações de ferramentas que o padrão-ouro recomenda substituir
+   (FastQC, Trimmomatic, Kallisto, Bowtie2, Blast2GO, KOBAS…), deixadas fora
+   por decisão explícita de escopo.
 6. **Dados de *S. frugiperda*** — fora do escopo definido; não auditados
 7. **Se o experimento GORE3 já foi coletado** — só se sabe que o sequenciamento está contratado
 
@@ -170,5 +206,57 @@ Em ordem de prioridade:
 | 2 | Obter IC₅₀/Kᵢ quantificado do GORE3 | Escrita da introdução |
 | 3 | Ler texto completo de de Andrade et al. (2026) para o campo de força | Decisão de MD |
 | 4 | Conferir métricas do assembly `GCF_050436995.1` | Escrita da metodologia |
-| 5 | Verificar as ~44 referências restantes | Submissão |
+| 5 | Verificar as 49 citações restantes do `.docx` | Submissão |
+| 5b | **Montar a lista de referências do `.docx`** — ela não existe | Submissão |
 | 6 | Confirmar status do sequenciamento na Macrogen | Cronograma |
+| 7 | Fichar os artigos Tier 1 marcados `⚠️ PENDENTE DE FICHAMENTO` em `literatura/0[1-4]_*.md` | Escrita da introdução |
+
+**Item novo, aberto em 27/07/2026 (ver §8).** O texto completo de Paulo et al.
+(2026), PMID 41572648, descreve o modo de ligação do GORE3 como
+**S1/S1′**, não S′2. Isso muda o enunciado da hipótese H6 e precisa ser
+reconciliado com [`05_lacunas_e_hipoteses.md`](05_lacunas_e_hipoteses.md) antes
+de escrever a metodologia de docking.
+
+---
+
+## 8. Modo de ligação do GORE3: o que a publicação diz
+
+Registrado em 27/07/2026, ao recuperar o texto completo de **PMID 41572648**
+(Paulo et al., *Pest Manag Sci* 82(5):4632-4647, doi:10.1002/ps.70579), que é
+acesso aberto (PMC13071266).
+
+O abstract afirma, textualmente, que o docking prevê para o GORE 3 em tripsinas
+de *S. frugiperda* uma pose conservada entre isoformas com **"occupancy of
+S1/S1′ and adjacent subsites and richer aromatic/hydrophobic contacts than the
+S1-focused reference benzamidine"**, e reporta inibição competitiva com
+**K = 4,00 mM** (GORE3) contra **1,64 mM** (benzamidina), mortalidade larval de
+até **46,66%**.
+
+Conferido no corpo do artigo (não só no abstract): *"a well-defined network of
+hydrogen bonds with polar residues lining the S1/S1′ pocket is accompanied by
+numerous hydrophobic contacts — alkyl, π–alkyl, and amide–π/π–π stacking —
+distributed along the groove walls"*.
+
+**As isoformas modeladas são nomeadas:** `XP_050552352.1`, `ACR25157.1`,
+`QLC28936.1` e `XP_050550273.1`. Três delas correspondem aos arquivos já
+protonados em pH 8,2 disponíveis localmente
+(`analise-alosterica/data/protonated/ACR157-*`, `QCL936-*`, `XP273-*`) —
+ou seja, o ativo local é reaproveitável para reproduzir e estender este
+docking, com a ressalva de que são tripsinas de *S. frugiperda*.
+
+**Por que isso importa aqui.** A base teórica registra o modo de ligação como
+pergunta em aberto entre **S1** e **S′2**, e a hipótese H6 propõe modo não
+canônico. A publicação não sustenta S′2: sustenta S1/S1′. São coisas
+diferentes — S1′ é o primeiro subsítio do lado *prime*, adjacente à ligação
+cindível; S′2 é outro. Três ressalvas antes de reescrever qualquer coisa:
+
+1. O trabalho é em ***S. frugiperda***, não *A. gemmatalis* — que é o escopo
+   definido deste projeto.
+2. É **docking**, não estrutura experimental, e sem MD de validação.
+3. Não elimina a pergunta de fundo: `LALAY` continua sem resíduo básico para
+   a ponte salina com Asp189, e o próprio artigo descreve os contatos como
+   aromáticos/hidrofóbicos.
+
+Ou seja: a hipótese H6 **não** foi refutada, mas o enunciado "S1 × S′2" está
+desatualizado em relação à literatura publicada e precisa ser reescrito como
+"S1/S1′ × sítio alternativo", com o teste de *blind docking* mantido.

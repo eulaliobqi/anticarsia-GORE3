@@ -18,8 +18,24 @@ Material de apoio para a escrita da introdução e para o ajuste da metodologia 
 | [`04_viabilidade.md`](04_viabilidade.md) | Dados, ativos locais reaproveitáveis, hardware, prazos, riscos |
 | [`05_lacunas_e_hipoteses.md`](05_lacunas_e_hipoteses.md) | Lacunas do conhecimento, hipóteses testáveis, contribuição original |
 | [`06_correcoes_projeto.md`](06_correcoes_projeto.md) | Inconsistências detectadas no `.docx`, com correção proposta |
-| [`referencias.bib`](referencias.bib) | BibTeX — somente referências com DOI/PMID verificado |
+| [`referencias.bib`](referencias.bib) | BibTeX — somente referências com DOI/PMID verificado (**131 entradas**) |
 | [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) | O que foi verificado, como, e o que **não** pôde ser confirmado |
+
+## Base bibliográfica — [`../literatura/`](../literatura/)
+
+Levantamento de 27/07/2026: **125 artigos verificados** em 4 temas, com texto
+completo recuperado para 47 deles.
+
+| Arquivo | Conteúdo |
+|---|---|
+| [`00_PROTOCOLO_BUSCA.md`](../literatura/00_PROTOCOLO_BUSCA.md) | Strings exatas por eixo, funil de triagem, o que funcionou e o que falhou |
+| [`01_peptideos_inibidores_tripsina.md`](../literatura/01_peptideos_inibidores_tripsina.md) | 41 refs — eixos 1A–1D |
+| [`02_rnaseq.md`](../literatura/02_rnaseq.md) | 31 refs — eixos 2A–2D |
+| [`03_biologia_estrutural.md`](../literatura/03_biologia_estrutural.md) | 30 refs — eixos 3A–3E |
+| [`04_manejo_anticarsia.md`](../literatura/04_manejo_anticarsia.md) | 23 refs — eixos 4A–4D |
+| [`05_AUDITORIA_REFS_DOCX.md`](../literatura/05_AUDITORIA_REFS_DOCX.md) | Veredito das citações do projeto original |
+| [`PDFS_PENDENTES.md`](../literatura/PDFS_PENDENTES.md) | 75 artigos fechados, com link para baixar via CAFe/UFV |
+| `INDEX.json` | Índice legível por máquina (tema, eixo, tier, DOI, acesso) |
 
 ---
 

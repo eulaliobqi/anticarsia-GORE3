@@ -1,0 +1,3 @@
+PMID 16029159 | The role of scaffolding in standard mechanism serine proteinase inhibitors.
+
+In single domain, "standard mechanism" protein inhibitors of serine proteinases, about a dozen residues make contact with the cognate enzyme. The remainder of the molecule, the scaffolding, holds the reactive site region of the inhibitor in a canonical conformation, improves the binding by about six orders of magnitude and protects it from proteolysis. However, the stability and global structure of the scaffolding is irrelevant to inhibition, provided that inhibition is measured much below the melting temperature, Tm.
