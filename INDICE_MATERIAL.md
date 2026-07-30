@@ -4,7 +4,7 @@ Função: mapa único de tudo que existe hoje (figuras, tabelas, texto,
 código, dado-fonte), para uso na geração futura do artigo em Word e da
 apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 — é o índice de orquestração que aponta pra eles.
-Última atualização: 29/07/2026 (FASE 1, Blocos A + A.1 + B + C concluídos).
+Última atualização: 30/07/2026 (FASE 2, Blocos A + B concluídos).
 ---
 
 # Índice de material — Pós-doc GORE3 / RNA-Seq
@@ -18,7 +18,11 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | FASE 1 | B — trimagem (fastp, teste A/B + lote completo) | ✅ concluído | §2.4, §3.5–3.7 |
 | FASE 1 | C — equilíbrio de trimagem (sweep de parâmetros + piloto HISAT2) | ✅ concluído | §2.4.1, §3.8 |
 | FASE 1 | Abstract / Introdução do artigo | ⏳ pendente | aguarda FASE 5 (não preenchido por projeção) |
-| FASE 2 | Alinhamento genoma-guiado (STAR/HISAT2 + Subread) | não iniciado | — |
+| FASE 2 | A — piloto de seleção de alinhador (STAR vs. HISAT2, 5 amostras) | ✅ concluído | §2.5, §3.9 |
+| FASE 2 | B — alinhamento completo, via STAR (13/13 amostras) | ✅ concluído | §2.5, §3.9 |
+| FASE 2 | B — alinhamento completo, via Subread/splicing (13/13 amostras) | ✅ concluído | §2.5, §3.9 |
+| FASE 2 | Verificação entre fases + estatísticas completas + Fig. 5 | ✅ concluído | §3.10 |
+| FASE 2 | Confirmação empírica de strandedness (forward/reverse) | ⏳ pendente | scripts prontos (`check_strandedness.sh`, `analyze_strandedness.py`), não executados |
 | FASE 3–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
 
 ## Figuras
@@ -29,6 +33,7 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | 2 | `figuras/Figure2_blocoA1_pertile_heatmap.png` | Heatmap tile×ciclo, ID-1 (limpa) vs. ID-8 (pior) | §3.4 | `codigo/fase1_blocoA/per_tile_analysis.py` | `resultados/blocoA1_pertile_results.csv` |
 | 3 | `figuras/Figure3_blocoB_trimming.png` | (a) sobrevivência pós-trim; (b) adapter-dimer % vs. GC% | §3.6 | `codigo/fase1_blocoB/analyze_blocoB.py` | `resultados/blocoB_trim_summary.csv` |
 | 4 | `figuras/Figure4_blocoB_before_after.png` | Curvas de qualidade antes/depois da trimagem, 5 amostras | §3.7 | `codigo/fase1_blocoB/plot_before_after_trim.py` | `resultados/figure4_quality_curves.csv` |
+| 5 | `figuras/Figure5_fase2_blocoB_mapping_rates.png` | Taxa de mapeamento STAR vs. Subread, 13 bibliotecas, agrupado por tratamento | §3.10 | `codigo/fase2_blocoB/analyze_blocoB2_alignment.py` | `resultados/fase2_blocoB_star_full_stats.csv`, `resultados/fase2_blocoB_subread_stats.csv` |
 
 Todas em PNG 300 dpi, legenda 100% em inglês no `artigo.md` (padrão
 Nature: `**Figure N |** frase-título...`), traduzida fielmente no
@@ -43,6 +48,9 @@ reprocessamento.
 | 2 | Post-trimming outcome by sample, Set B parameters | §3.6 | `resultados/blocoB_trim_summary.csv` |
 | 3 | Post-trimming depth by treatment group | §3.7 | `resultados/blocoB_trim_summary.csv` (agregado por grupo) |
 | 4 | Depth asymmetry by planned Phase 5 contrast | §3.7 | `resultados/blocoB_trim_summary.csv` (agregado) + `docs/07_analise_rnaseq.md` §6.1 (lista de contrastes) |
+| 5 | Aligner-selection pilot: STAR vs. HISAT2 (5 amostras) | §3.9 | `resultados/fase2_blocoA_star_vs_hisat2.csv` |
+| 6 | STAR full-batch mapping rate, 13 bibliotecas | §3.9 | `resultados/fase2_blocoB_star_mapping_summary.csv` |
+| 7 | STAR splice-junction and mismatch statistics, 13 bibliotecas | §3.10 | `resultados/fase2_blocoB_star_full_stats.csv` |
 
 Todas as tabelas do artigo são texto Markdown gerado a partir dos CSVs
 acima — nenhum número foi digitado à mão sem conferência contra a fonte
@@ -62,10 +70,19 @@ acima — nenhum número foi digitado à mão sem conferência contra a fonte
 | `codigo/fase1_blocoA/` | Download+md5 (`download_and_verify.sh`, `md5sum.txt`), samplesheets, FastQC+MultiQC (`run_fastqc_multiqc.sh`), análise+Fig.1 (`analyze_blocoA.py`), per-tile+Fig.2 (`per_tile_analysis.py`) |
 | `codigo/fase1_blocoB/` | Teste A/B fastp (`run_fastp_ab_test.sh`, `compare_ab_test.py`), trimagem completa (`run_fastp_full_trim.sh`), resumo+Fig.3 (`analyze_blocoB.py`), curvas antes/depois+Fig.4 (`plot_before_after_trim.py`, `extract_fig4_data.py`) |
 | `codigo/fase1_blocoC/` | Subamostragem (`subsample_reads.sh`), sweep de parâmetros fastp Sets B/C1/C2/C3 (`run_fastp_paramsweep.sh`), índice HISAT2 piloto (`build_hisat2_index_pilot.sh`), alinhamento piloto (`run_hisat2_pilot.sh`), análise+critério de decisão (`analyze_blocoC.py` → `resultados/blocoC_param_sweep.csv`) |
+| `codigo/fase2_blocoA/` | Índices anotados STAR/HISAT2 (`build_star_index.sh`, `build_hisat2_index_annotated.sh`, `convert_gff_to_gtf.sh`), piloto STAR×HISAT2 nas 5 amostras (`run_star_hisat2_subsample.sh`), análise+critério de decisão+Tabela 5 (`analyze_fase2_blocoA.py` → `resultados/fase2_blocoA_star_vs_hisat2.csv`) |
+| `codigo/fase2_blocoB/` | Alinhamento completo STAR, 13 amostras, resumível (`run_alignment_full.sh`), alinhamento completo Subread/splicing, 13 amostras, resumível (`run_subread_align_full.sh`), verificação entre fases + estatísticas completas + Fig.5 + Tabelas 6-7 (`analyze_blocoB2_alignment.py`), confirmação de strandedness pós-alinhamento — **pronto, ainda não executado** (`check_strandedness.sh`, `analyze_strandedness.py`) |
 
 Todo comando, incluindo os que falharam parcialmente (flag `-d` do
-FastQC), está documentado inline nos próprios scripts — não só na prosa
-do artigo.
+FastQC na FASE 1; falha de segmentação por concorrência de threads na
+FASE 2, Bloco B — ver `run_alignment_full.sh`/`run_subread_align_full.sh`),
+está documentado inline nos próprios scripts — não só na prosa do
+artigo. Os scripts da FASE 2 em diante seguem convenção própria de
+comentário mais verboso (o quê **e** por quê, não só o quê) — ver
+`feedback-codigo-didatico-posdoc` na memória do projeto — porque estes
+scripts ainda vão ser reaproveitados/adaptados nas fases seguintes
+(quantificação, splicing) por quem não estava presente na decisão
+original.
 
 ## Dados grandes NÃO versionados (ficam só no servidor, por design)
 
@@ -75,15 +92,17 @@ do artigo.
 | FASTQ trimados | `~/rnaseq-Anticarsia-GORE3/trimmed/` | ~40 GB estimado | idem |
 | Relatórios HTML completos (FastQC/MultiQC/fastp) | `~/rnaseq-Anticarsia-GORE3/qc/{pre_trim,post_trim,ab_test}/` | ~45 MB só os JSON do fastp | grande, e os números relevantes já foram extraídos para os CSVs acima |
 | Índice HISAT2 piloto (Bloco C, sem anotação de splice sites) | `~/rnaseq-Anticarsia-GORE3/genome_index_pilot/` | ~590 MB | específico do teste de equilíbrio de trimagem; a FASE 2 formal precisa de índice próprio, com anotação |
+| BAMs STAR + Subread (13 amostras cada, FASE 2 Bloco B) | `~/rnaseq-Anticarsia-GORE3/bam/{star,subread}/` | ~35–70 GB estimado | grande demais para git — os logs-texto (`Log.final.out`, `.subread_align.log`) que sustentam as Tabelas 6-7 **foram copiados e versionados** em `qc/fase2_blocoB_{star,subread}/` (260 KB total), suficiente para reproduzir a análise sem acesso ao servidor |
 
-**Risco declarado, não escondido:** se o servidor for limpo antes da
-FASE 2 rodar, os FASTQ brutos e trimados precisam ser regerados a partir
-dos links de download da Macrogen (que já expiraram, ver
-`docs/07_analise_rnaseq.md` §13.1) — ou seja, **o dado bruto baixado é
-neste momento insubstituível**. Os CSVs em `resultados/` bastam para
-reproduzir todas as figuras/tabelas do artigo, mas não para continuar a
-análise (FASE 2 em diante) se o `raw_fastq/`/`trimmed/` do servidor for
-perdido.
+**Risco declarado, não escondido:** os links de download da Macrogen já
+expiraram (`docs/07_analise_rnaseq.md` §13.1) — se o servidor for limpo,
+os FASTQ brutos e trimados **não podem ser regerados**, e os BAMs da
+FASE 2 (Bloco B) também não, já que dependem deles. Os CSVs em
+`resultados/` (incluindo os novos da FASE 2) bastam para reproduzir todas
+as figuras/tabelas do artigo, mas não para continuar a análise (FASE 3 em
+diante — quantificação por gene precisa dos BAMs em si, não só das
+estatísticas resumo) se `raw_fastq/`/`trimmed/`/`bam/` do servidor forem
+perdidos.
 
 ## Pendências e lacunas conhecidas (não fabricadas, ver `artigo.md` §5 / `artigo_pt.md` §5 para o texto completo)
 

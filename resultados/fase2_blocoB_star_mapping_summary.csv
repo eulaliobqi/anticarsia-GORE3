@@ -1,0 +1,14 @@
+id,uniquely_mapped_pct,multi_mapped_pct,combined_mapped_pct,meets_80pct
+ID-1,82.35,7.90,90.25,True
+ID-2,74.59,8.53,83.12,True
+ID-3,83.11,4.84,87.95,True
+ID-5,81.88,5.42,87.30,True
+ID-7,78.48,5.37,83.85,True
+ID-8,78.83,7.41,86.24,True
+ID-9,83.44,6.51,89.95,True
+ID-10,82.78,6.98,89.76,True
+ID-12,87.23,4.56,91.79,True
+ID-14,85.93,4.14,90.07,True
+ID-15,84.59,4.17,88.76,True
+ID-16,86.96,3.53,90.49,True
+ID-18,86.78,3.90,90.68,True

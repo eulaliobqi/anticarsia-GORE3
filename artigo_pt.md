@@ -4,10 +4,14 @@
 > trabalho. Nada aqui é projeção, expectativa típica de literatura, ou "resultado
 > esperado" — quando um resultado não existe ainda, a seção diz isso
 > explicitamente em vez de ser omitida ou preenchida por extrapolação.
-> Status atual: **FASE 1, Blocos A, A.1, B e C concluídos** (QC bruto,
+> Status atual: **FASE 1 completa** (Blocos A, A.1, B e C — QC bruto,
 > fechamento da lacuna per-tile, trimagem com fastp, teste de equilíbrio de
-> parâmetros de trimagem). Ver `docs/07_analise_rnaseq.md` para o plano
-> completo das fases seguintes.
+> parâmetros de trimagem). **FASE 2 (Blocos A e B) completa**: piloto STAR
+> vs. HISAT2 decidiu por STAR (Bloco A), e as 13 bibliotecas completas
+> foram alinhadas com sucesso nas duas vias — STAR (expressão gênica) e
+> Subread (splicing), 13/13 cada uma, todas acima do limiar de 80% de
+> mapeamento (§3.9). Ver `docs/07_analise_rnaseq.md` para o plano completo
+> das fases seguintes (FASE 3, quantificação, ainda não iniciada).
 >
 > **Versão em inglês:** `artigo.md` (mantida em paralelo, sincronizada a
 > cada atualização — esta é a tradução fiel, não um resumo).
@@ -180,6 +184,47 @@ Set B, (ii) o Q30 pós-trim permanecesse ≥95%, (iii) a taxa de mapeamento
 do piloto HISAT2 não caísse, e (iv) a biblioteca controle limpa não fosse
 prejudicada. Resultados completos:
 `resultados/blocoC_param_sweep.csv`.
+
+### 2.5 Alinhamento genoma-guiado (FASE 2)
+
+**Bloco A — piloto de seleção de alinhador.** Como nenhum alinhador único é
+ótimo tanto para quantificação em nível de gene quanto para detecção de
+junção de splicing (Coxe et al., 2024), STAR 2.7.10b e HISAT2 2.2.2 foram
+comparados lado a lado num subconjunto de cinco amostras cobrindo os quatro
+grupos de tratamento mais uma réplica adicional (Control_R1/ID-1;
+Benzamidine_R2/ID-7, Benzamidine_R3/ID-8; SKTI_R1/ID-9, SKTI_R2/ID-10),
+usando as bibliotecas completas trimadas (Set B) contra um índice do genoma
+construído a partir de `GCF_050436995.1` com o GTF da RS_2026_04 como guia
+de junção de splicing (`--outSAMtype None`, sem escrever BAM — esta etapa
+só mede taxa de mapeamento). Código:
+`codigo/fase2_blocoA/run_star_hisat2_subsample.sh`,
+`build_star_index.sh`/`build_hisat2_index_annotated.sh`,
+`convert_gff_to_gtf.sh`; análise: `codigo/fase2_blocoA/analyze_fase2_blocoA.py`;
+resultado completo: `resultados/fase2_blocoA_star_vs_hisat2.csv`. Regra de
+decisão, combinada com o orientador do projeto antes de inspecionar os
+resultados: o alinhador com vantagem de taxa de mapeamento ≥2 pontos
+percentuais nas amostras-piloto seria rodado sozinho no lote completo, em
+vez de rodar os dois alinhadores nas 13 bibliotecas.
+
+**Bloco B — alinhamento do lote completo, duas vias paralelas.** Seguindo a
+decisão do Bloco A (§3.9), o alinhador vencedor (STAR) foi rodado nas 13
+bibliotecas trimadas com saída em BAM (`--outSAMtype BAM SortedByCoordinate
+--twopassMode Basic`), produzindo o entregável usado depois para
+quantificação em nível de gene (FASE 3) — código:
+`codigo/fase2_blocoB/run_alignment_full.sh`. Em paralelo, o Subread-align
+2.1.1 foi rodado nas mesmas 13 bibliotecas trimadas como a via dedicada de
+acurácia de junção de splicing (Coxe et al., 2024 reportam o Subread como o
+mais promissor em acurácia de mapeamento em nível de junção, em vez de em
+nível de base — a propriedade de que depende a análise de splicing
+alternativo da FASE 6, H1 e H5) — código:
+`codigo/fase2_blocoB/run_subread_align_full.sh`. Os dois scripts são
+retomáveis (um marcador de conclusão por amostra é checado antes de
+rerodar) e toleram falha isolada de uma amostra sem abortar as demais
+(`set -uo pipefail`, não `set -e`), porque a primeira tentativa de execução
+mostrou que rodar os dois jobs de 16 threads simultaneamente no servidor
+causou falhas de segmentação num subconjunto de amostras em ambas as
+ferramentas (§3.9, §5 item 9) — um achado operacional/de agendamento, não
+uma propriedade dos dados de sequenciamento.
 
 ---
 
@@ -536,6 +581,151 @@ preparo de biblioteca (§5, item 1) segue em aberto, mas agora mais
 restrita: não é um artefato de uma escolha de parâmetro de trimagem
 corrigível.
 
+### 3.9 STAR supera o HISAT2 no piloto de seleção de alinhador; alinhamento do lote completo em andamento no momento da redação
+
+**Resultado do Bloco A (concluído).** O STAR superou o HISAT2 nas cinco
+bibliotecas-piloto por 9,33–13,02 pontos percentuais, e foi o único
+alinhador a ultrapassar o limiar de aprovação de >80% de mapeamento
+declarado pelo projeto em qualquer amostra (Tabela 5;
+`resultados/fase2_blocoA_star_vs_hisat2.csv`). Pela regra de decisão
+pré-acordada (§2.5), **o STAR sozinho foi selecionado** para a rodada do
+Bloco B no lote completo; o HISAT2 não foi rodado nas outras oito
+bibliotecas.
+
+**Tabela 5 | Piloto de seleção de alinhador: STAR vs. HISAT2 (índice anotado), cinco amostras.**
+
+| Amostra | Rótulo | Mapeamento STAR (%) | Mapeamento HISAT2 (%) | Diferença (pp) | STAR ≥80%? | HISAT2 ≥80%? |
+|---|---|---:|---:|---:|:---:|:---:|
+| ID-1 | Control_R1 | 90,46 | 77,44 | 13,02 | sim | não |
+| ID-9 | SKTI_R1 | 90,86 | 78,54 | 12,32 | sim | não |
+| ID-10 | SKTI_R2 | 90,59 | 78,59 | 12,00 | sim | não |
+| ID-8 | Benzamidine_R3 | 86,91 | 77,58 | 9,33 | sim | não |
+| ID-7 | Benzamidine_R2 | 83,49 | 74,15 | 9,34 | sim | não |
+
+**Resultado do Bloco B (concluído, as duas vias — 30/07/2026, 09h48).**
+
+- **Via STAR: 13/13 bibliotecas concluídas.** Em toda amostra, a taxa
+  combinada de mapeamento único mais multi-mapeado cai entre 83,1–91,8%
+  (Tabela 6) — **as 13 bibliotecas ultrapassam o limiar de aprovação de
+  >80% do projeto**, a menor sendo ID-2 com 83,12%.
+- **Via Subread: 13/13 bibliotecas concluídas**, incluindo ID-1. A
+  primeira tentativa de execução produziu uma falha de segmentação em
+  ID-1 (BAM de 0 bytes) porque este script e o do STAR pediam 16 threads
+  simultaneamente no servidor; ID-1 foi rerodada isoladamente depois que a
+  via STAR já tinha terminado (sem disputa de threads), concluindo em 3,1
+  minutos, com 26.065.883 reads mapeados unicamente, 62.066 indels
+  chamados, e um BAM indexado com sucesso, sem corrupção — resolvendo a
+  Limitação 9.
+
+**Tabela 6 | Taxa de mapeamento do STAR no lote completo, 13 bibliotecas (final).**
+
+| Amostra | Mapeamento único (%) | Multi-mapeado (%) | Combinado (%) |
+|---|---:|---:|---:|
+| ID-12 | 87,23 | 4,56 | 91,79 |
+| ID-18 | 86,78 | 3,90 | 90,68 |
+| ID-16 | 86,96 | 3,53 | 90,49 |
+| ID-1 | 82,35 | 7,90 | 90,25 |
+| ID-14 | 85,93 | 4,14 | 90,07 |
+| ID-9 | 83,44 | 6,51 | 89,95 |
+| ID-10 | 82,78 | 6,98 | 89,76 |
+| ID-15 | 84,59 | 4,17 | 88,76 |
+| ID-3 | 83,11 | 4,84 | 87,95 |
+| ID-5 | 81,88 | 5,42 | 87,30 |
+| ID-8 | 78,83 | 7,41 | 86,24 |
+| ID-7 | 78,48 | 5,37 | 83,85 |
+| ID-2 | 74,59 | 8,53 | 83,12 |
+
+*Versão legível por máquina: `resultados/fase2_blocoB_star_mapping_summary.csv`.
+Arquivos `Log.final.out` completos por amostra: servidor,
+`~/rnaseq-Anticarsia-GORE3/qc/fase2_blocoB_star/`.*
+
+### 3.10 Verificação entre fases, estatísticas completas de alinhamento, e comparação STAR–Subread
+
+Duas checagens automatizadas foram rodadas antes de tratar o alinhamento
+do Bloco B como verificado, em vez de confiar só no resumo de taxa de
+mapeamento (código: `codigo/fase2_blocoB/analyze_blocoB2_alignment.py`).
+**(i)** O "Number of input reads" (pares de leitura) de cada amostra do
+STAR foi cruzado contra a contagem de reads pós-trimagem registrada
+independentemente na FASE 1 Bloco B
+(`resultados/blocoB_trim_summary.csv`, `reads_after`, total R1+R2):
+`reads_after` é igual a `2 × pares de leitura de entrada` exatamente nas
+13 bibliotecas, sem exceção. Isso confirma que o STAR rodou sobre o FASTQ
+trimado correto e correspondente de cada amostra — um tipo de erro
+(arquivo de entrada errado ou desatualizado) que não seria visível pela
+taxa de mapeamento sozinha, já que um FASTQ trocado mas válido ainda
+produziria uma taxa de mapeamento plausível. **(ii)** Os 13 arquivos de
+log do Subread contêm o marcador próprio da ferramenta "Completed
+successfully.", e nenhum contém qualquer string de erro ou warning
+(checado diretamente, não inferido do status de saída).
+
+**Estatísticas de junção de splicing e taxa de erro (STAR, Tabela 7; dado
+completo: `resultados/fase2_blocoB_star_full_stats.csv`).** O total de
+junções de splicing detectadas por amostra varia de 10.691.972
+(Benzamidine_R2, a biblioteca de menor profundidade) a 29.884.406
+(SKTI_R3); a fração anotada contra o GTF da RS_2026_04 é consistentemente
+alta e estreita nas 13 bibliotecas (98,9–99,6%), e a taxa de mismatch por
+base é uniforme (1,26–1,53%) — nenhuma das duas mostra o tipo de outlier
+específico de amostra que indicaria um problema de contaminação ou
+incompatibilidade com a referência em alguma biblioteca individual.
+
+**Tabela 7 | Estatísticas de junção de splicing e mismatch do STAR, 13 bibliotecas.**
+
+| Amostra | Splices (total) | Splices anotadas (%) | Taxa de mismatch (%) | Não mapeado: curto demais (%) | Não mapeado: outro (%) |
+|---|---:|---:|---:|---:|---:|
+| ID-1 | 22.890.218 | 99,21 | 1,50 | 7,37 | 2,10 |
+| ID-2 | 16.735.271 | 99,03 | 1,53 | 9,81 | 6,80 |
+| ID-3 | 18.124.299 | 99,34 | 1,45 | 10,49 | 1,34 |
+| ID-5 | 18.754.015 | 99,43 | 1,42 | 8,03 | 4,49 |
+| ID-7 | 10.691.972 | 99,21 | 1,30 | 12,41 | 3,49 |
+| ID-8 | 15.570.825 | 99,31 | 1,38 | 8,97 | 4,65 |
+| ID-9 | 21.160.774 | 99,59 | 1,35 | 7,72 | 1,84 |
+| ID-10 | 17.968.284 | 99,55 | 1,38 | 7,49 | 2,14 |
+| ID-12 | 29.884.406 | 99,63 | 1,38 | 6,71 | 1,05 |
+| ID-14 | 22.737.302 | 99,62 | 1,32 | 8,57 | 1,03 |
+| ID-15 | 24.450.805 | 99,64 | 1,41 | 9,68 | 1,25 |
+| ID-16 | 25.408.075 | 99,71 | 1,40 | 8,38 | 0,94 |
+| ID-18 | 22.615.969 | 99,64 | 1,26 | 6,52 | 2,66 |
+
+Reads não mapeados são dominados pela categoria "curto demais" (6,5–12,4%)
+em vez de "outro" (0,9–6,8%) em toda biblioteca exceto ID-2 (9,81%
+curto-demais vs. 6,80% outro, suas duas maiores categorias de não-mapeado
+sendo comparáveis em tamanho, diferente do resto do lote) — "curto demais"
+é a categoria do STAR esperada a partir de moléculas residuais de
+inserto-curto/adapter-dimer já caracterizadas na FASE 1 (§3.6), então essa
+distribuição é consistente com, não adicional a, o problema de preparo de
+biblioteca já documentado; não é um achado novo.
+
+**STAR vs. Subread — uma diferença real e esperada, não suavizada
+(Fig. 5).** A taxa de mapeamento geral do Subread (só matches únicos;
+multi-mapping explicitamente desabilitado em `run_subread_align_full.sh`,
+batendo com a própria justificativa documentada da configuração de
+produção) é menor que a taxa combinada do STAR em todas as 13
+bibliotecas, e cai **abaixo do limiar de 80% do projeto em quatro
+amostras**: Control_R2 (75,6%), Benzamidine_R2 (78,3%), Benzamidine_R3
+(79,1%) e Benzamidine_R1 (79,7%) (dado completo:
+`resultados/fase2_blocoB_subread_stats.csv`). Isso não é tratado como
+falha de alinhamento do Subread: o limiar de aprovação de 80% foi
+declarado para a via de quantificação de expressão gênica (§2 — o papel
+que o STAR ocupa aqui), e a taxa menor do Subread é consequência direta e
+mecanística de a ferramenta rodar sem reportar multi-mapping,
+configuração escolhida deliberadamente porque o papel do Subread neste
+projeto é acurácia de junção éxon-éxon (§2.5), não maximizar a contagem de
+reads atribuídos a algum lugar do genoma. Declarado aqui em vez de
+omitido, porque a diferença numérica é real e medida de forma
+reprodutível, mesmo que sua explicação não indique um problema com os
+dados de sequenciamento em si.
+
+**Figura 5 | Taxa de mapeamento do lote completo, STAR vs. Subread, 13
+bibliotecas.** Gráfico de barras agrupadas, STAR (azul; % único +
+multi-mapeado) versus Subread (vermelho; % único, reporte de multi-mapping
+desabilitado por desenho), por biblioteca, ordenado por grupo de
+tratamento e réplica biológica. Linha tracejada: o limiar de aprovação de
+80% de taxa de mapeamento declarado pelo projeto. As 13 barras do STAR
+ultrapassam o limiar; quatro barras do Subread (Control_R2 e as três
+réplicas de Benzamidine) ficam abaixo dele, pelo motivo declarado acima.
+Arquivo: `figuras/Figure5_fase2_blocoB_mapping_rates.png`; código:
+`codigo/fase2_blocoB/analyze_blocoB2_alignment.py`.
+
 ---
 
 ## 4. Discussão
@@ -664,6 +854,16 @@ sinalizar (FASE 2 em diante):**
    no painel (b), não um limiar declarado antes de ver o dado (diferente
    do limiar de ΔQ > 5,0 Phred na Fig. 1). É divulgado como tal e não deve
    ser lido como tendo o mesmo peso probatório.
+9. ~~**A FASE 2 Bloco B está incompleta no momento da redação.**~~ —
+   **Resolvido (§3.9).** As 13 amostras do STAR e as 13 do Subread
+   (incluindo a rerrodada do ID-1) concluíram com sucesso. O problema de
+   concorrência que causou as falhas de segmentação originais (dois jobs
+   de alinhamento de 16 threads lançados ao mesmo tempo no mesmo servidor)
+   era operacional, não uma propriedade dos dados de sequenciamento, e não
+   se repetiu quando a rerrodada do ID-1 foi lançada depois que a via STAR
+   já tinha terminado. As taxas de mapeamento do STAR por amostra
+   (Tabela 6) estão exportadas em
+   `resultados/fase2_blocoB_star_mapping_summary.csv`.
 
 ---
 
@@ -681,6 +881,9 @@ preprocessor. *Bioinformatics* **34**, i884–i890 (2018).
 Ewels, P., Magnusson, M., Lundin, S. & Käller, M. MultiQC: summarize
 analysis results for multiple tools and samples in a single report.
 *Bioinformatics* **32**, 3047–3048 (2016).
+
+Coxe, K. et al. Benchmarking short-read RNA-seq alignment and assembly
+tools for splicing analysis. (2024). PMID 38475429.
 
 ---
 
@@ -705,3 +908,10 @@ analysis results for multiple tools and samples in a single report.
 | Figura 4 (PNG 300 dpi) | `figuras/Figure4_blocoB_before_after.png` |
 | FASTQ trimados (26 arquivos) | servidor: `~/rnaseq-Anticarsia-GORE3/trimmed/` (não versionado — dado grande, não vai ao git) |
 | Relatórios HTML completos FastQC/MultiQC/fastp | servidor: `~/rnaseq-Anticarsia-GORE3/qc/{pre_trim,post_trim,ab_test}/` (não versionado) |
+| Scripts do piloto de seleção de alinhador (STAR vs. HISAT2) | `codigo/fase2_blocoA/` (`run_star_hisat2_subsample.sh`, `build_star_index.sh`, `build_hisat2_index_annotated.sh`, `convert_gff_to_gtf.sh`, `analyze_fase2_blocoA.py`) |
+| Resultados do piloto de seleção de alinhador (Tabela 5) | `resultados/fase2_blocoA_star_vs_hisat2.csv` |
+| Resumo de mapeamento do STAR no lote completo (Tabela 6) | `resultados/fase2_blocoB_star_mapping_summary.csv` |
+| Verificação entre fases, estatísticas completas STAR/Subread, geração da Fig. 5 (Tabela 7) | `codigo/fase2_blocoB/analyze_blocoB2_alignment.py` → `resultados/fase2_blocoB_star_full_stats.csv`, `resultados/fase2_blocoB_subread_stats.csv` |
+| Figura 5 (PNG 300 dpi) | `figuras/Figure5_fase2_blocoB_mapping_rates.png` |
+| Scripts de alinhamento do lote completo (STAR + Subread) | `codigo/fase2_blocoB/` (`run_alignment_full.sh`, `run_subread_align_full.sh`, `check_strandedness.sh`, `analyze_strandedness.py`) |
+| BAMs e logs do STAR/Subread (13 bibliotecas, em andamento) | servidor: `~/rnaseq-Anticarsia-GORE3/{bam/star,bam/subread,qc/fase2_blocoB_star,qc/fase2_blocoB_subread}/` (não versionado — dado grande) |

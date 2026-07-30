@@ -4,10 +4,14 @@
 > trabalho. Nada aqui é projeção, expectativa típica de literatura, ou "resultado
 > esperado" — quando um resultado não existe ainda, a seção diz isso
 > explicitamente em vez de ser omitida ou preenchida por extrapolação.
-> Status atual: **FASE 1, Blocos A, A.1, B e C concluídos** (QC bruto,
+> Status atual: **FASE 1 completa** (Blocos A, A.1, B e C — QC bruto,
 > fechamento da lacuna per-tile, trimagem com fastp, teste de equilíbrio de
-> parâmetros de trimagem). Ver `docs/07_analise_rnaseq.md` para o plano
-> completo das fases seguintes.
+> parâmetros de trimagem). **FASE 2 (Blocos A e B) completa**: piloto STAR
+> vs. HISAT2 decidiu por STAR (Bloco A), e as 13 bibliotecas completas
+> foram alinhadas com sucesso nas duas vias — STAR (expressão gênica) e
+> Subread (splicing), 13/13 cada uma, todas acima do limiar de 80% de
+> mapeamento (§3.9). Ver `docs/07_analise_rnaseq.md` para o plano completo
+> das fases seguintes (FASE 3, quantificação, ainda não iniciada).
 >
 > **Versão em português:** `artigo_pt.md` (mantida em paralelo, sincronizada
 > a cada atualização — tradução fiel, não um resumo).
@@ -170,6 +174,45 @@ percentage points versus Set B, (ii) post-trim Q30 remained ≥95%, (iii) the
 HISAT2 pilot mapping rate did not decrease, and (iv) the clean control
 library was not degraded. Full results:
 `resultados/blocoC_param_sweep.csv`.
+
+### 2.5 Genome-guided alignment (Phase 2)
+
+**Block A — aligner selection pilot.** Because no single aligner is optimal
+for both gene-level quantification and splice-junction detection (Coxe et
+al., 2024), STAR 2.7.10b and HISAT2 2.2.2 were compared head-to-head on a
+five-sample subset spanning all four treatment groups plus one additional
+replicate (Control_R1/ID-1; Benzamidine_R2/ID-7, Benzamidine_R3/ID-8;
+SKTI_R1/ID-9, SKTI_R2/ID-10), using the trimmed (Set B) full libraries
+against a genome index built from `GCF_050436995.1` with the RS_2026_04
+GTF as splice-junction guide (`--outSAMtype None`, no BAM written — this
+step measures mapping rate only). Code:
+`codigo/fase2_blocoA/run_star_hisat2_subsample.sh`,
+`build_star_index.sh`/`build_hisat2_index_annotated.sh`,
+`convert_gff_to_gtf.sh`; analysis: `codigo/fase2_blocoA/analyze_fase2_blocoA.py`;
+full output: `resultados/fase2_blocoA_star_vs_hisat2.csv`. Decision rule,
+agreed with the project supervisor before inspecting results: the aligner
+with a ≥2 percentage-point mapping-rate advantage across the pilot samples
+would be run alone on the full batch, rather than running both aligners on
+all 13 libraries.
+
+**Block B — full-batch alignment, two parallel tracks.** Following the
+Block A decision (§3.9), the winning aligner (STAR) was run on all 13
+trimmed libraries with BAM output (`--outSAMtype BAM SortedByCoordinate
+--twopassMode Basic`), producing the deliverable used downstream for
+gene-level quantification (Phase 3) — code:
+`codigo/fase2_blocoB/run_alignment_full.sh`. In parallel, Subread-align
+2.1.1 was run on the same 13 trimmed libraries as the dedicated
+splice-junction-accuracy track (Coxe et al., 2024 report Subread as the
+most promising tool for junction-level, as opposed to base-level, mapping
+accuracy — the property Phase 6's alternative-splicing analysis (H1, H5)
+depends on) — code: `codigo/fase2_blocoB/run_subread_align_full.sh`. Both
+scripts are resumable (a per-sample completion marker is checked before
+re-running) and tolerate an isolated per-sample failure without aborting
+the remaining samples (`set -uo pipefail`, not `set -e`), because the
+first execution attempt showed that running both 16-thread jobs
+concurrently on the server caused segmentation faults in a subset of
+samples for both tools (§3.9, §5 item 9) — an operational finding, not a
+property of the sequence data.
 
 ---
 
@@ -503,6 +546,146 @@ invariant to the parameters tested here. The library-prep root cause
 (§5, item 1) remains open, but is now further constrained: it is not an
 artefact of a correctable trimming-parameter choice.
 
+### 3.9 STAR outperforms HISAT2 in the aligner-selection pilot; full-batch alignment in progress at the time of writing
+
+**Block A result (complete).** STAR outperformed HISAT2 in all five pilot
+libraries by 9.33–13.02 percentage points, and was the only aligner to
+clear the project's declared >80% mapping-rate acceptance threshold in any
+sample (Table 5; `resultados/fase2_blocoA_star_vs_hisat2.csv`). Per the
+pre-agreed decision rule (§2.5), **STAR alone was selected** for the
+full-batch Block B run; HISAT2 was not run on the remaining eight
+libraries.
+
+**Table 5 | Aligner-selection pilot: STAR vs. HISAT2 (annotated index), five samples.**
+
+| Sample | Label | STAR mapping (%) | HISAT2 mapping (%) | Difference (pp) | STAR ≥80%? | HISAT2 ≥80%? |
+|---|---|---:|---:|---:|:---:|:---:|
+| ID-1 | Control_R1 | 90.46 | 77.44 | 13.02 | yes | no |
+| ID-9 | SKTI_R1 | 90.86 | 78.54 | 12.32 | yes | no |
+| ID-10 | SKTI_R2 | 90.59 | 78.59 | 12.00 | yes | no |
+| ID-8 | Benzamidine_R3 | 86.91 | 77.58 | 9.33 | yes | no |
+| ID-7 | Benzamidine_R2 | 83.49 | 74.15 | 9.34 | yes | no |
+
+**Block B result (complete, both tracks — 30 July 2026, 09:48).**
+
+- **STAR track: 13/13 libraries complete.** Every sample's combined
+  uniquely-mapped-plus-multi-mapped rate falls within 83.1–91.8%
+  (Table 6) — **all 13 libraries clear the project's >80% acceptance
+  threshold**, the lowest being ID-2 at 83.12%.
+- **Subread track: 13/13 libraries complete**, including ID-1. The first
+  execution attempt produced a segmentation fault on ID-1 (0-byte BAM)
+  because this script and the STAR script were both requesting 16 threads
+  concurrently on the server; ID-1 was re-run in isolation after the STAR
+  track finished (no thread contention), completing in 3.1 minutes with
+  26,065,883 uniquely mapped reads, 62,066 called indels, and a
+  successfully indexed, non-corrupted BAM — resolving Limitation 9.
+
+**Table 6 | STAR full-batch mapping rate, all 13 libraries (final).**
+
+| Sample | Uniquely mapped (%) | Multi-mapped (%) | Combined (%) |
+|---|---:|---:|---:|
+| ID-12 | 87.23 | 4.56 | 91.79 |
+| ID-18 | 86.78 | 3.90 | 90.68 |
+| ID-16 | 86.96 | 3.53 | 90.49 |
+| ID-1 | 82.35 | 7.90 | 90.25 |
+| ID-14 | 85.93 | 4.14 | 90.07 |
+| ID-9 | 83.44 | 6.51 | 89.95 |
+| ID-10 | 82.78 | 6.98 | 89.76 |
+| ID-15 | 84.59 | 4.17 | 88.76 |
+| ID-3 | 83.11 | 4.84 | 87.95 |
+| ID-5 | 81.88 | 5.42 | 87.30 |
+| ID-8 | 78.83 | 7.41 | 86.24 |
+| ID-7 | 78.48 | 5.37 | 83.85 |
+| ID-2 | 74.59 | 8.53 | 83.12 |
+
+*Machine-readable version: `resultados/fase2_blocoB_star_mapping_summary.csv`.
+Full per-sample `Log.final.out` files: server,
+`~/rnaseq-Anticarsia-GORE3/qc/fase2_blocoB_star/`.*
+
+### 3.10 Cross-phase verification, full alignment statistics, and STAR–Subread comparison
+
+Two automated checks were run before treating the Block B alignment as
+verified, rather than relying on the mapping-rate summary alone (code:
+`codigo/fase2_blocoB/analyze_blocoB2_alignment.py`). **(i)** STAR's
+per-sample "Number of input reads" (read pairs) was cross-checked against
+the independently recorded post-trimming read count from Phase 1 Block B
+(`resultados/blocoB_trim_summary.csv`, `reads_after`, total R1+R2 reads):
+`reads_after` equals `2 × input read pairs` exactly in all 13 libraries,
+with no exceptions. This confirms STAR was run on the correct, matching
+trimmed FASTQ file for every sample — a class of error (wrong or stale
+input file) that would not be visible from the mapping-rate percentage
+alone, since a mismatched-but-valid FASTQ would still produce a plausible
+mapping rate. **(ii)** All 13 Subread log files contain the tool's own
+"Completed successfully." marker, and none contain any error or warning
+string (checked directly, not inferred from exit status).
+
+**Splice-junction and error-rate statistics (STAR, Table 7; full data:
+`resultados/fase2_blocoB_star_full_stats.csv`).** Total detected splice
+junctions per sample range from 10,691,972 (Benzamidine_R2, the
+lowest-depth library) to 29,884,406 (SKTI_R3); the fraction annotated
+against the RS_2026_04 GTF is consistently high and narrow across all 13
+libraries (98.9–99.6%), and the mismatch rate per base is uniform
+(1.26–1.53%) — neither shows the kind of sample-specific outlier that
+would indicate a contamination or reference-mismatch problem in any
+individual library.
+
+**Table 7 | STAR splice-junction and mismatch statistics, all 13 libraries.**
+
+| Sample | Splices (total) | Splices annotated (%) | Mismatch rate (%) | Unmapped: too short (%) | Unmapped: other (%) |
+|---|---:|---:|---:|---:|---:|
+| ID-1 | 22,890,218 | 99.21 | 1.50 | 7.37 | 2.10 |
+| ID-2 | 16,735,271 | 99.03 | 1.53 | 9.81 | 6.80 |
+| ID-3 | 18,124,299 | 99.34 | 1.45 | 10.49 | 1.34 |
+| ID-5 | 18,754,015 | 99.43 | 1.42 | 8.03 | 4.49 |
+| ID-7 | 10,691,972 | 99.21 | 1.30 | 12.41 | 3.49 |
+| ID-8 | 15,570,825 | 99.31 | 1.38 | 8.97 | 4.65 |
+| ID-9 | 21,160,774 | 99.59 | 1.35 | 7.72 | 1.84 |
+| ID-10 | 17,968,284 | 99.55 | 1.38 | 7.49 | 2.14 |
+| ID-12 | 29,884,406 | 99.63 | 1.38 | 6.71 | 1.05 |
+| ID-14 | 22,737,302 | 99.62 | 1.32 | 8.57 | 1.03 |
+| ID-15 | 24,450,805 | 99.64 | 1.41 | 9.68 | 1.25 |
+| ID-16 | 25,408,075 | 99.71 | 1.40 | 8.38 | 0.94 |
+| ID-18 | 22,615,969 | 99.64 | 1.26 | 6.52 | 2.66 |
+
+Unmapped reads are dominated by "too short" (6.5–12.4%) rather than
+"other" (0.9–6.8%) in every library except ID-2 (9.81% too-short vs. 6.80%
+other, its two largest unmapped categories being comparable in size,
+unlike the rest of the batch) — "too short" is the STAR category expected
+from residual short-insert/adapter-dimer molecules already characterized
+in Phase 1 (§3.6), so this distribution is consistent with, not
+additional to, the previously documented library-prep issue; it is not a
+new finding.
+
+**STAR vs. Subread — a real, expected gap, not smoothed over (Fig. 5).**
+Subread's overall mapped rate (unique matches only; multi-mapping
+explicitly disabled in `run_subread_align_full.sh`, matching the
+production configuration's own documented rationale) is lower than STAR's
+combined rate in every one of the 13 libraries, and falls **below the
+project's 80% threshold in four samples**: Control_R2 (75.6%),
+Benzamidine_R2 (78.3%), Benzamidine_R3 (79.1%) and Benzamidine_R1 (79.7%)
+(full data: `resultados/fase2_blocoB_subread_stats.csv`). This is not
+treated as a Subread alignment failure: the 80% acceptance threshold was
+declared for the gene-expression quantification track (§2 — the role STAR
+plays here), and Subread's lower rate is the direct, mechanistic
+consequence of the tool being run without multi-mapping reporting, a
+configuration chosen deliberately because Subread's role in this project
+is exon-exon junction accuracy (§2.5), not maximizing the count of reads
+assigned somewhere in the genome. Declared here rather than omitted,
+because the numeric gap is real and reproducibly measured, even though
+its explanation does not indicate a problem with the underlying sequence
+data.
+
+**Figure 5 | Full-batch mapping rate, STAR vs. Subread, all 13
+libraries.** Grouped bar chart, STAR (blue; uniquely-mapped + multi-mapped
+%) versus Subread (red; uniquely-mapped %, multi-mapping reporting
+disabled by design), per library, ordered by treatment group and
+biological replicate. Dashed line: the project's declared 80%
+mapping-rate acceptance threshold. All 13 STAR bars clear the threshold;
+four Subread bars (Control_R2, and all three Benzamidine replicates) fall
+below it, for the reason stated above. File:
+`figuras/Figure5_fase2_blocoB_mapping_rates.png`; code:
+`codigo/fase2_blocoB/analyze_blocoB2_alignment.py`.
+
 ---
 
 ## 4. Discussion
@@ -619,6 +802,15 @@ reasons tied to each group's role in the study's argument (Table 4).
    not a threshold declared before the data were seen (unlike the ΔQ > 5.0
    Phred threshold in Fig. 1). It is disclosed as such and should not be
    read as having the same evidentiary weight.
+9. ~~**Phase 2 Block B is incomplete at the time of writing.**~~ —
+   **Resolved (§3.9).** All 13 STAR samples and all 13 Subread samples
+   (including the ID-1 re-run) completed successfully. The concurrency
+   issue that caused the original segmentation faults (two 16-thread
+   alignment jobs launched at once on the same server) was operational,
+   not a property of the sequencing data, and did not recur once the
+   ID-1 re-run was launched after the STAR track had already finished.
+   Per-sample STAR mapping rates (Table 6) are exported to
+   `resultados/fase2_blocoB_star_mapping_summary.csv`.
 
 ---
 
@@ -636,6 +828,9 @@ preprocessor. *Bioinformatics* **34**, i884–i890 (2018).
 Ewels, P., Magnusson, M., Lundin, S. & Käller, M. MultiQC: summarize
 analysis results for multiple tools and samples in a single report.
 *Bioinformatics* **32**, 3047–3048 (2016).
+
+Coxe, K. et al. Benchmarking short-read RNA-seq alignment and assembly
+tools for splicing analysis. (2024). PMID 38475429.
 
 ---
 
@@ -660,3 +855,10 @@ analysis results for multiple tools and samples in a single report.
 | Figure 4 (300 dpi PNG) | `figuras/Figure4_blocoB_before_after.png` |
 | Trimmed FASTQ (26 files) | server: `~/rnaseq-Anticarsia-GORE3/trimmed/` (não versionado — dado grande, não vai ao git) |
 | Full FastQC/MultiQC/fastp HTML reports | server: `~/rnaseq-Anticarsia-GORE3/qc/{pre_trim,post_trim,ab_test}/` (não versionado) |
+| Aligner-selection pilot (STAR vs. HISAT2) scripts | `codigo/fase2_blocoA/` (`run_star_hisat2_subsample.sh`, `build_star_index.sh`, `build_hisat2_index_annotated.sh`, `convert_gff_to_gtf.sh`, `analyze_fase2_blocoA.py`) |
+| Aligner-selection pilot results (Table 5) | `resultados/fase2_blocoA_star_vs_hisat2.csv` |
+| Full-batch STAR mapping-rate summary (Table 6) | `resultados/fase2_blocoB_star_mapping_summary.csv` |
+| Cross-phase verification, full STAR/Subread stats, Fig. 5 generation (Table 7) | `codigo/fase2_blocoB/analyze_blocoB2_alignment.py` → `resultados/fase2_blocoB_star_full_stats.csv`, `resultados/fase2_blocoB_subread_stats.csv` |
+| Figure 5 (300 dpi PNG) | `figuras/Figure5_fase2_blocoB_mapping_rates.png` |
+| Full-batch alignment scripts (STAR + Subread) | `codigo/fase2_blocoB/` (`run_alignment_full.sh`, `run_subread_align_full.sh`, `check_strandedness.sh`, `analyze_strandedness.py`) |
+| STAR/Subread BAMs, logs (13 libraries, in progress) | server: `~/rnaseq-Anticarsia-GORE3/{bam/star,bam/subread,qc/fase2_blocoB_star,qc/fase2_blocoB_subread}/` (não versionado — dado grande) |

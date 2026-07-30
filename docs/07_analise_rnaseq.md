@@ -123,7 +123,8 @@ triagem inicial.
 
 ## 3. FASE 2 — Alinhamento genoma-guiado
 
-**Atualização 30/07/2026 — em execução no servidor (`~/rnaseq-Anticarsia-GORE3/`):**
+**Atualização 30/07/2026 — CONCLUÍDA (Blocos A e B, servidor
+`~/rnaseq-Anticarsia-GORE3/`):**
 
 **Bloco A (piloto, decisão STAR vs. HISAT2) — concluído.** Testado em 5
 amostras (ID-1, ID-7, ID-8, ID-9, ID-10) com índice anotado, sem escrever BAM
@@ -135,21 +136,49 @@ em nenhuma.** Critério combinado com o usuário (diferença ≥2pp decide o
 alinhador único): **decisão = rodar só STAR** nas 13 bibliotecas completas,
 não os dois.
 
-**Bloco B (13 bibliotecas completas) — em andamento.**
+**Bloco B (13 bibliotecas completas) — concluído nas duas vias.**
 
-- *Via STAR* (`codigo/fase2_blocoB/run_alignment_full.sh`, screen
-  `fase2_blocoB_star_retry`): **6/13 concluídas** (ID-1, ID-2, ID-8, ID-9,
-  ID-16, ID-18), **ID-3 em processamento**, 6 restantes (ID-5, ID-7, ID-10,
-  ID-12, ID-14, ID-15). Primeira tentativa teve 5 amostras com "Falha de
-  segmentação" por concorrência de threads — este script e o de Subread
-  foram lançados juntos, cada um pedindo 16 threads; script reescrito para
-  pular amostras já concluídas (`Log.final.out` como marcador) e não usar
-  `set -e`, para que uma falha isolada não interrompa as demais.
+- *Via STAR* (`codigo/fase2_blocoB/run_alignment_full.sh`): **13/13
+  concluídas**, todas acima do limiar de 80% (combinado único+multi:
+  83,12–91,79%; menor valor ID-2, maior ID-12).
+  `resultados/fase2_blocoB_star_mapping_summary.csv`. Primeira tentativa
+  teve 5 amostras com "Falha de segmentação" por concorrência de
+  threads — este script e o de Subread foram lançados juntos, cada um
+  pedindo 16 threads; script reescrito para pular amostras já concluídas
+  (`Log.final.out` como marcador) e não usar `set -e`, para que uma falha
+  isolada não interrompa as demais (retomado via screen
+  `fase2_blocoB_star_retry`, que terminou sozinho ao concluir a última
+  amostra).
 - *Via Subread* (`codigo/fase2_blocoB/run_subread_align_full.sh`, splicing,
-  §3b): **12/13 concluídas com sucesso** (BAM + índice + `.indel.vcf`
-  íntegros para ID-2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 18). **ID-1 falhou**
-  (mesma causa de concorrência de threads — BAM de 0 bytes); pendente
-  re-executar isoladamente, sem o STAR rodando em paralelo.
+  §3b): **13/13 concluídas com sucesso**, incluindo ID-1, que falhou na
+  1ª tentativa (mesma causa de concorrência — BAM de 0 bytes) e foi
+  rerodada isoladamente com sucesso depois que o STAR já tinha terminado
+  (3,1 min, 26.065.883 reads únicos, 62.066 indels, BAM íntegro e
+  indexado). Taxa de mapeamento único do Subread (multi-mapping
+  desabilitado por desenho, ver script) fica entre 75,6% e 83,1% — **4
+  amostras abaixo do limiar de 80%** (Control_R2, e as 3 réplicas de
+  Benzamidine): esperado, não é falha, porque o limiar de 80% foi
+  declarado para a via de expressão gênica (STAR); o Subread aqui serve
+  só à acurácia de junção de splicing (§3b), não à contagem máxima de
+  reads mapeados. `resultados/fase2_blocoB_subread_stats.csv`.
+
+**Verificação de consistência entre fases:** `codigo/fase2_blocoB/analyze_blocoB2_alignment.py`
+cruzou o "Number of input reads" do STAR contra `reads_after` da FASE 1
+Bloco B (`resultados/blocoB_trim_summary.csv`) — bate exatamente
+(`reads_after = 2 × input_reads`) nas 13 amostras, confirmando que o
+alinhamento rodou sobre o FASTQ trimado correto de cada amostra. Também
+confirma os 13 logs do Subread com o marcador "Completed successfully.",
+sem nenhuma string de erro. Estatísticas completas de splice junction e
+mismatch rate do STAR (`resultados/fase2_blocoB_star_full_stats.csv`):
+99,0–99,7% das junções anotadas contra a RS_2026_04, mismatch rate
+uniforme (1,26–1,53%), sem outlier por amostra. Figura de comparação
+STAR×Subread: `figuras/Figure5_fase2_blocoB_mapping_rates.png`.
+
+**Pendência declarada (não a impede de prosseguir para FASE 3):** a
+orientação de fita (forward/reverse) segue apenas inferida do nome do
+kit (§0) — `codigo/fase2_blocoB/check_strandedness.sh` e
+`analyze_strandedness.py` já existem para confirmar isso empiricamente
+sobre os BAMs agora disponíveis, mas ainda não foram executados.
 
 **Duas vias, propositalmente redundantes**, porque nenhum alinhador único é
 ótimo para os dois objetivos deste projeto (expressão gênica e detecção de
