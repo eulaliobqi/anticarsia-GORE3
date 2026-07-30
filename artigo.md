@@ -13,9 +13,12 @@
 > mapeamento (§3.9). **FASE 3 (Blocos A-F) completa**: quantificação por
 > gene (featureCounts, via prioritária) e por transcrito (Salmon
 > decoy-aware + tximport, apoio à hipótese H1), verificadas cruzadamente
-> (concordância Spearman 0,98–0,99, §3.11). Ver `docs/07_analise_rnaseq.md`
-> para o plano completo das fases seguintes (FASE 4/5, correção de lote
-> condicional + DESeq2, ainda não iniciadas).
+> (concordância Spearman 0,98–0,99, §3.11). **FASE 4 decidida** (30/07/2026):
+> nenhuma correção formal de lote — o confundimento de amostra única
+> (ID-8) torna o ComBat-seq inaplicável (a própria ferramenta recusa
+> rodar), decisão justificada por literatura + código-fonte (§4); checagem
+> de sensibilidade planejada para a FASE 5. Ver `docs/07_analise_rnaseq.md`
+> para o plano completo (FASE 5, DESeq2, ainda não iniciada).
 >
 > **Versão em português:** `artigo_pt.md` (mantida em paralelo, sincronizada
 > a cada atualização — tradução fiel, não um resumo).
@@ -944,19 +947,69 @@ reasons tied to each group's role in the study's argument (Table 4).
 
 **Planned next steps to actually resolve this, not merely flag it
 (Phase 2 onward):**
-1. Re-verify per-contrast depth asymmetry after alignment, using mapping
-   rate and the number of genes passing DESeq2's independent-filtering
-   threshold per sample, not read count alone — read count is a proxy,
-   mapped/usable count is the real quantity that matters.
+1. ~~Re-verify per-contrast depth asymmetry after alignment, using mapping
+   rate...~~ — **Done (Phase 3, Table 11).** Using featureCounts'
+   gene-assigned read counts (the actually-usable quantity, not raw
+   trimmed-read survival), the asymmetry **persists after alignment and
+   quantification**: Benzamidine's mean assigned-read count is 77.2% of
+   Control's, essentially unchanged in relative terms from the
+   pre-alignment picture (§3.7). This is not a new finding reversing
+   §3.7 — it is the promised confirmation that the risk is real at the
+   quantity that actually matters for DESeq2 (usable counts), not an
+   artefact of the trimming-survival proxy.
+
+**Table 11 | Group-level assigned-read depth, post-quantification (Phase 3 recheck).**
+
+| Group | Assigned reads (sum, n=3) | Mean/sample | % of Control mean |
+|---|---:|---:|---:|
+| Control | 133,724,241 | 44,574,747 | 100.0% |
+| Benzamidine | 103,235,368 | 34,411,789 | 77.2% |
+| SKTI | 123,806,115 | 41,268,705 | 92.6% |
+| GORE3 | 131,731,502 | 43,910,501 | 98.5% |
+
+*Code: `codigo/fase3_blocoF/recheck_depth_asymmetry.py`; data:
+`resultados/fase3_blocoF_depth_asymmetry_recheck.csv`.*
+
 2. When DESeq2 runs (Phase 5), inspect per-gene dispersion estimates
    separately for contrasts #2/#3/#5/#6 versus #1/#4, to check whether the
    depth asymmetry measurably degrades detection power for
    moderate-to-low-expression genes in the affected arms, rather than
-   assuming it does from read counts alone.
+   assuming it does from read counts alone. **Not yet done — depends on
+   the fitted DESeq2 model (Phase 5).**
 3. Decide, informed by (1)–(2) and not before, whether any
    depth-compensating step (e.g., down-weighting, or flagging genes with
    contrast-specific low power) is warranted for contrasts #2 and #3
    specifically.
+
+**Batch/run confound (ID-8, Benzamidine_R3) — resolved decision, not a
+correction.** §3.3 already established that ID-8 was sequenced on a
+separate flow cell/lane (`LH00688`) from the other 12 libraries
+(`LH00129`). This is a single-sample "batch" (n=1), not a balanced
+multi-sample batch, and three independent lines of evidence converge on
+**not applying formal batch correction**: **(i)** a source-code fact, not
+a paper — the project's own cited ComBat-seq tool
+(`zhang2020combat`, and verified directly in its source,
+`github.com/zhangyuqing/ComBat-seq`) contains the guard `if(any(table(batch)<=1))
+stop("ComBat-seq doesn't support 1 sample per batch yet")` — it refuses
+to run on this design outright. **(ii)** `nygaard2016methods` (PMID
+26272994) shows batch-correction methods that try to preserve group
+differences can inflate false positives specifically under batch/group
+imbalance — reinforcing that forcing correction here would be a risk,
+not a fix. **(iii)** Including run/lane as a DESeq2 design covariate
+instead (a common alternative) is also rejected: with one sample in the
+minority level, that covariate coefficient would behave as an individual
+intercept for ID-8, silently absorbing all of that sample's variation
+(technical *and* biological) and reducing the effective Benzamidine
+group to n=2 under the appearance of a correction. **Decision:** no
+formal batch adjustment; the confound is disclosed here rather than
+hidden, per `leek2010tackling`'s (PMID 20838408) minimum standard of
+reporting processing group alongside biological variables. **Planned
+verification (Phase 5, not yet run):** re-run the Benzamidine-involving
+contrasts (#2, #5) with and without ID-8 and report whether conclusions
+change — a reasonable general sensitivity-analysis practice, not a
+named, literature-validated protocol for this exact single-sample-batch
+scenario (a targeted search found no such paper — reported as an
+analytical decision, not a citation).
 
 ---
 
@@ -1046,6 +1099,17 @@ reasons tied to each group's role in the study's argument (Table 4).
     assignment) is a reasonable extrapolation to *A. gemmatalis*, not an
     established fact for this species — same caveat structure as the
     Coxe et al. (2024) plant-to-insect transfer already declared above.
+12. **No formal batch correction is applied for the ID-8 (Benzamidine_R3)
+    single-sample sequencing-run confound (§4).** ComBat-seq — this
+    project's own cited batch-correction tool — refuses to run on a
+    design with one sample in a batch level (verified directly in its
+    source code); the alternative of a design covariate would silently
+    behave as an individual intercept for that one sample. No formal
+    correction is applied; the confound is disclosed here rather than
+    hidden. A sensitivity check (Benzamidine-involving contrasts with and
+    without ID-8) is planned for Phase 5 but not yet run — **not yet
+    resolved**, this is a decision about *how* to proceed, not a fix
+    already validated.
 
 ---
 
@@ -1074,6 +1138,14 @@ methodology influence transcript abundance estimation. *Genome Biology*
 
 Zytnicki, M. mmquant: how to count multi-mapping reads? *BMC
 Bioinformatics* **18**, 411 (2017).
+
+Nygaard, V., Rødland, E. A. & Hovig, E. Methods that remove batch effects
+while retaining group differences may lead to exaggerated confidence in
+downstream analyses. *Biostatistics* **17**, 29–39 (2016).
+
+Leek, J. T. et al. Tackling the widespread and critical impact of batch
+effects in high-throughput data. *Nat. Rev. Genet.* **11**, 733–739
+(2010).
 
 ---
 
@@ -1112,4 +1184,5 @@ Bioinformatics* **18**, 411 (2017).
 | Decoy-aware Salmon index + quant (Phase 3 Block D) | `codigo/fase3_blocoD/build_salmon_decoy_index.sh`, `run_salmon_quant_full.sh`, `analyze_salmon_mapping.py` |
 | tximport adaptation (Phase 3 Block E) | `codigo/fase3_blocoE/build_tx2gene.py`, `build_samplesheet.py`, `00_tximport_gore3.R` |
 | Cross-quantifier verification (Phase 3 Block F) | `codigo/fase3_blocoF/analyze_fase3_consistency.py` → `resultados/fase3_blocoF_crosscheck.csv` |
+| Depth-asymmetry post-quantification recheck (Table 11) | `codigo/fase3_blocoF/recheck_depth_asymmetry.py` → `resultados/fase3_blocoF_depth_asymmetry_recheck.csv` |
 | Salmon index/quant, tximport outputs (large) | server: `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy,salmon}/` (não versionado — dado grande) |

@@ -29,7 +29,8 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | FASE 3 | D — Salmon decoy-aware (índice + quant, apoio a H1) | ✅ concluído | §4, §3.11 |
 | FASE 3 | E — tximport adaptado (tx2gene do GTF real) | ✅ concluído | §4, §3.11 |
 | FASE 3 | F — verificação cruzada entre quantificadores | ✅ concluído (ρ=0,983–0,988) | §4, §3.11 |
-| FASE 4–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
+| FASE 4 | Decisão de correção de lote — NÃO aplicar ComBat-seq (lote de amostra única) | ✅ decidido | §4 (Discussão), §5 item 12 |
+| FASE 5–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
 
 ## Figuras
 
@@ -63,6 +64,7 @@ reprocessamento.
 | 8 | featureCounts gene-assignment rate, 13 bibliotecas | §3.11 | `resultados/fase3_blocoC_featurecounts_summary.csv` |
 | 9 | Salmon vs. STAR mapping rate, 13 bibliotecas | §3.11 | `resultados/fase3_blocoD_salmon_mapping_summary.csv` |
 | 10 | Gene-level concordance featureCounts vs. Salmon+tximport, 13 bibliotecas | §3.11 | `resultados/fase3_blocoF_crosscheck.csv` |
+| 11 | Group-level assigned-read depth, post-quantification recheck | §4 (Discussion) | `resultados/fase3_blocoF_depth_asymmetry_recheck.csv` |
 
 Todas as tabelas do artigo são texto Markdown gerado a partir dos CSVs
 acima — nenhum número foi digitado à mão sem conferência contra a fonte
@@ -89,7 +91,7 @@ acima — nenhum número foi digitado à mão sem conferência contra a fonte
 | `codigo/fase3_blocoC/` | featureCounts produção sem `-M -O --fraction` (`run_featurecounts_genelevel.sh`), resumo+Fig.6 (`analyze_featurecounts.py`) |
 | `codigo/fase3_blocoD/` | Índice Salmon decoy-aware (`build_salmon_decoy_index.sh`), quant resumível 13 amostras (`run_salmon_quant_full.sh`), resumo+Fig.7 (`analyze_salmon_mapping.py`) |
 | `codigo/fase3_blocoE/` | tx2gene do GTF real (`build_tx2gene.py`), samplesheet (`build_samplesheet.py`), tximport adaptado (`00_tximport_gore3.R`) |
-| `codigo/fase3_blocoF/` | Verificação cruzada featureCounts×Salmon+tximport+STAR, 3 checagens+Fig.8 (`analyze_fase3_consistency.py`) |
+| `codigo/fase3_blocoF/` | Verificação cruzada featureCounts×Salmon+tximport+STAR, 3 checagens+Fig.8 (`analyze_fase3_consistency.py`); reverificação de assimetria de profundidade pós-quantificação, Tabela 11 (`recheck_depth_asymmetry.py`) |
 
 Todo comando, incluindo os que falharam parcialmente (flag `-d` do
 FastQC na FASE 1; falha de segmentação por concorrência de threads na

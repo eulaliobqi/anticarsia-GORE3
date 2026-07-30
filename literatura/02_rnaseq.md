@@ -324,6 +324,43 @@ DOI: [10.1186/s12859-017-1816-4](https://doi.org/10.1186/s12859-017-1816-4) · P
 
 **Ressalva:** Benchmark em humano/camundongo/levedura — busca dirigida por um benchmark equivalente em inseto ou família multigênica não encontrou nada (busca honesta, sem forçar citação); o mais próximo é Kwon 2015 (PMID 26112470, *Xenopus*, genes duplicados, só abstract), que não é inseto e não resolve a lacuna, só é a evidência mais próxima disponível.
 
+### `nygaard2016methods` — Tier 1
+**Nygaard V, Rødland EA, Hovig E.** (2016). Methods that remove batch effects while retaining group differences may lead to exaggerated confidence in downstream analyses. `Biostatistics` 2016;17(1):29-39.
+
+DOI: [10.1093/biostatistics/kxv027](https://doi.org/10.1093/biostatistics/kxv027) · PMID: [26272994](https://pubmed.ncbi.nlm.nih.gov/26272994/) · PMC: PMC4679072
+**Lido de:** **texto completo**
+
+**O que estabelece:** Métodos de remoção de efeito de lote que tentam preservar diferenças de grupo (ex. ComBat com covariável de grupo) podem **induzir diferenças espúrias e inflar falsos positivos especificamente quando grupos estão distribuídos de forma desbalanceada entre os lotes** — o ajuste "força" uma separação que não é inteiramente biológica.
+
+**Onde entra:** FASE 4 (`docs/07_analise_rnaseq.md` §5) — justifica **não** aplicar ComBat-seq no desenho deste projeto, onde o desbalanceamento é extremo (lote B tem 1 única amostra, ID-8, contra 12 no lote A) — forçar a correção sob esse desbalanceamento é, pela própria lógica do artigo, um risco de gerar diferenças espúrias, não de corrigir um problema real.
+
+**Ressalva:** O artigo trata de desbalanceamento entre GRUPOS de tratamento e lotes (múltiplas amostras por lote), não do caso extremo de um lote de amostra única — o princípio (correção forçada sob desbalanceamento é arriscada) generaliza, o cenário exato não foi testado.
+
+### `leek2010tackling` — Tier 1
+**Leek JT, Scharpf RB, Corrada Bravo H, Simcha D, Langmead B, Johnson WE, Geman D, Baggerly K, Irizarry RA.** (2010). Tackling the widespread and critical impact of batch effects in high-throughput data. `Nat Rev Genet` 2010;11(10):733-739.
+
+DOI: [10.1038/nrg2825](https://doi.org/10.1038/nrg2825) · PMID: [20838408](https://pubmed.ncbi.nlm.nih.gov/20838408/) · PMC: PMC3880143
+**Lido de:** **texto completo**
+
+**O que estabelece:** Revisão fundadora sobre efeitos de lote em dados de alto rendimento. Recomendação central relevante aqui: **"no mínimo, análises devem reportar o grupo de processamento e o momento de todas as amostras de um estudo junto com as variáveis biológicas de interesse, para que os resultados possam ser verificados independentemente"** — ou seja, divulgar o confundimento explicitamente é o piso mínimo, mesmo quando a correção formal não é aplicável.
+
+**Onde entra:** FASE 4 — justifica a decisão de **declarar explicitamente** o confundimento de lote (ID-8 numa corrida separada) no artigo, em vez de silenciar, já que a correção formal (ComBat-seq) não é estatisticamente aplicável a um lote de amostra única (ver nota técnica abaixo).
+
+**Ressalva:** A discussão de confundimento do artigo opera no nível de grupo inteiro (ex. "todos os casos processados num dia, todos os controles noutro") — um problema mais grosseiro que o deste projeto (uma única réplica dentro de um grupo caindo num lote diferente das outras 11 amostras, não o grupo inteiro). Não endereça o caso de confundimento de amostra única especificamente.
+
+### Nota técnica (não é artigo — GitHub/Bioconductor, conforme escopo de "literatura" deste projeto inclui fontes técnicas confiáveis além de papers)
+
+**ComBat-seq recusa lotes de 1 amostra — fato de código-fonte, não de paper.** O código-fonte do ComBat-seq (`ComBat_seq.R`, verificado tanto no espelho Bioconductor/rdrr.io quanto no repositório canônico `github.com/zhangyuqing/ComBat-seq`) contém a guarda:
+```r
+batch <- as.factor(batch)
+if(any(table(batch)<=1)){
+  stop("ComBat-seq doesn't support 1 sample per batch yet")
+}
+```
+Ou seja, a ferramenta **recusa rodar** em qualquer desenho onde um nível de lote tenha exatamente 1 amostra — exatamente o caso deste projeto (lote B = só ID-8). Corroborado por um fórum de suporte do Bioconductor (support.bioconductor.org/p/53040/), onde Gordon Smyth (coautor do limma/edgeR, fonte tecnicamente autorizada mas não um artigo revisado por pares) recomenda a usuário com lotes pequenos (2 por lote) usar covariável no modelo GLM (design do DESeq2/edgeR) em vez de ComBat, por tamanho de amostra insuficiente para o ComBat funcionar de forma confiável.
+
+**Onde entra:** FASE 4 — esse é o fato decisivo (não apenas a ressalva geral da literatura) que fecha a decisão: ComBat-seq **não pode nem ser executado** neste desenho. Incluir "lote/corrida" como covariável no modelo do DESeq2 também não é recomendado aqui — com 1 amostra no lote B, o termo de covariável se comportaria como um intercepto individual para ID-8, absorvendo silenciosamente toda a variação daquela amostra (técnica E biológica) e reduzindo o grupo Benzamidina a n=2 de forma não transparente. **Decisão: sem correção formal de lote; confundimento declarado explicitamente (Leek 2010); verificação de robustez planejada para a FASE 5** (rodar os contrastes envolvendo Benzamidina com e sem ID-8 e reportar se a conclusão muda) — esse último passo é prática estatística geral razoável, não um protocolo específico validado na literatura para este cenário exato (busca dirigida não encontrou nada — divulgado como tal, não fabricado).
+
 ### `froussios2019well` — Tier 2
 **Froussios K, Schurch NJ, Mackinnon K, Gierliński M, Duc C, Simpson GG, Barton GJ.** (2019). How well do RNA-Seq differential gene expression tools perform in a complex eukaryote? A case study in Arabidopsis thaliana. `Bioinformatics` 2019;35(18):3372-3377.
 

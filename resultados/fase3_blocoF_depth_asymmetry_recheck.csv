@@ -1,0 +1,5 @@
+group,n,assigned_reads_sum,assigned_reads_mean,pct_of_control_mean
+Control,3,133724241,44574747,100.0
+Benzamidine,3,103235368,34411789,77.2
+SKTI,3,123806115,41268705,92.6
+GORE3,3,131731502,43910501,98.5

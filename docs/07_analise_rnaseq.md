@@ -404,6 +404,74 @@ tratamento. Módulo já existe: `RNA-Seq-not-model/modules/differential_expr.nf`
 (`COMBAT_SEQ`) + `RNA-Seq-not-model/scripts/05_batch_correction.R`, ativado
 por `params.run_combat_seq`.
 
+**Decisão final (30/07/2026) — NÃO rodar ComBat-seq, confundimento
+declarado, verificação de robustez planejada para a FASE 5.** A condição
+acima de fato se aplica: 12 das 13 amostras foram sequenciadas na mesma
+corrida/flowcell (`LH00129`), e **ID-8 (Benzamidine_R3) sozinha numa
+corrida separada** (`LH00688`, §13.1) — mas o desbalanceamento é extremo
+(lote B = 1 única amostra), não um lote multi-amostra balanceado. Decisão
+baseada em três tipos de fonte (não só artigo, conforme escopo ampliado
+de "literatura" deste projeto — inclui código-fonte/documentação técnica
+e fóruns de bioinformática confiáveis):
+
+1. **Fato de código-fonte, decisivo:** o próprio `ComBat_seq.R`
+   (`github.com/zhangyuqing/ComBat-seq`, espelhado no Bioconductor)
+   contém a guarda `if(any(table(batch)<=1)) stop("ComBat-seq doesn't
+   support 1 sample per batch yet")` — a ferramenta **recusa rodar**
+   neste desenho. Não é uma escolha de parâmetro; é um limite estrutural
+   da ferramenta já citada no projeto (`zhang2020combat`).
+2. **Literatura revisada por pares:** `nygaard2016methods` (PMID
+   26272994, lido em texto completo) mostra que métodos de correção de
+   lote que tentam preservar diferença de grupo **podem inflar falsos
+   positivos especificamente sob desbalanceamento** entre lote e
+   grupo — reforça não forçar correção aqui. `leek2010tackling` (PMID
+   20838408, lido em texto completo) recomenda, como piso mínimo quando
+   correção formal não é aplicável, **declarar explicitamente** o grupo
+   de processamento de cada amostra junto com as variáveis biológicas —
+   é o que este parágrafo faz.
+3. **Consenso de prática (fórum Bioconductor, não citável como artigo mas
+   fonte tecnicamente autorizada — Gordon Smyth, coautor limma/edgeR):**
+   para lotes pequenos/desbalanceados, recomenda covariável no modelo GLM
+   em vez de ComBat. **Rejeitado aqui também:** com 1 amostra no lote B,
+   incluir "corrida" como covariável no `design` do DESeq2 se comportaria
+   como um intercepto individual para ID-8 — absorveria toda a variação
+   daquela amostra (técnica **e** biológica) de forma não transparente,
+   reduzindo o grupo Benzamidina a n=2 disfarçado de "correção."
+
+**Decisão:** nenhuma correção formal de lote. O confundimento fica
+declarado explicitamente (não escondido) em `artigo.md`/`artigo_pt.md`
+§5 (Limitações). **Ação concreta para a FASE 5:** rodar os contrastes que
+envolvem Benzamidina (#2 GORE3×Benzamidina, #5 Benzamidina×Controle) duas
+vezes — com e sem ID-8 — e reportar se a conclusão (genes DE, direção do
+efeito) muda. Isto é prática estatística geral razoável (verificação de
+robustez/sensibilidade), **não um protocolo específico validado na
+literatura para este cenário exato** — busca dirigida não encontrou
+nenhum artigo prescrevendo isso nominalmente para confundimento de
+amostra única; divulgado como decisão analítica própria, não como
+citação.
+
+**Reverificação da assimetria de profundidade entre grupos (prometida em
+`artigo.md` §4, agora feita com dado real da FASE 3, não só read count
+bruto da FASE 1):** somando reads atribuídos a genes (featureCounts,
+Bloco C) por grupo —
+
+| Grupo | Reads atribuídos (soma, n=3) | Média/amostra |
+|---|---:|---:|
+| Controle | 133.724.241 | 44,6M |
+| Benzamidina | 103.235.368 | 34,4M |
+| SKTI | 123.806.115 | 41,3M |
+| GORE3 | 131.731.502 | 43,9M |
+
+**A assimetria não desaparece no pós-alinhamento/pós-quantificação** —
+Benzamidina segue ~23% abaixo do Controle em reads efetivamente
+utilizáveis (não só na sobrevivência bruta da trimagem, FASE 1 §3.7).
+Confirma que os contrastes #2 e #5 (os que envolvem Benzamidina) carregam
+risco real de poder estatístico reduzido, consistente com — e agora
+verificado além de — o que a FASE 1 já tinha sinalizado. Item 2 do plano
+original (`artigo.md` §4: "inspecionar dispersão por gene do DESeq2
+separadamente para esses contrastes") permanece para a FASE 5, já que
+depende do modelo ajustado.
+
 ---
 
 ## 6. FASE 5 — Expressão diferencial

@@ -13,9 +13,12 @@
 > mapeamento (§3.9). **FASE 3 (Blocos A-F) completa**: quantificação por
 > gene (featureCounts, via prioritária) e por transcrito (Salmon
 > decoy-aware + tximport, apoio à hipótese H1), verificadas cruzadamente
-> (concordância Spearman 0,98–0,99, §3.11). Ver `docs/07_analise_rnaseq.md`
-> para o plano completo das fases seguintes (FASE 4/5, correção de lote
-> condicional + DESeq2, ainda não iniciadas).
+> (concordância Spearman 0,98–0,99, §3.11). **FASE 4 decidida** (30/07/2026):
+> nenhuma correção formal de lote — o confundimento de amostra única
+> (ID-8) torna o ComBat-seq inaplicável (a própria ferramenta recusa
+> rodar), decisão justificada por literatura + código-fonte (§4); checagem
+> de sensibilidade planejada para a FASE 5. Ver `docs/07_analise_rnaseq.md`
+> para o plano completo (FASE 5, DESeq2, ainda não iniciada).
 >
 > **Versão em inglês:** `artigo.md` (mantida em paralelo, sincronizada a
 > cada atualização — esta é a tradução fiel, não um resumo).
@@ -1002,21 +1005,71 @@ razões diferentes ligadas ao papel de cada grupo no argumento do estudo
 
 **Próximos passos planejados para de fato resolver isso, não só
 sinalizar (FASE 2 em diante):**
-1. Reverificar a assimetria de profundidade por contraste depois do
-   alinhamento, usando taxa de mapeamento e o número de genes que passam
-   no limiar de filtragem independente do DESeq2 por amostra, não a
-   contagem de reads sozinha — contagem de reads é um proxy, a contagem
-   mapeada/utilizável é a quantidade real que importa.
+1. ~~Reverificar a assimetria de profundidade por contraste depois do
+   alinhamento, usando taxa de mapeamento...~~ — **Feito (FASE 3, Tabela
+   11).** Usando as contagens de reads atribuídos a genes do featureCounts
+   (a quantidade efetivamente utilizável, não a sobrevivência bruta da
+   trimagem), a assimetria **persiste depois do alinhamento e da
+   quantificação**: a contagem média de reads atribuídos da Benzamidina é
+   77,2% da do Controle, essencialmente inalterada em termos relativos em
+   relação ao quadro pré-alinhamento (§3.7). Não é um achado novo que
+   reverte o §3.7 — é a confirmação prometida de que o risco é real na
+   quantidade que de fato importa para o DESeq2 (contagens utilizáveis),
+   não um artefato do proxy de sobrevivência da trimagem.
+
+**Tabela 11 | Profundidade de reads atribuídos por grupo, pós-quantificação (reverificação FASE 3).**
+
+| Grupo | Reads atribuídos (soma, n=3) | Média/amostra | % da média do Controle |
+|---|---:|---:|---:|
+| Controle | 133.724.241 | 44.574.747 | 100,0% |
+| Benzamidina | 103.235.368 | 34.411.789 | 77,2% |
+| SKTI | 123.806.115 | 41.268.705 | 92,6% |
+| GORE3 | 131.731.502 | 43.910.501 | 98,5% |
+
+*Código: `codigo/fase3_blocoF/recheck_depth_asymmetry.py`; dado:
+`resultados/fase3_blocoF_depth_asymmetry_recheck.csv`.*
+
 2. Quando o DESeq2 rodar (FASE 5), inspecionar as estimativas de
    dispersão por gene separadamente para os contrastes #2/#3/#5/#6 versus
    #1/#4, para checar se a assimetria de profundidade de fato degrada o
    poder de detecção para genes de expressão moderada-a-baixa nos braços
    afetados, em vez de assumir que degrada só a partir da contagem de
-   reads.
+   reads. **Ainda não feito — depende do modelo DESeq2 ajustado (FASE 5).**
 3. Decidir, informado por (1)–(2) e não antes, se alguma etapa de
    compensação de profundidade (ex.: ponderação, ou sinalização de genes
    com poder específico-de-contraste baixo) se justifica especificamente
    para os contrastes #2 e #3.
+
+**Confundimento de lote/corrida (ID-8, Benzamidine_R3) — decisão
+resolvida, não uma correção.** O §3.3 já tinha estabelecido que ID-8 foi
+sequenciada num flowcell/lane separado (`LH00688`) das outras 12
+bibliotecas (`LH00129`). Isso é um "lote" de amostra única (n=1), não um
+lote multi-amostra balanceado, e três linhas independentes de evidência
+convergem para **não aplicar correção formal de lote**: **(i)** um fato
+de código-fonte, não de artigo — a própria ferramenta ComBat-seq já
+citada no projeto (`zhang2020combat`, verificado diretamente no código-fonte,
+`github.com/zhangyuqing/ComBat-seq`) contém a guarda
+`if(any(table(batch)<=1)) stop("ComBat-seq doesn't support 1 sample per
+batch yet")` — ela recusa rodar nesse desenho. **(ii)** `nygaard2016methods`
+(PMID 26272994) mostra que métodos de correção de lote que tentam
+preservar diferença de grupo podem inflar falsos positivos
+especificamente sob desbalanceamento entre lote e grupo — reforçando que
+forçar a correção aqui seria um risco, não uma solução. **(iii)** Incluir
+lote/corrida como covariável no `design` do DESeq2 (uma alternativa
+comum) também é rejeitado: com uma amostra no nível minoritário, esse
+coeficiente de covariável se comportaria como um intercepto individual
+para ID-8, absorvendo silenciosamente toda a variação daquela amostra
+(técnica **e** biológica) e reduzindo o grupo Benzamidina a n=2 efetivo
+sob aparência de correção. **Decisão:** nenhum ajuste formal de lote; o
+confundimento é divulgado aqui em vez de escondido, seguindo o piso
+mínimo de `leek2010tackling` (PMID 20838408) de reportar o grupo de
+processamento junto com as variáveis biológicas. **Verificação planejada
+(FASE 5, ainda não rodada):** rerrodar os contrastes que envolvem
+Benzamidina (#2, #5) com e sem ID-8 e reportar se a conclusão muda —
+prática geral razoável de análise de sensibilidade, não um protocolo
+nominal validado na literatura para este cenário exato de confundimento
+de amostra única (uma busca dirigida não encontrou artigo nesse sentido —
+reportado como decisão analítica própria, não como citação).
 
 ---
 
@@ -1113,6 +1166,17 @@ sinalizar (FASE 2 em diante):**
     *A. gemmatalis*, não um fato estabelecido para esta espécie — mesma
     estrutura de ressalva da transferência planta→inseto de Coxe et al.
     (2024) já declarada acima.
+12. **Nenhuma correção formal de lote é aplicada para o confundimento de
+    amostra única do ID-8 (Benzamidine_R3, §4).** O ComBat-seq —
+    ferramenta de correção de lote já citada neste projeto — recusa
+    rodar num desenho com uma amostra num nível de lote (verificado
+    diretamente no código-fonte); a alternativa de covariável no design
+    se comportaria como intercepto individual para essa amostra. Nenhuma
+    correção formal é aplicada; o confundimento é divulgado aqui em vez
+    de escondido. Uma checagem de sensibilidade (contrastes envolvendo
+    Benzamidina com e sem ID-8) está planejada para a FASE 5 mas ainda
+    não foi rodada — **ainda não resolvido**, é uma decisão sobre *como*
+    proceder, não uma correção já validada.
 
 ---
 
@@ -1141,6 +1205,14 @@ methodology influence transcript abundance estimation. *Genome Biology*
 
 Zytnicki, M. mmquant: how to count multi-mapping reads? *BMC
 Bioinformatics* **18**, 411 (2017).
+
+Nygaard, V., Rødland, E. A. & Hovig, E. Methods that remove batch effects
+while retaining group differences may lead to exaggerated confidence in
+downstream analyses. *Biostatistics* **17**, 29–39 (2016).
+
+Leek, J. T. et al. Tackling the widespread and critical impact of batch
+effects in high-throughput data. *Nat. Rev. Genet.* **11**, 733–739
+(2010).
 
 ---
 
@@ -1179,4 +1251,5 @@ Bioinformatics* **18**, 411 (2017).
 | Índice Salmon decoy-aware + quant (FASE 3 Bloco D) | `codigo/fase3_blocoD/build_salmon_decoy_index.sh`, `run_salmon_quant_full.sh`, `analyze_salmon_mapping.py` |
 | Adaptação do tximport (FASE 3 Bloco E) | `codigo/fase3_blocoE/build_tx2gene.py`, `build_samplesheet.py`, `00_tximport_gore3.R` |
 | Verificação cruzada entre quantificadores (FASE 3 Bloco F) | `codigo/fase3_blocoF/analyze_fase3_consistency.py` → `resultados/fase3_blocoF_crosscheck.csv` |
+| Reverificação de assimetria de profundidade pós-quantificação (Tabela 11) | `codigo/fase3_blocoF/recheck_depth_asymmetry.py` → `resultados/fase3_blocoF_depth_asymmetry_recheck.csv` |
 | Índice/quant do Salmon, saídas do tximport (grande) | servidor: `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy,salmon}/` (não versionado — dado grande) |
