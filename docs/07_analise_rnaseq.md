@@ -1,11 +1,17 @@
 # Análise de RNA-Seq — pipeline calibrado ao desenho real
 
 Especificação executável, passo a passo, de como processar os dados do
-experimento GORE3 quando os FASTQ chegarem da Macrogen. Cada decisão tem
-citação em `docs/referencias.bib` ou em `literatura/`. Nada aqui foi
-executado — os FASTQ não existem ainda; isto é o que a base teórica
-(`03_metodologia_padrao_ouro.md`) descrevia em nível de decisão, agora escrito
-em nível de execução.
+experimento GORE3. Cada decisão tem citação em `docs/referencias.bib` ou em
+`literatura/`; isto é o que a base teórica (`03_metodologia_padrao_ouro.md`)
+descrevia em nível de decisão, agora escrito em nível de execução.
+
+**Atualização 28/07/2026:** o relatório de QC bruto da Macrogen (pedido
+`HN00280302`) chegou — ver §13.1 para o diagnóstico. Os FASTQ em si (13
+arquivos pareados, ~2 GB cada) ainda **não foram baixados** para o servidor;
+só o relatório HTML/PDF de controle de qualidade está disponível localmente
+em `report-rnaseq-macrogen/`. Nenhuma fase abaixo de FASE 2 em diante foi
+executada — apenas a FASE 1 (QC/trimagem) pode ser calibrada com dado real
+agora; o resto continua descrito em nível de decisão.
 
 ---
 
@@ -14,29 +20,38 @@ em nível de execução.
 | Parâmetro | Valor |
 |---|---|
 | Grupos | Controle · Benzamidina (controle positivo) · SKTI (inibidor natural) · GORE3 |
-| Réplicas biológicas | 3 por grupo |
-| Amostras totais | 12 |
-| Leitura | Paired-end, 150 nt |
-| Profundidade alvo | ~40 milhões de reads/amostra |
+| Réplicas biológicas | 3 por grupo (desenho) |
+| Amostras totais (desenho) | 12 |
+| **Amostras entregues (HN00280302, 24/07/2026)** | **13** — ver §13.1, mismatch não resolvido |
+| Leitura | Paired-end, 151 nt (confirmado no relatório Macrogen; "150 nt" do desenho é o valor nominal do kit) |
+| Profundidade obtida | 8,2–11,9 Gbp / 54,2–78,9 M reads por amostra (alvo de ~40M reads era conservador — todas as amostras excederam) |
 | Espécie | *Anticarsia gemmatalis* |
 | Genoma de referência | `GCF_050436995.1` (ilAntGemm2) — nível cromossomo, 32 cromossomos, N50 12,19 Mb, **BUSCO 99,36% completo** |
 | Anotação | NCBI RS_2026_04 — 15.773 genes, 14.238 codificantes de proteína |
 
-**⚠️ Duas informações ainda não confirmadas com a Macrogen, e que este pipeline
-não pode ser fechado sem elas:**
+**⚠️ Do par de informações pendentes na versão anterior deste documento, uma
+foi resolvida pelo relatório da Macrogen, a outra continua em aberto:**
 
-1. **Tamanho de fragmento/inserto da biblioteca.** "150 nt" é o comprimento de
-   *leitura*, não de *fragmento* — são parâmetros distintos, e a diferença
-   afeta diretamente a identificabilidade de isoforma
-   (`ferrerbonsoms2022identifiability`, PMID 34978563: o comprimento de
-   fragmento ótimo depende do gene; genes com muitas isoformas — como a
-   família de tripsinas, o alvo central da H1 — precisam de fragmento maior
-   para deconvolução confiável). **Ação: pedir à Macrogen o tamanho médio de
-   inserto da biblioteca**, não assumir.
-2. **Orientação da biblioteca (strand-specific ou não)** e protocolo de
-   seleção de RNA (polyA ou depleção de rRNA) — nenhum dos dois está
-   registrado em `04_viabilidade.md`. Afeta o parâmetro `--libType` do Salmon
-   e `strandedness` do featureCounts/Subread abaixo.
+1. **Tamanho de fragmento/inserto da biblioteca — AINDA NÃO CONFIRMADO.** O
+   relatório de raw data da Macrogen não reporta tamanho de inserto (isso
+   normalmente vem de QC de biblioteca via Bioanalyzer/TapeStation, não do
+   relatório de sequenciamento). "151 nt" continua sendo o comprimento de
+   *leitura*, não de *fragmento* — a diferença afeta a identificabilidade de
+   isoforma (`ferrerbonsoms2022identifiability`, PMID 34978563), relevante
+   para a família de tripsinas (H1). **Ação: pedir à Macrogen o tamanho médio
+   de inserto**, ou estimar via `picard CollectInsertSizeMetrics` depois do
+   alinhamento genoma-guiado (FASE 2) — não assumir.
+2. **Orientação da biblioteca — RESOLVIDO.** A página "Order Information" do
+   relatório Macrogen registra `Library Kit: Illumina Stranded mRNA Prep,
+   Ligation Reference Guide`. É um kit **stranded** (seleção por poli-A +
+   marcação de segunda fita, protocolo de ligação) — não é o caso "não
+   registrado" que o documento anterior apontava. Consequência prática: usar
+   `--libType ISR` no Salmon e `-s 2` (reverse) no featureCounts/Subread como
+   ponto de partida; **confirmar empiricamente com `salmon --libType A`** ou
+   `RSeQC infer_experiment.py` nas primeiras amostras alinhadas antes de
+   fixar o parâmetro em todo o lote — kits "stranded" da Illumina são
+   tipicamente reverse-stranded, mas o relatório não declara o sentido
+   explicitamente.
 
 ---
 
@@ -380,9 +395,11 @@ o genoma-guiado como via primária.
 ## 13. O que falta confirmar antes de fechar o pipeline
 
 1. **Tamanho de fragmento/inserto** da biblioteca Macrogen (§0) — bloqueia a
-   escolha fina de parâmetros de Salmon/tximport para isoforma.
-2. **Strandedness** e protocolo de seleção de RNA — bloqueia `--libType`
-   (Salmon) e `-s` (featureCounts/Subread).
+   escolha fina de parâmetros de Salmon/tximport para isoforma. Ainda não
+   confirmado mesmo após o relatório de raw data (§13.1).
+2. ~~**Strandedness**~~ — **resolvido em 28/07/2026** via `Library Kit:
+   Illumina Stranded mRNA Prep, Ligation` no relatório Macrogen (§0, §13.1).
+   Falta só confirmar o sentido (forward/reverse) empiricamente pós-alinhamento.
 3. **O que constitui uma réplica biológica** (nº de intestinos agrupados por
    amostra) — não documentado em nenhum lugar do projeto ainda
    (`03_metodologia_padrao_ouro.md` §8).
@@ -391,6 +408,235 @@ o genoma-guiado como via primária.
 5. **GTF/GFF exato** a baixar do RefSeq para RS_2026_04 (link em
    `NOTAS_DE_AUDITORIA.md` §10) — confirmar formato compatível com
    STAR/HISAT2/Subread/featureCounts antes de escrever os módulos.
+6. ~~**Mapeamento `ID-N` → grupo/réplica biológica**~~ — **resolvido em
+   28/07/2026** via `identificacao-amostras.xlsx` + confirmação do Eulálio
+   (`ID-18` = corpo gorduroso, fora do desenho de 4 grupos). Ver §13.1. Cada
+   grupo fecha em n=3; o defeito de qualidade da FASE 1 concentra-se em
+   Benzamidine (2/3 réplicas) e SKTI (1/3) — ponto de atenção que passa para
+   a FASE 5, não mais pendência de mapeamento.
+
+## 13.1 Diagnóstico do QC bruto — pedido HN00280302 (recebido 24/07/2026, lido 28/07/2026)
+
+Fonte: `report-rnaseq-macrogen/20260724_HN00280302_TRR_Report/` (HTML + PDF
+`assets/spgs/HN00280302.pdf`, 14 páginas, e 26 imagens per-base-quality em
+`assets/images/quality_images/`). Nenhum FASTQ foi baixado ainda — este
+diagnóstico é só sobre o relatório de QC que a Macrogen gera antes da
+entrega dos arquivos.
+
+### Estatísticas por amostra (raw data)
+
+| ID | Bases (Gbp) | Reads (M) | GC% | Q20% | Q30% |
+|---|---|---|---|---|---|
+| 1 | 9.8 | 65.1 | 51.8 | 98.8 | 95.6 |
+| 2 | 10.1 | 67.0 | 53.4 | 98.5 | 94.5 |
+| 3 | 8.8 | 58.2 | 49.1 | 98.4 | 94.4 |
+| 5 | 8.3 | 55.0 | 52.3 | 98.5 | 94.7 |
+| **7** | 8.7 | 57.9 | **59.7** | 97.0 | **90.4** |
+| **8** | 11.9 | 78.9 | **63.1** | **94.5** | **84.1** |
+| 9 | 9.4 | 62.3 | 54.7 | 98.4 | 94.1 |
+| **10** | 9.3 | 61.8 | **60.8** | 97.0 | **90.5** |
+| 12 | 10.1 | 67.1 | 49.1 | 98.8 | 95.5 |
+| 14 | 8.2 | 54.2 | 48.4 | 98.6 | 95.0 |
+| 15 | 9.4 | 62.2 | 48.8 | 98.5 | 94.8 |
+| 16 | 9.0 | 59.8 | 50.3 | 98.6 | 94.9 |
+| 18 | 10.1 | 67.0 | 49.5 | 98.7 | 95.2 |
+
+10 de 13 amostras estão dentro do esperado para mRNA-seq de inseto: GC
+48–54%, Q20 ≥98,4%, Q30 ≥94,1%. Três amostras destoam — **ID-7, ID-8, ID-10**
+— com GC elevado (59,7–63,1%) e Q30 reduzido (84,1–90,5%). ID-8 é o pior
+caso: maior profundidade nominal (11,9 Gbp) e pior qualidade (Q30 84,1%,
+Q20 94,5%).
+
+### Causa raiz (identificada nas imagens per-base-quality, não só na tabela)
+
+Inspecionadas as 26 imagens `ID-X_R{1,2}_per_base_quality.png`:
+
+- **ID-7, ID-8 e ID-10 têm, no R1, o mesmo defeito localizado**: qualidade
+  cai abruptamente do patamar normal (~39–40) para a faixa 24–28 (com
+  mínimos a ~9) especificamente entre os **ciclos ~44–90**, e volta ao normal
+  depois do ciclo ~90. A forma e a posição do vale são quase idênticas nas
+  três amostras — não é o padrão esperado de degradação gradual de qualidade
+  em direção à extremidade 3' (o que se vê em todas as outras 10 amostras).
+- **ID-8 tem um segundo problema, independente e mais grave, no R2**: ruído
+  difuso ao longo de quase toda a leitura (não localizado), o que explica por
+  que ID-8 é a única amostra com Q20 abaixo de 98% e a pior de todas em Q30.
+- R2 de ID-7 e ID-10 está limpo (só variação pontual normal) — o problema
+  compartilhado é específico do R1 dessas duas.
+
+**⚠️ CORREÇÃO (28/07/2026, FASE 1 Bloco A — ver `artigo.md` §3.3):** a frase
+original aqui dizia que o padrão apontava para "causa técnica compartilhada
+da corrida (lane/tile do flowcell...)". **Isso foi verificado contra os
+headers reais dos FASTQ e não se sustenta.** ID-7 e ID-10 dividem
+lane/flowcell (`LH00129`, `23NNGLLT4:4`) com as **10 amostras limpas** —
+"mesma corrida" não explica por que só essas duas têm o defeito ali. ID-8
+está numa corrida **inteiramente separada** (`LH00688`, `253LHLLT4:5`) —
+não pode compartilhar causa de corrida com as outras duas por definição. Um
+teste de Per Tile Sequence Quality (FastQC) foi inconclusivo: as 13
+amostras, incluindo as limpas, mostram `warn`/`fail` com magnitude
+comparável — não discrimina causa técnica localizada de ruído de fundo
+normal do flowcell. **A causa do defeito está em aberto, não resolvida.**
+Ver diagnóstico completo e critério objetivo de confirmação (ΔQ > 5 Phred,
+aplicado às 13 amostras) em `artigo.md` §3.2–3.3 e `resultados/blocoA_results.csv`.
+
+### Ação recomendada na FASE 1
+
+Não excluir as 3 amostras a priori — o defeito é localizado (região de
+~46 nt dentro de uma leitura de 151 nt) e recuperável por trimagem/masking
+padrão do fastp. Mas:
+
+1. Rodar FastQC/MultiQC pós-`fastp` **separadamente para ID-7/ID-8/ID-10** e
+   comparar taxa de sobrevivência de reads e comprimento médio pós-trim
+   contra as outras 10 amostras antes de prosseguir para FASE 2.
+2. Tratar a taxa de mapeamento da FASE 2 (critério de aprovação já definido
+   em §2, >80%) como o veredito real para essas 3 — se cair muito abaixo das
+   demais, considerar exclusão apenas então, com justificativa registrada.
+3. Marcar ID-8 como a amostra de maior risco do lote inteiro.
+4. Guardar a hipótese de causa técnica de corrida (não biológica) para não
+   confundir esse artefato com efeito de tratamento na FASE 5 — se ID-7,
+   ID-8 e ID-10 caírem no mesmo grupo experimental, o artefato de qualidade
+   pode se sobrepor a um efeito real de grupo e precisa ser desacoplado.
+
+### Mapeamento ID → grupo/réplica — RESOLVIDO (28/07/2026)
+
+Fonte: `identificacao-amostras.xlsx` (planilha de submissão à Macrogen, 17
+tubos) + confirmação direta do Eulálio sobre `ID-18`.
+
+| Grupo | Tubos submetidos | Entregues (raw data) | Ausentes na entrega |
+|---|---|---|---|
+| Control | ID-1,2,3,4 | ID-1,2,3 (**n=3**) | ID-4 |
+| Benzamidine | ID-5,6,7,8 | ID-5,**7,8** (**n=3**) | ID-6 |
+| SKTI | ID-9,10,11,12,13 | ID-9,**10**,12 (**n=3**) | ID-11, ID-13 |
+| GORE3 | ID-14,15,16,17 | ID-14,15,16 (**n=3**) | ID-17 |
+| — (fora do desenho) | não consta na planilha | **ID-18** | — |
+
+**`ID-18` = corpo gorduroso da lagarta** (confirmado pelo Eulálio) — não é
+réplica de nenhum dos 4 grupos de intestino médio, é outro tecido, amostra
+única sem réplica. **Não entra na matriz de contrastes da FASE 5**
+(DESeq2 precisa de réplicas por grupo, e não há grupo/tratamento definido
+para ela). Uso potencial a decidir depois: referência de expressão
+tecido-específica (ex.: checar se genes candidatos da família de
+serino-proteases, FASE 9, também são expressos em corpo gorduroso, o que
+ajudaria a interpretar especificidade tecidual) — não usar para nada que
+exija DE ou WGCNA com essa amostra sozinha.
+
+**O mismatch 13×12 está explicado:** cada um dos 4 grupos fechou
+exatamente em **n=3**, como o desenho confirmado pede — os 4 tubos que não
+vieram (ID-4, ID-6, ID-11, ID-13, mais ID-17 = **5 tubos**, não 4; SKTI
+submeteu 5 tubos para render 3) ficaram de fora desta entrega, mais o
+corpo gorduroso (ID-18) que nunca fez parte da contagem de 12. Se os
+5 tubos ausentes forem réplicas de contingência (para o caso de alguma
+falhar no QC da própria Macrogen) ou pertencem a uma entrega futura,
+segue sem confirmação — mas não bloqueia mais a FASE 5, porque n=3 por
+grupo já está garantido nesta entrega.
+
+**⚠️ Achado que muda a leitura do diagnóstico de qualidade (§ acima): o
+defeito técnico compartilhado não está espalhado entre grupos — está
+concentrado.** Das 3 amostras com o vale de qualidade nos ciclos ~44–90 do
+R1:
+- **Benzamidine perde 2 de suas 3 réplicas** (ID-7 e ID-8) para o defeito —
+  incluindo ID-8, a pior amostra do lote inteiro (ruído difuso adicional no
+  R2).
+- **SKTI perde 1 de 3** (ID-10).
+- **Control e GORE3 estão limpos** — nenhuma das 3 réplicas de cada tem o
+  defeito.
+
+Consequência direta para a FASE 5: os contrastes que envolvem Benzamidine
+(#2 GORE3 vs. Benzamidina, #5 Benzamidina vs. Controle, #6 GORE3 vs.
+SKTI+Benzamidina agrupados) carregam risco de ruído técnico concentrado
+num grupo inteiro, não distribuído — poder estatístico e taxa de
+falso-positivo desse grupo especificamente devem ser tratados com mais
+cautela que os demais. Registrar isso explicitamente no relatório de DE,
+não só na FASE 1.
+
+### Urgência operacional — RESOLVIDA (28/07/2026)
+
+Os 26 arquivos (47 GB) foram baixados para
+`eulalio@200.235.143.10:~/rnaseq-Anticarsia-GORE3/raw_fastq/` via
+`screen -S rnaseq_download`, com retry automático por arquivo. **Os 26
+md5sum conferem 100% contra `HN00280302_13samples_md5sum_DownloadLink.txt`**
+(verificado com `md5sum -c`, todos `SUCESSO`) — a integridade dos dados
+brutos está confirmada, não é mais suposição. Log completo em
+`~/rnaseq-Anticarsia-GORE3/raw_fastq/download.log` e
+`md5sum_check.log` no servidor.
+
+FASE 1 (QC/trimagem) pode começar assim que o mapeamento de grupos (acima)
+for usado para nomear as amostras no samplesheet do pipeline.
+
+## 13.2 Teste de equilíbrio de trimagem (Bloco C, 29/07/2026)
+
+**Pergunta:** afrouxar os parâmetros de trimagem do fastp (qualidade ou
+sensibilidade de detecção de overlap/adapter-dimer) recupera reads úteis
+nas 4 amostras problemáticas (ID-7, ID-8, ID-9, ID-10) sem custo de
+qualidade, em relação ao Set B de produção (§13.1/Bloco B)?
+
+**Desenho:** sub-amostras determinísticas de 2.000.000 pares
+(`seqtk sample -s100`) de ID-1 (controle limpo) + ID-7/8/9/10, testando 4
+configurações de fastp (`codigo/fase1_blocoC/run_fastp_paramsweep.sh`):
+
+| Set | Parâmetro variado |
+|---|---|
+| **B** (baseline) | produção atual — `--qualified_quality_phred 20`, overlap default |
+| **C1** | `--qualified_quality_phred 15` (afrouxar qualidade) |
+| **C2** | overlap-analysis mais permissivo (`--overlap_len_require 20 --overlap_diff_limit 8 --overlap_diff_percent_limit 30`) |
+| **C3** | overlap-analysis mais restritivo (contraprova) |
+
+Critério de decisão pré-declarado: um Set só substitui o Set B se, nas 4
+amostras problemáticas, simultaneamente (1) sobrevivência sobe ≥5 pontos
+percentuais, (2) Q30 pós-trim continua ≥95%, (3) a taxa de mapeamento
+HISAT2 (piloto, ver abaixo) não piora, e (4) o controle limpo (ID-1) não é
+prejudicado.
+
+**Piloto de alinhamento (não é a FASE 2 formal):** para arbitrar com dado
+real — não só com métricas do próprio fastp — os reads trimados de cada
+config foram alinhados com HISAT2 contra um índice **piloto** de
+`GCF_050436995.1` (`codigo/fase1_blocoC/build_hisat2_index_pilot.sh`,
+construído a partir do FASTA já baixado em outro projeto local,
+`~/vg_search/genome/`, **sem** anotação de splice sites — suficiente para
+taxa de mapeamento geral, não para quantificação de isoforma). Isso é
+estritamente um teste piloto sobre a subamostra de 2M pares; a FASE 2 formal
+segue não iniciada e vai precisar de índice próprio, com anotação, nas 13
+amostras completas.
+
+**Resultado (`resultados/blocoC_param_sweep.csv`, script
+`codigo/fase1_blocoC/analyze_blocoC.py`): nenhuma das 3 variantes recuperou
+qualquer read.** O %adapter-dimer ficou **idêntico** (até a 2ª casa decimal)
+entre Set B e C1/C2 em todas as 4 amostras — ex. ID-7: 31,19% nos três; ID-8:
+25,60% nos três; ID-9: 16,20% nos três; ID-10: 30,65% em B/C1, 30,65%/mesmo em
+C2. A diferença de sobrevivência foi 0,00pp (ou -0,01pp, ruído de
+arredondamento) em todos os casos. Set C3 (mais restritivo) piorou
+ligeiramente a taxa de mapeamento em 3 das 4 amostras (ex. ID-7:
+74,83%→74,81%), confirmando que a classificação *é* sensível ao parâmetro
+na direção esperada, mas C1/C2 não geraram ganho na direção contrária.
+
+**Interpretação:** a perda de reads nessas 4 amostras não é efeito de um
+limiar de qualidade/overlap escolhido conservador demais — é uma
+característica estrutural das próprias bibliotecas (par de leitura cujo
+inserto biológico é curto o bastante para R1/R2 se sobreporem quase
+totalmente com adaptador), invariante aos parâmetros testados. **Achado
+adicional do piloto de alinhamento:** os reads que sobrevivem à trimagem
+nas 4 amostras problemáticas mapeiam em taxa (74,8–79,4%) comparável à do
+controle limpo (78,0%) — o que sobrevive é dado de qualidade equivalente ao
+resto do lote; o problema é volume perdido, não degradação do que resta.
+
+**⚠️ Nenhuma das taxas de mapeamento (mesmo em ID-1, controle limpo, 78,0%)
+atinge o critério de aprovação oficial de >80% declarado em §2** — mas isso
+é esperado e não comparável diretamente: o índice piloto não tem anotação
+de splice sites, o que reduz a sensibilidade a reads que cruzam junções
+éxon-éxon (justamente onde HISAT2 se beneficia mais de guia por anotação).
+A taxa de mapeamento real da FASE 2, com índice anotado e as 13 amostras
+completas, ainda precisa ser medida — este piloto não a substitui, só
+compara as 4 amostras problemáticas entre si e contra o controle, o que é
+válido independentemente do valor absoluto de mapeamento.
+
+**Conclusão: Set B (produção) confirmado como equilíbrio ótimo por teste
+empírico, não por suposição.** Nenhuma mudança no pipeline de trimagem;
+`run_fastp_full_trim.sh` permanece como está. Pendência que persiste,
+inalterada: a causa raiz de por que essas 4 bibliotecas especificamente
+tiveram inserto curto na preparação (tamanho de inserto não reportado pela
+Macrogen) segue sem explicação — o Bloco C mostrou que não é recuperável por
+trimagem, não por que aconteceu.
+
+---
 
 ## Fora de escopo deste documento
 

@@ -18,9 +18,11 @@ Material de apoio para a escrita da introdução e para o ajuste da metodologia 
 | [`04_viabilidade.md`](04_viabilidade.md) | Dados, ativos locais reaproveitáveis, hardware, prazos, riscos |
 | [`05_lacunas_e_hipoteses.md`](05_lacunas_e_hipoteses.md) | Lacunas do conhecimento, hipóteses testáveis, contribuição original |
 | [`06_correcoes_projeto.md`](06_correcoes_projeto.md) | Inconsistências detectadas no `.docx`, com correção proposta |
-| [`07_analise_rnaseq.md`](07_analise_rnaseq.md) | Pipeline de RNA-Seq passo a passo, calibrado ao desenho real (4 grupos × 3 réplicas, PE 150nt, ~40M reads) |
+| [`07_analise_rnaseq.md`](07_analise_rnaseq.md) | Pipeline de RNA-Seq passo a passo; ✅ FASE 1 (Blocos A/A.1/B) concluída — ver `../artigo.md` §13.1 corrigido |
 | [`referencias.bib`](referencias.bib) | BibTeX — somente referências com DOI/PMID verificado (**138 entradas**) |
 | [`NOTAS_DE_AUDITORIA.md`](NOTAS_DE_AUDITORIA.md) | O que foi verificado, como, e o que **não** pôde ser confirmado |
+| [`../artigo.md`](../artigo.md) / [`../artigo_pt.md`](../artigo_pt.md) | Artigo vivo (EN/PT) com os resultados reais da FASE 1 — Methods/Results/Limitations, nunca projeção |
+| [`../INDICE_MATERIAL.md`](../INDICE_MATERIAL.md) | Índice-mestre de figuras/tabelas/código/dados — orquestração para geração futura de Word/PPTX |
 
 ## Base bibliográfica — [`../literatura/`](../literatura/)
 

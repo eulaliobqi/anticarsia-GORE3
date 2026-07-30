@@ -1,0 +1,21 @@
+id,label,set,set_desc,reads_before,reads_after,pct_survival,pct_adapter_dimer,pct_low_quality,pct_too_short,q30_before,q30_after,mean_len_after,hisat2_overall_alignment_pct
+ID-1,Control_R1 (limpa),setB,"baseline producao (qq20, overlap default)",4000000,3899230,97.48,0.97,1.23,0.3,95.58,96.66,146,78.01
+ID-1,Control_R1 (limpa),setC1,qq15 (afrouxar qualidade),4000000,3899230,97.48,0.97,1.23,0.3,95.58,96.66,146,78.01
+ID-1,Control_R1 (limpa),setC2,"qq20, overlap permissivo (20/8/30)",4000000,3898920,97.47,0.97,1.22,0.32,95.58,96.66,146,78.01
+ID-1,Control_R1 (limpa),setC3,"qq20, overlap restritivo (40/3/10) - contraprova",4000000,3899392,97.48,0.97,1.23,0.3,95.58,96.66,146,78.0
+ID-7,Benzamidine_R2,setB,"baseline producao (qq20, overlap default)",4000000,2656466,66.41,31.19,1.39,0.99,90.39,96.4,145,74.83
+ID-7,Benzamidine_R2,setC1,qq15 (afrouxar qualidade),4000000,2656466,66.41,31.19,1.39,0.99,90.39,96.4,145,74.83
+ID-7,Benzamidine_R2,setC2,"qq20, overlap permissivo (20/8/30)",4000000,2656276,66.41,31.19,1.39,1.0,90.39,96.39,145,74.83
+ID-7,Benzamidine_R2,setC3,"qq20, overlap restritivo (40/3/10) - contraprova",4000000,2656410,66.41,31.19,1.4,0.98,90.39,96.39,145,74.81
+ID-8,Benzamidine_R3,setB,"baseline producao (qq20, overlap default)",4000000,2498344,62.46,25.6,9.8,2.14,84.14,96.8,145,78.45
+ID-8,Benzamidine_R3,setC1,qq15 (afrouxar qualidade),4000000,2498344,62.46,25.6,9.8,2.14,84.14,96.8,145,78.45
+ID-8,Benzamidine_R3,setC2,"qq20, overlap permissivo (20/8/30)",4000000,2498334,62.46,25.6,9.8,2.14,84.14,96.8,145,78.45
+ID-8,Benzamidine_R3,setC3,"qq20, overlap restritivo (40/3/10) - contraprova",4000000,2498352,62.46,25.6,9.81,2.13,84.14,96.8,145,78.44
+ID-9,SKTI_R1,setB,"baseline producao (qq20, overlap default)",4000000,3296522,82.41,16.2,0.85,0.52,94.13,96.74,146,79.36
+ID-9,SKTI_R1,setC1,qq15 (afrouxar qualidade),4000000,3296522,82.41,16.2,0.85,0.52,94.13,96.74,146,79.36
+ID-9,SKTI_R1,setC2,"qq20, overlap permissivo (20/8/30)",4000000,3296440,82.41,16.2,0.84,0.53,94.13,96.74,146,79.36
+ID-9,SKTI_R1,setC3,"qq20, overlap restritivo (40/3/10) - contraprova",4000000,3296534,82.41,16.2,0.85,0.52,94.13,96.74,146,79.35
+ID-10,SKTI_R2,setB,"baseline producao (qq20, overlap default)",4000000,2703036,67.58,30.65,0.95,0.8,90.5,96.58,146,79.22
+ID-10,SKTI_R2,setC1,qq15 (afrouxar qualidade),4000000,2703036,67.58,30.65,0.95,0.8,90.5,96.58,146,79.22
+ID-10,SKTI_R2,setC2,"qq20, overlap permissivo (20/8/30)",4000000,2702918,67.57,30.65,0.95,0.81,90.5,96.58,146,79.25
+ID-10,SKTI_R2,setC3,"qq20, overlap restritivo (40/3/10) - contraprova",4000000,2703066,67.58,30.65,0.95,0.8,90.5,96.58,146,79.22

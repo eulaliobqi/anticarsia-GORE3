@@ -1,0 +1,662 @@
+
+> **Documento vivo — construído incrementalmente, bloco de análise por bloco de análise.**
+> Cada seção só contém o que foi de fato executado e confirmado nesta sessão de
+> trabalho. Nada aqui é projeção, expectativa típica de literatura, ou "resultado
+> esperado" — quando um resultado não existe ainda, a seção diz isso
+> explicitamente em vez de ser omitida ou preenchida por extrapolação.
+> Status atual: **FASE 1, Blocos A, A.1, B e C concluídos** (QC bruto,
+> fechamento da lacuna per-tile, trimagem com fastp, teste de equilíbrio de
+> parâmetros de trimagem). Ver `docs/07_analise_rnaseq.md` para o plano
+> completo das fases seguintes.
+>
+> **Versão em português:** `artigo_pt.md` (mantida em paralelo, sincronizada
+> a cada atualização — tradução fiel, não um resumo).
+>
+> **Índice-mestre de material (figuras/tabelas/código/dados, para geração
+> futura de Word/PPTX):** `INDICE_MATERIAL.md`.
+
+# Transcriptomic response of *Anticarsia gemmatalis* midgut to the peptide protease inhibitor GORE3
+
+**Eulálio Gutemberg Bonfim dos Santos Jr.¹\*, [demais autores a definir]**
+
+¹ Laboratory of Enzymology and Biochemistry of Proteins and Peptides,
+Departamento de Bioquímica e Biologia Molecular, Universidade Federal de
+Viçosa (UFV), BIOAGRO/INCT-IPP, Viçosa-MG, Brasil
+
+\*Correspondência: eulalio.santos@ufv.br
+
+---
+
+## Abstract
+
+*[PENDENTE — o abstract só será escrito quando houver resultados de expressão
+diferencial (FASE 5) para resumir. Um abstract escrito agora, cobrindo só QC
+de dados brutos, não resumiria um achado científico substantivo — seria
+preenchimento de seção por completude, o que este documento evita
+explicitamente.]*
+
+---
+
+## 1. Introduction
+
+*[PENDENTE — a introdução deste artigo deve ser derivada de
+`docs/01_fundamentacao_teorica.md`, `docs/02_estado_da_arte_GORE.md` e
+`docs/05_lacunas_e_hipoteses.md`, já auditados e com citação verificada. Será
+escrita como bloco próprio, não copiada diretamente desses documentos sem
+revisão de contexto para formato de artigo.]*
+
+---
+
+## 2. Materials and Methods
+
+### 2.1 Biological material and experimental design
+
+Fifth-instar *Anticarsia gemmatalis* larvae were fed artificial diet
+supplemented with one of four treatments: untreated control, benzamidine
+(synthetic positive control), SKTI (natural Kunitz-type trypsin inhibitor)
+or GORE3 (the peptide inhibitor under study), with three biological
+replicates per treatment (midgut tissue, one replicate per larva pool). One
+additional, non-replicated fat-body sample was included outside this
+four-group design. Sample identity and treatment-group assignment were
+resolved from the Macrogen submission manifest
+(`identificacao-amostras.xlsx`) and confirmed against the raw-data
+delivery; the correspondence is reported in Table S1
+(`codigo/fase1_blocoA/samplesheet.tsv`).
+
+### 2.2 RNA sequencing
+
+Total RNA was sequenced by Macrogen Inc. (order HN00280302, delivered 24
+July 2026) as paired-end, 2×151 bp reads using the Illumina Stranded mRNA
+Prep, Ligation library kit. Sequencing instrument identity was not stated
+explicitly in the vendor report ("Illumina platform"); it was inferred from
+the instrument-ID prefix in the FASTQ read headers (`LH00xxx`, consistent
+with the Illumina NovaSeq X series) — reported here as an inference from raw
+header content, not as a vendor-confirmed specification. NovaSeq
+instruments use two-colour sequencing-by-synthesis chemistry, in which the
+absence of a light signal is basecalled as G; as sequencing progresses and
+per-cluster signal weakens, this can miscall true T/C bases as G,
+producing polyG tails (Chen et al., 2018) — the mechanistic basis for the
+`--trim_poly_g` parameter adopted in §2.4. Thirteen libraries
+were delivered as 26 raw FASTQ files (~47 GB). File integrity was verified
+against the vendor-supplied MD5 checksums for all 26 files (100% match;
+`codigo/fase1_blocoA/md5sum.txt`).
+
+### 2.3 Raw-read quality control
+
+Raw-read quality was assessed with FastQC v0.12.1 and aggregated with
+MultiQC v1.33 (Ewels et al., 2016), run in a dedicated Conda/Mamba
+environment on a Linux server (32 CPU cores, 188 GB RAM), independently of
+the vendor's own QC report. Exact tool versions and the full environment
+specification are recorded in `resultados/blocoA_ENV_VERSIONS.txt`.
+
+Total per-file read counts from FastQC were cross-checked against the
+vendor-reported totals for all 13 samples, and read counts between mates
+(R1/R2) were checked for exact agreement within each pair.
+
+To test whether the localized raw-read quality defect visible in the
+vendor's per-base-quality plots for three libraries reflected a shared
+sequencing-run artefact, we (i) extracted the sequencing instrument, flow
+cell and lane identifiers from the first FASTQ read header of each library;
+(ii) computed, from the FastQC "Per base sequence quality" module, the mean
+Phred score in a read-1 cycle window declared *before* inspecting
+per-sample identities (cycles 44–90, matching the position range visually
+apparent in the vendor plots) versus the flanking region (cycles 1–43 and
+91–151), flagging any library with a flanking-minus-window drop exceeding
+5.0 Phred; and (iii) inspected the FastQC "Per tile sequence quality"
+module for evidence of tile-localized defects. Analysis code:
+`codigo/fase1_blocoA/analyze_blocoA.py`.
+
+### 2.4 Read trimming (Phase 1, Block B)
+
+Two candidate fastp v1.3.0 parameter sets were compared empirically before
+committing to one for the full batch, because the project's cited
+literature (Chen, 2025; Chen et al., 2018) justifies choosing fastp over
+Trimmomatic/Cutadapt but gives no numeric threshold guidance (declared as
+Limitation 2 in the previous version of this document): **Set A**
+(`--detect_adapter_for_pe --length_required 36 --qualified_quality_phred 20`,
+matching the value originally recorded in `docs/07_analise_rnaseq.md`) and
+**Set B** (`--detect_adapter_for_pe --length_required 50
+--qualified_quality_phred 20 --trim_poly_g --trim_poly_x
+--overrepresentation_analysis`, matching the sibling `RNA-Seq-not-model`
+pipeline's production module, adapted to fastp 1.3.0). Both sets were run
+on two representative libraries — Control_R1 (clean) and Benzamidine_R3
+(worst raw-QC profile) — comparing read survival, Q20/Q30 after filtering,
+and the breakdown of the `filtering_result` categories fastp reports.
+Code: `codigo/fase1_blocoB/run_fastp_ab_test.sh`,
+`codigo/fase1_blocoB/compare_ab_test.py`; full comparison:
+`resultados/blocoB_ab_test_comparison.csv`.
+
+Based on the A/B result (§3.5), Set B was selected and applied to all 13
+libraries (26 files) in a single batch run
+(`codigo/fase1_blocoB/run_fastp_full_trim.sh`), producing trimmed FASTQ in
+`trimmed/` and one fastp JSON/HTML report per library in `qc/post_trim/`.
+Post-trim QC results are analysed in `codigo/fase1_blocoB/analyze_blocoB.py`.
+
+Alignment and quantification (Phase 2 onward) had not been executed at the
+time of writing this section and are not reported below.
+
+### 2.4.1 Trimming-parameter equilibrium test (Phase 1, Block C)
+
+Because four libraries (Benzamidine_R2/R3, SKTI_R1/R2) lost 17.6–37.5% of
+reads to fastp's `adapter_dimer_reads` classification under Set B (§3.6),
+we tested whether relaxing trimming parameters could recover reads without
+a quality cost, rather than assuming Set B was already optimal. Deterministic
+2,000,000-read-pair subsamples (`seqtk` 1.5, seed `-s100`) were drawn from
+Control_R1 (clean reference) and the four affected libraries
+(`codigo/fase1_blocoC/subsample_reads.sh`), then trimmed with four fastp
+configurations (`codigo/fase1_blocoC/run_fastp_paramsweep.sh`): **Set B**
+(production baseline); **Set C1** (`--qualified_quality_phred 15` instead
+of 20); **Set C2** (more permissive overlap-analysis:
+`--overlap_len_require 20 --overlap_diff_limit 8
+--overlap_diff_percent_limit 30`, versus fastp defaults 30/5/20); **Set C3**
+(more restrictive overlap-analysis, as a sanity-check counter-test:
+`--overlap_len_require 40 --overlap_diff_limit 3
+--overlap_diff_percent_limit 10`). `--length_required 50` and the
+poly-G/poly-X/adapter-detection flags were held fixed across all sets,
+since §3.5 already showed `--length_required` does not affect survival.
+
+To arbitrate with data beyond fastp's own metrics, trimmed subsample reads
+from every sample × set combination were aligned with HISAT2 2.2.2 against
+a **pilot** index of `GCF_050436995.1` built without splice-site annotation
+(`codigo/fase1_blocoC/build_hisat2_index_pilot.sh`, genome FASTA reused from
+a separate local project, `~/vg_search/genome/`) — adequate for an overall
+mapping-rate comparison across configurations, not for isoform-level
+quantification; this pilot precedes and is independent of the formal
+Phase 2 genome-guided alignment on the complete 13 libraries.
+Pre-declared decision rule (`codigo/fase1_blocoC/analyze_blocoC.py`): a
+candidate set would replace Set B in production only if, in all four
+affected libraries simultaneously, (i) read survival increased by ≥5
+percentage points versus Set B, (ii) post-trim Q30 remained ≥95%, (iii) the
+HISAT2 pilot mapping rate did not decrease, and (iv) the clean control
+library was not degraded. Full results:
+`resultados/blocoC_param_sweep.csv`.
+
+---
+
+## 3. Results
+
+### 3.1 Library yield and identity confirmed independently of the vendor report
+
+FastQC-derived read counts matched the vendor-reported totals exactly for
+all 13 samples (e.g., Control_R1: 32,550,688 × 2 = 65,101,376 reads,
+identical to the vendor total; Benzamidine_R3: 39,460,179 × 2 = 78,920,358,
+identical). R1/R2 mate counts were identical within every pair (13/13).
+This is independent, read-content-level confirmation beyond the
+checksum-level integrity check in §2.2.
+
+### 3.2 A quality defect confined to three libraries, by a pre-declared criterion
+
+Mean R1 quality dropped by more than 5 Phred in the cycles-44–90 window
+relative to flanking cycles in exactly three of the 13 libraries —
+Benzamidine_R2 (ΔQ = 5.48), Benzamidine_R3 (ΔQ = 5.75) and SKTI_R2
+(ΔQ = 5.46) — and in none of the remaining ten (ΔQ range 0.08–1.81;
+Fig. 1, Table 1). The criterion was applied uniformly to all 13 libraries,
+not only to the three originally flagged from visual inspection of the
+vendor report, and reproduced that original flagging exactly (no false
+positives or negatives against the pre-declared threshold).
+
+**Table 1 | Raw-read summary statistics and quality-window test, by sample.**
+
+| Sample | Treatment / replicate | Reads (R1) | R1/R2 match | ΔQ (cycles 44–90) | Flagged |
+|---|---|---:|:---:|---:|:---:|
+| ID-1 | Control_R1 | 32,550,688 | yes | 0.08 | no |
+| ID-2 | Control_R2 | 33,504,042 | yes | 0.89 | no |
+| ID-3 | Control_R3 | 29,090,048 | yes | 1.08 | no |
+| ID-5 | Benzamidine_R1 | 27,500,647 | yes | 0.73 | no |
+| ID-7 | Benzamidine_R2 | 28,930,368 | yes | 5.48 | **yes** |
+| ID-8 | Benzamidine_R3 | 39,460,179 | yes | 5.75 | **yes** |
+| ID-9 | SKTI_R1 | 31,172,157 | yes | 1.81 | no |
+| ID-10 | SKTI_R2 | 30,906,748 | yes | 5.46 | **yes** |
+| ID-12 | SKTI_R3 | 33,545,221 | yes | 0.33 | no |
+| ID-14 | GORE3_R1 | 27,090,197 | yes | 0.35 | no |
+| ID-15 | GORE3_R2 | 31,079,636 | yes | 0.95 | no |
+| ID-16 | GORE3_R3 | 29,902,657 | yes | 0.72 | no |
+| ID-18 | FatBody | 33,478,105 | yes | 0.42 | no |
+
+*Full machine-readable output: `resultados/blocoA_results.csv`.*
+
+**Figure 1 | Raw-read quality drop is confined to three libraries, defined
+by a pre-declared position window.** Mean Phred quality score in read-1
+cycles 44–90 was subtracted from the flanking-region mean (cycles 1–43 and
+91–151) for each of the 13 raw FASTQ libraries (FastQC v0.12.1). Red bars
+denote the three libraries exceeding the threshold declared before the
+sample set was inspected (ΔQ > 5.0 Phred, dashed line): Benzamidine_R2,
+Benzamidine_R3 and SKTI_R2. All ten remaining libraries — spanning all
+four treatment groups and the non-replicated fat-body sample — fall below
+ΔQ = 1.8. Sample labels combine treatment group and biological replicate
+number, resolved from the Macrogen sample submission manifest (Table S1).
+File: `figuras/Figure1_blocoA_quality_dip.png`.
+
+### 3.3 The defect does not track sequencing lane; the physical cause remains open
+
+Read headers showed that 12 of the 13 libraries — including both clean and
+defective samples — were sequenced on the same instrument, flow cell and
+lane (`LH00129`, flow cell `23NNGLLT4`, lane 4). Only Benzamidine_R3
+(ID-8) was sequenced separately, on a different instrument, flow cell and
+lane altogether (`LH00688`, flow cell `253LHLLT4`, lane 5).
+
+This directly constrains the possible explanations: because Benzamidine_R2
+and SKTI_R2 share a lane with all ten unaffected libraries, a lane-wide
+technical cause is excluded for those two specifically; because
+Benzamidine_R3 was sequenced on an entirely separate run, it cannot share a
+lane- or flow-cell-level cause with the other two. A first, coarse
+tile-resolved test (whole-read FastQC "Per tile sequence quality" pass/warn/fail
+flag) was inconclusive, as reported in the previous version of this
+section: all 13 libraries showed warn/fail flags at comparable magnitude.
+
+### 3.4 A position-resolved re-analysis closes the gap: tile heterogeneity is real, localized, and tracks GC content
+
+The coarse test above collapsed the entire 151-cycle read into one
+pass/warn/fail flag, which cannot detect an effect confined to a 46-cycle
+window. We repeated the per-tile analysis restricted to the same
+pre-declared window (cycles 44–90) used in §3.2, computing, for every
+sample and every physical tile, the mean per-tile quality deviation inside
+the window versus in the flanking cycles, then comparing the **spread
+(population standard deviation) of these per-tile values across tiles**
+between window and flank
+(code: `codigo/fase1_blocoA/per_tile_analysis.py`; full output:
+`resultados/blocoA1_pertile_results.csv`).
+
+The logic of this test: if the window-specific quality drop reflects a
+sample-wide chemistry/library effect acting equally on every cluster
+regardless of its physical position, tiles should disagree with each other
+about as much inside the window as outside it (ratio ≈ 1). If instead
+specific physical tiles are disproportionately bad only within that cycle
+range, inter-tile spread should be much larger inside the window than
+outside it (ratio ≫ 1).
+
+**Result: the ratio is elevated specifically in four libraries, and it
+tracks vendor-reported GC content, not lane membership.**
+
+| Sample | Label | GC% (vendor) | Std. dev. window | Std. dev. flank | Ratio (window/flank) |
+|---|---|---:|---:|---:|---:|
+| ID-8 | Benzamidine_R3 | 63.1 | 0.646 | 0.103 | **6.28** |
+| ID-9 | SKTI_R1 | 54.7 | 0.587 | 0.266 | **2.21** |
+| ID-7 | Benzamidine_R2 | 59.7 | 0.486 | 0.223 | **2.18** |
+| ID-10 | SKTI_R2 | 60.8 | 0.509 | 0.250 | **2.04** |
+| ID-16 | GORE3_R3 | 50.3 | 0.317 | 0.255 | 1.25 |
+| remaining 8 samples | — | 48.4–53.4 | 0.13–0.24 | 0.18–0.28 | 0.72–0.94 |
+
+Pearson correlation between vendor-reported GC% and the window/flank ratio
+across all 13 samples: **r = 0.80**; Spearman rank correlation (robust to
+the ID-8 outlier): **ρ = 0.49**. The four samples with ratio > 2 are
+exactly the four samples with the highest GC content in the entire batch
+(59.7–63.1%, versus 48.4–54.7% for the rest) — including **SKTI_R1
+(ID-9)**, which had *not* been flagged by the mean-based criterion in §3.2
+(ΔQ = 1.81, below the 5.0 threshold) but shows the second-highest
+window/flank ratio in the dataset. This is disclosed as a graded,
+GC-correlated effect, not a strictly binary three-library phenomenon as
+§3.2 alone would suggest.
+
+**Figure 2 | Quality loss in cycles 44–90 is tile-heterogeneous in the
+worst-affected library and absent in a clean one.** Per-tile quality
+deviation from the sample mean (FastQC "Per tile sequence quality", read 1),
+plotted as tile (flow-cell physical position, y-axis, arbitrary order) by
+sequencing cycle (binned, x-axis), for **(a)** Control_R1 (ID-1, clean;
+window/flank ratio 0.72) and **(b)** Benzamidine_R3 (ID-8, worst-affected;
+window/flank ratio 6.28). Dashed vertical lines mark the pre-declared
+cycles-44–90 window. Colour scale: blue, tile better than the sample mean
+at that cycle; red, tile worse than the sample mean (Phred units, clipped
+at ±3). A conspicuous banded, alternating pattern of well- and
+poorly-performing tiles appears only inside the marked window in ID-8, and
+is absent throughout ID-1 and outside the window in ID-8 — a signature
+inconsistent with either a whole-lane or a whole-library-uniform cause.
+File: `figuras/Figure2_blocoA1_pertile_heatmap.png`.
+
+**Interpretation, stated at the confidence the data actually support — no
+further than that.** Three findings jointly constrain the explanation: (i)
+a lane-wide physical cause is excluded (§3.3: unaffected libraries share
+the same lane and tiles); (ii) a pure library-composition cause acting
+uniformly on all clusters is also inconsistent with the data (it would
+predict low, not high, inter-tile spread inside the window — the opposite
+of Fig. 2b); (iii) the effect is nonetheless strongly GC-correlated, not
+randomly distributed among libraries. The pattern most consistent with all
+three observations is an **interaction**: a subtle, cycle-specific imaging
+or focus artefact affecting the run broadly during cycles 44–90 (invisible
+in low-GC libraries, which tolerate it without measurable quality loss),
+that becomes visible specifically in the higher-GC libraries whose cluster
+signal properties leave less margin to absorb it. This is our best-supported
+account, not a proven mechanism — we did not, and could not from FastQC
+output alone, test focus/illumination metrics directly. **The precise
+physical root cause is characterized in more depth than in §3.3, but is
+not fully solved, and we do not claim otherwise.**
+
+### 3.5 The A/B trimming test reveals the true bottleneck, and it is not the tested parameter
+
+Contrary to the premise of the A/B test, the choice between
+`--length_required 36` and `50` made almost no difference to read survival
+for either library (Control_R1: 97.53% vs. 97.48%; Benzamidine_R3: 62.53%
+vs. 62.49%). What the test did reveal, from fastp's own
+`filtering_result` breakdown, is the actual dominant cause of read loss in
+Benzamidine_R3: **25.6% of its read pairs were classified as
+`adapter_dimer_reads`** — pairs whose insert is so short that read 1 and
+read 2 sequence into each other's adapter — versus a negligible fraction
+in Control_R1. This category, not the length or quality filters under
+test, accounts for the majority of Benzamidine_R3's read loss and was not
+part of the original hypothesis space in §2.3. Because both parameter
+sets performed identically on the metric that actually matters (survival),
+and Set B adds adapter/poly-tail safety relevant to the confirmed NovaSeq
+X (2-colour) chemistry (§2.2) at no measured cost, **Set B was adopted for
+the full batch**.
+
+### 3.6 Adapter-dimer contamination, not a flow-cell defect, explains the raw-read quality pattern
+
+Applying Set B to all 13 libraries and tabulating `adapter_dimer_reads`
+(Table 2; `resultados/blocoB_trim_summary.csv`) shows the same four
+libraries flagged throughout §3.2–3.4 — Benzamidine_R2, Benzamidine_R3,
+SKTI_R1, SKTI_R2 — carry 16–31% adapter-dimer reads, against 1–7% for the
+remaining nine. This produces a strong correlation with vendor-reported GC
+content (Pearson r = 0.92, Spearman ρ = 0.63, n = 13; Fig. 3b) — tighter
+than the per-tile-variance correlation in §3.4 (r = 0.80, ρ = 0.49) — and
+a correspondingly asymmetric read survival (62–82% for the four affected
+libraries vs. 91–97% for the rest; Fig. 3a).
+
+**Table 2 | Post-trimming outcome by sample, Set B parameters.**
+
+| Sample | Label | GC% (vendor) | Adapter-dimer reads (%) | Survival (%) | Q30 before | Q30 after |
+|---|---|---:|---:|---:|---:|---:|
+| ID-1 | Control_R1 | 51.8 | 0.96 | 97.48 | 95.58 | 96.66 |
+| ID-2 | Control_R2 | 53.4 | 5.79 | 92.93 | 94.47 | 96.34 |
+| ID-3 | Control_R3 | 49.1 | 6.60 | 91.67 | 94.44 | 96.55 |
+| ID-5 | Benzamidine_R1 | 52.3 | 4.60 | 93.92 | 94.73 | 96.41 |
+| ID-7 | Benzamidine_R2 | 59.7 | **31.16** | **66.44** | 90.39 | 96.38 |
+| ID-8 | Benzamidine_R3 | 63.1 | **25.58** | **62.49** | 84.14 | 96.80 |
+| ID-9 | SKTI_R1 | 54.7 | **16.23** | 82.38 | 94.13 | 96.74 |
+| ID-10 | SKTI_R2 | 60.8 | **30.65** | **67.56** | 90.49 | 96.57 |
+| ID-12 | SKTI_R3 | 49.1 | 2.21 | 96.56 | 95.55 | 96.86 |
+| ID-14 | GORE3_R1 | 48.4 | 2.21 | 95.45 | 95.04 | 96.82 |
+| ID-15 | GORE3_R2 | 48.8 | 5.97 | 92.51 | 94.84 | 96.72 |
+| ID-16 | GORE3_R3 | 50.3 | 6.47 | 92.12 | 94.87 | 96.62 |
+| ID-18 | FatBody | 49.5 | 3.22 | 95.36 | 95.19 | 96.53 |
+
+A second, encouraging result in the same table: **post-trim Q30 is
+essentially uniform across all 13 libraries (96.3–96.9%)**, including the
+four affected ones (Benzamidine_R2: 90.4%→96.4%; Benzamidine_R3:
+84.1%→96.8%; SKTI_R2: 90.5%→96.6%). Trimming fully normalises base-call
+quality; what it cannot recover is the lost yield from reads that were
+never a usable biological fragment to begin with.
+
+**Figure 3 | Read survival and adapter-dimer contamination separate the
+same four libraries flagged by raw-QC metrics, and correlate with GC
+content.** **(a)** Percentage of read pairs surviving fastp trimming
+(Set B parameters, §2.4), by sample. **(b)** Adapter-dimer read percentage
+(fastp `filtering_result.adapter_dimer_reads`) versus vendor-reported GC
+content, per sample; Pearson r and Spearman ρ given in the panel title.
+Red markers in both panels denote libraries with adapter-dimer rate >10%
+(Benzamidine_R2, Benzamidine_R3, SKTI_R1, SKTI_R2); this is a
+post-hoc visual cutoff chosen after inspecting the bimodal distribution
+in (b), not a pre-declared threshold as in Fig. 1. File:
+`figuras/Figure3_blocoB_trimming.png`.
+
+**This revises, and largely supersedes, the interpretation offered in
+§3.4.** The imaging-artefact-×-GC-sensitivity hypothesis was the
+best-supported account *given only FastQC output*; adapter-dimer
+contamination is a more direct, more strongly correlated (r = 0.92 vs.
+0.80), and mechanistically simpler explanation that also naturally
+accounts for the per-tile heterogeneity in Fig. 2 (short-insert molecules
+reading into adapter sequence around cycle ~44–90 would behave differently
+from normal-insert molecules in a way that need not be spatially uniform
+across tiles) without requiring an additional, unobserved imaging effect.
+We do not have a library-prep-level explanation for *why* these four
+specific libraries carry more short-insert/adapter-dimer molecules (this
+would require insert-size metrics from the library QC stage, which
+Macrogen's raw-data report does not include — Limitation 3 in the previous
+version of this document, now partially informed but not resolved by this
+finding). A targeted PubMed search (four query variants: two-colour/2-channel
+SBS chemistry artefacts; adapter-dimer/short-insert formation vs. GC
+content or library composition) returned no directly relevant peer-reviewed
+result at the time of writing. We report this as an empty search, not as
+absence of any relationship in the literature — the GC–adapter-dimer
+correlation in §3.6 is presented as this study's own empirical finding,
+not as literature-confirmed.
+
+### 3.7 Group- and contrast-level exposure to reduced depth
+
+Aggregating Table 2 by treatment group makes the practical consequence of
+§3.6 concrete (Table 3; group sums from `resultados/blocoB_trim_summary.csv`).
+
+**Table 3 | Post-trimming depth by treatment group.**
+
+| Group | Reads before (sum, n=3) | Reads after (sum) | Survival | Mean depth after (per sample) |
+|---|---:|---:|---:|---:|
+| Control | 190,289,556 | 179,065,714 | 94.10% | 59.7 M |
+| Benzamidine | 191,782,388 | 139,419,904 | **72.70%** | 46.5 M |
+| SKTI | 191,248,252 | 157,904,910 | 82.57% | 52.6 M |
+| GORE3 | 176,144,980 | 164,311,914 | 93.28% | 54.8 M |
+
+Both Benzamidine and SKTI lose 2 of 3 replicates to reduced depth (§3.6),
+but the practical impact differs by contrast because the two groups play
+different roles in the planned contrast matrix
+(`docs/07_analise_rnaseq.md` §6.1):
+
+**Table 4 | Depth asymmetry by planned Phase 5 contrast.**
+
+| # | Contrast | Groups (survival) | Asymmetry | Role |
+|---|---|---|---|---|
+| 1 | GORE3 vs. Control | 93.3% vs. 94.1% | minimal | Main effect |
+| 2 | GORE3 vs. Benzamidine | 93.3% vs. **72.7%** | **high** | 2nd priority — does GORE3 beat the classic S1-directed positive control? |
+| 3 | GORE3 vs. SKTI | 93.3% vs. 82.6% | moderate–high | 3rd priority — **H4**, the proteolytic-compensation mechanistic test |
+| 4 | SKTI vs. Control | 82.6% vs. 94.1% | moderate | Reproduces the known SKTI-compensation pattern |
+| 5 | Benzamidine vs. Control | **72.7%** vs. 94.1% | **high** | Positive-control effect alone |
+| 6 | GORE3 vs. (SKTI + Benzamidine pooled) | 93.3% vs. pooled reduced | **high** | Inherits both groups' depth loss |
+
+Four of the six planned contrasts touch a reduced-depth group. Benzamidine
+and SKTI carry the asymmetry into different parts of the scientific
+argument: Benzamidine's loss weighs most on contrast #2, the head-to-head
+efficacy comparison against the classical pharmacological standard;
+SKTI's loss weighs most on contrast #3 (H4), the mechanistic test the
+project's original hypotheses treat as central. Neither loss is severe
+enough, in absolute depth (46.5–59.7 M reads/sample after trimming, all
+above the original ~40 M target), to argue against proceeding — but it is
+severe enough to require explicit reporting per-contrast, not folded into
+a single dataset-wide caveat.
+
+**Figure 4 | Trimming fully normalises base-call quality in every
+affected library; it does not — and cannot — restore lost depth.**
+Mean read-1 Phred quality by cycle, before (red) and after (dark blue)
+fastp trimming (Set B parameters, §2.4), for Control_R1 (clean reference)
+and the four libraries flagged in §3.2–3.6 (Benzamidine_R2,
+Benzamidine_R3, SKTI_R1, SKTI_R2). Shaded band: the pre-declared cycles
+44–90 window from Fig. 1. Both curves are computed by fastp from the same
+input file (`read1_before_filtering`/`read1_after_filtering` quality
+curves), avoiding cross-tool binning artefacts. Note SKTI_R1's visibly
+milder pre-trim dip relative to the other three, consistent with it
+falling below the binary threshold in §3.2 (Fig. 1) despite carrying the
+second-highest adapter-dimer rate in the dataset (§3.6, Table 2). File:
+`figuras/Figure4_blocoB_before_after.png`; code:
+`codigo/fase1_blocoB/plot_before_after_trim.py`.
+
+### 3.8 Loosening trimming parameters does not recover reads: Set B confirmed as an empirical equilibrium
+
+None of the three candidate configurations (§2.4.1) recovered any reads in
+any of the four affected libraries. The `adapter_dimer_reads` percentage
+was **identical to two decimal places** between Set B and Sets C1/C2 in
+every affected library (e.g., Benzamidine_R2: 31.19% under all three; SKTI_R2:
+30.65% under Set B and C1, 30.65% under C2 as well), and survival differed
+by 0.00 percentage points (one exception, SKTI_R2 under Set C2, at
+−0.01 pp — within rounding noise). Set C3 (more restrictive overlap
+detection) produced a small but directionally consistent *decrease* in
+HISAT2 pilot mapping rate in three of the four libraries (e.g.,
+Benzamidine_R2: 74.83%→74.81%), confirming the classification is sensitive
+to this parameter in the expected direction — yet loosening it in the
+opposite direction (Set C2) produced no corresponding gain. None of the
+three candidates met the pre-declared decision criteria (§2.4.1); Set B
+remains the production configuration
+(`resultados/blocoC_param_sweep.csv`).
+
+An incidental finding from the pilot alignment step: reads that do survive
+trimming in the four affected libraries map at rates (74.8–79.4%)
+comparable to the clean control library (78.0%) — the surviving data is
+not degraded relative to the rest of the batch; what is lost is volume, not
+quality of what remains. (Absolute mapping rates here, including the clean
+control, fall below the project's declared >80% Phase 2 acceptance
+threshold — expected and not directly comparable, since this pilot index
+lacks splice-site annotation, which reduces sensitivity to exon-exon
+junction-spanning reads; the real Phase 2 mapping rate, with an annotated
+index on the complete 13 libraries, remains to be measured.)
+
+**Interpretation:** read loss in these four libraries reflects a structural
+property of the underlying molecules (biological insert short enough that
+R1/R2 overlap almost entirely with adapter sequence) rather than an
+overly conservative choice of quality or overlap-detection threshold — it is
+invariant to the parameters tested here. The library-prep root cause
+(§5, item 1) remains open, but is now further constrained: it is not an
+artefact of a correctable trimming-parameter choice.
+
+---
+
+## 4. Discussion
+
+*[Parcial — restrito ao que o Bloco A permite discutir; retomado quando a
+FASE 2 (mapeamento) e FASE 5 (expressão diferencial) estiverem disponíveis.]*
+
+The original observation (§3.2–3.3) was that the Benzamidine treatment
+group is the most exposed to a raw-read quality defect (two of three
+biological replicates affected, including the single worst library in the
+dataset by both Q20 and Q30), while Control and GORE3 appeared unaffected
+and SKTI had one of three replicates affected. §3.6 refines the group-level
+picture: once adapter-dimer contamination is used as the operative metric
+instead of the original mean-quality threshold, **SKTI is equally affected
+(2 of 3 replicates: SKTI_R1 and SKTI_R2)**, not the 1-of-3 picture §3.2's
+binary criterion suggested.
+
+§3.4 upgraded this from "unresolved" to "characterized, GC-correlated,
+still not fully explained mechanistically," identifying SKTI_R1 (ID-9) as
+a fourth, graded-risk library alongside Benzamidine_R2, Benzamidine_R3 and
+SKTI_R2. §3.6 sharpens this further: the risk is not primarily one of
+*base-call quality* (which trimming fully corrects, Table 2) but of
+**yield** — Benzamidine and SKTI each lose 2 of 3 replicates to
+substantially reduced read depth (62–68% and 67–82% survival,
+respectively) driven by adapter-dimer contamination correlated with GC
+content, while Control and GORE3 keep close to full depth (91–97%) in all
+replicates. For Phase 5 contrasts, this reframes the caveat from "quality
+risk" to "statistical power asymmetry": Benzamidine-vs-Control and
+SKTI-vs-Control contrasts will run on libraries with systematically lower
+usable read depth in the treatment arm, which should be reported alongside
+any differential expression result from those specific contrasts, not
+folded silently into the general n=3 power limitation already declared in
+`docs/04_viabilidade.md` §1.1.
+
+§3.7 sharpens this once more, from a group-level to a contrast-level
+statement: the two most consequential comparisons in the entire contrast
+matrix — #2 (GORE3 vs. Benzamidine, the head-to-head test against the
+pharmacological standard) and #3 (GORE3 vs. SKTI, hypothesis H4) — are
+exactly the two carrying the largest depth asymmetry, for different
+reasons tied to each group's role in the study's argument (Table 4).
+
+**Planned next steps to actually resolve this, not merely flag it
+(Phase 2 onward):**
+1. Re-verify per-contrast depth asymmetry after alignment, using mapping
+   rate and the number of genes passing DESeq2's independent-filtering
+   threshold per sample, not read count alone — read count is a proxy,
+   mapped/usable count is the real quantity that matters.
+2. When DESeq2 runs (Phase 5), inspect per-gene dispersion estimates
+   separately for contrasts #2/#3/#5/#6 versus #1/#4, to check whether the
+   depth asymmetry measurably degrades detection power for
+   moderate-to-low-expression genes in the affected arms, rather than
+   assuming it does from read counts alone.
+3. Decide, informed by (1)–(2) and not before, whether any
+   depth-compensating step (e.g., down-weighting, or flagging genes with
+   contrast-specific low power) is warranted for contrasts #2 and #3
+   specifically.
+
+---
+
+## 5. Limitations (declared explicitly, not smoothed over)
+
+1. **Cause of the quality defect is now best explained by adapter-dimer
+   contamination (§3.6), correlated with GC content, but the library-prep
+   root cause is still not established.** We do not know *why* these four
+   libraries produced more short-insert molecules — this would require
+   insert-size / molarity QC data from the library-prep stage, which
+   Macrogen's raw-data delivery does not include (see item 3 below). §3.8
+   further constrains this: the read loss is not an artefact of the chosen
+   fastp trimming/overlap-detection thresholds (an empirical parameter
+   sweep found zero recoverable reads under three alternative
+   configurations), so the root cause is upstream of trimming, in the
+   library molecules themselves.
+2. ~~**fastp trimming parameters are undecided.**~~ — **Resolved (§3.5,
+   §2.4).** An empirical A/B test on two representative libraries showed
+   the tested parameter (`--length_required 36` vs. `50`) makes negligible
+   difference to survival; Set B (50, plus poly-G/poly-X trimming and
+   overrepresentation analysis) was adopted for the full batch because it
+   is strictly no worse and adds safety relevant to the confirmed NovaSeq
+   X chemistry, at zero measured cost.
+3. **Library insert/fragment size is not confirmed.** This is required for
+   isoform-level analyses (Phase 6) and is not reported by Macrogen's raw
+   data QC; it must be requested from the vendor or estimated
+   post-alignment (`picard CollectInsertSizeMetrics`).
+4. **Library strandedness direction (forward vs. reverse) is inferred, not
+   confirmed.** The vendor-stated kit name indicates a stranded protocol,
+   but the read orientation must still be confirmed empirically
+   post-alignment (`salmon --libType A` or `RSeQC infer_experiment.py`).
+5. **Five of the 17 tubes submitted to Macrogen were not delivered in this
+   batch** (Control ID-4; Benzamidine ID-6; SKTI ID-11, ID-13; GORE3
+   ID-17). Each treatment group still resolves to n=3 in this delivery, so
+   this does not block analysis, but the reason for the gap (contingency
+   replicates never sequenced, or a pending future delivery) is
+   unconfirmed.
+6. **A FastQC command-line deviation occurred and is disclosed for the
+   record:** the `-d qc/tmp` flag failed ("Option d is ambiguous") during
+   execution and the tool fell back to its default temp-file behaviour.
+   All 26 outputs were nonetheless produced successfully and no stray or
+   corrupted files were found on inspection (`codigo/fase1_blocoA/run_fastqc_multiqc.sh`
+   carries this note inline).
+7. **Statistical power is now asymmetric across treatment groups AND across
+   planned contrasts, not just across the dataset as a whole (§3.7,
+   Tables 3–4).** Benzamidine and SKTI each retain only 2 of 3 replicates
+   at close-to-full read depth after trimming; Control and GORE3 do not
+   have this problem. Four of six planned Phase 5 contrasts touch a
+   reduced-depth group, and the two highest-impact ones (#2 GORE3 vs.
+   Benzamidine; #3 GORE3 vs. SKTI/H4) are exactly the two carrying the
+   largest asymmetry. This compounds, rather than duplicates, the general
+   n=3 power limitation already declared in `docs/04_viabilidade.md` §1.1.
+   **Not yet resolved — resolution plan stated in §4** (re-check with
+   mapping rate and DESeq2 dispersion once Phases 2 and 5 run, not
+   inferred from read counts alone).
+8. **The >10% adapter-dimer colour cutoff in Fig. 3 is a post-hoc visual
+   choice**, made after inspecting the bimodal distribution in panel (b),
+   not a threshold declared before the data were seen (unlike the ΔQ > 5.0
+   Phred threshold in Fig. 1). It is disclosed as such and should not be
+   read as having the same evidentiary weight.
+
+---
+
+## References
+
+Andrews, S. *FastQC: A Quality Control Tool for High Throughput Sequence
+Data* (Babraham Bioinformatics, 2010); https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
+
+Chen, S. fastp 1.0: an ultra-fast all-round tool for FASTQ data quality
+control and preprocessing. *iMeta* **4**, e70078 (2025).
+
+Chen, S., Zhou, Y., Chen, Y. & Gu, J. fastp: an ultra-fast all-in-one FASTQ
+preprocessor. *Bioinformatics* **34**, i884–i890 (2018).
+
+Ewels, P., Magnusson, M., Lundin, S. & Käller, M. MultiQC: summarize
+analysis results for multiple tools and samples in a single report.
+*Bioinformatics* **32**, 3047–3048 (2016).
+
+---
+
+## Reproducibility — code and data locations
+
+| Item | Path |
+|---|---|
+| Sample mapping / replace-names table | `codigo/fase1_blocoA/samplesheet.tsv`, `samplesheet_replace_names.tsv` |
+| FASTQ download + MD5 verification | `codigo/fase1_blocoA/download_and_verify.sh`, `md5sum.txt` |
+| FastQC + MultiQC execution | `codigo/fase1_blocoA/run_fastqc_multiqc.sh` |
+| QC analysis + figure generation (Fig. 1) | `codigo/fase1_blocoA/analyze_blocoA.py` |
+| Position-resolved per-tile analysis + figure generation (Fig. 2) | `codigo/fase1_blocoA/per_tile_analysis.py` |
+| fastp A/B parameter test | `codigo/fase1_blocoB/run_fastp_ab_test.sh`, `compare_ab_test.py` |
+| Full-batch fastp trimming (13 samples, Set B) | `codigo/fase1_blocoB/run_fastp_full_trim.sh` |
+| Post-trim summary + Fig. 3 generation | `codigo/fase1_blocoB/analyze_blocoB.py` |
+| Before/after quality curves + Fig. 4 generation | `codigo/fase1_blocoB/plot_before_after_trim.py`, `extract_fig4_data.py` |
+| Results (CSV, machine-readable) | `resultados/blocoA_results.csv`, `resultados/blocoA1_pertile_results.csv`, `resultados/blocoB_ab_test_comparison.csv`, `resultados/blocoB_trim_summary.csv`, `resultados/figure4_quality_curves.csv` |
+| Exact tool/environment versions | `resultados/blocoA_ENV_VERSIONS.txt` |
+| Figure 1 (300 dpi PNG) | `figuras/Figure1_blocoA_quality_dip.png` |
+| Figure 2 (300 dpi PNG) | `figuras/Figure2_blocoA1_pertile_heatmap.png` |
+| Figure 3 (300 dpi PNG) | `figuras/Figure3_blocoB_trimming.png` |
+| Figure 4 (300 dpi PNG) | `figuras/Figure4_blocoB_before_after.png` |
+| Trimmed FASTQ (26 files) | server: `~/rnaseq-Anticarsia-GORE3/trimmed/` (não versionado — dado grande, não vai ao git) |
+| Full FastQC/MultiQC/fastp HTML reports | server: `~/rnaseq-Anticarsia-GORE3/qc/{pre_trim,post_trim,ab_test}/` (não versionado) |
