@@ -1,0 +1,15 @@
+FASE 3, Bloco B - auditoria de ferramentas (30/07/2026, servidor eulalio@200.235.143.10)
+
+env "ngs":
+  gffread 0.12.7 (ja usado na FASE 2 Bloco A, convert_gff_to_gtf.sh)
+  featureCounts v2.1.1 (Subread package; ja usado no teste de strandedness)
+  salmon: NAO instalado neste env
+
+env "rnaseq-tools":
+  salmon 1.10.3 (JA INSTALADO - nenhuma instalacao necessaria)
+
+Conclusao: as 3 ferramentas necessarias para a FASE 3 (gffread, featureCounts,
+salmon) ja estao disponiveis no servidor, distribuidas entre os dois envs
+existentes. Blocos C/D devem ativar o env correspondente a cada ferramenta
+(ngs para featureCounts/gffread, rnaseq-tools para salmon) - mesmo padrao
+ja usado nos scripts da FASE 2.

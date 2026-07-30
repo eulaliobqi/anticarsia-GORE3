@@ -1,0 +1,14 @@
+id,label,salmon_mapping_pct,star_combined_mapping_pct,diff_pp
+ID-1,Control_R1,91.0888,90.25,0.84
+ID-2,Control_R2,88.8341,83.12,5.71
+ID-3,Control_R3,85.1942,87.95,-2.76
+ID-5,Benzamidine_R1,91.1843,87.3,3.88
+ID-7,Benzamidine_R2,80.2676,83.85,-3.58
+ID-8,Benzamidine_R3,88.2594,86.24,2.02
+ID-9,SKTI_R1,86.9888,89.95,-2.96
+ID-10,SKTI_R2,87.3102,89.76,-2.45
+ID-12,SKTI_R3,87.7516,91.79,-4.04
+ID-14,GORE3_R1,86.7986,90.07,-3.27
+ID-15,GORE3_R2,85.5534,88.76,-3.21
+ID-16,GORE3_R3,86.7265,90.49,-3.76
+ID-18,FatBody,88.7765,90.68,-1.9

@@ -1,0 +1,2 @@
+featurecounts_s,salmon_libtype,decision_basis,samples_agree
+2,ISR,"reverse (-s 2) venceu de forma consistente em 2 amostras testadas (ID-1=75.03%, ID-8=73.62%), confirmado empiricamente via featureCounts -s1 vs -s2 (codigo/fase2_blocoB/check_strandedness.sh).",True

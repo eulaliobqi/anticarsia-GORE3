@@ -300,6 +300,30 @@ DOI: [10.3390/plants13050582](https://doi.org/10.3390/plants13050582) · PMID: [
 
 **Ressalva:** É *Arabidopsis*, planta diploide, os próprios autores dizem que é 'talvez menos complexa' que outros genomas vegetais, e não testam inseto. O ranking não se transfere automaticamente para *A. gemmatalis*; a lição estrutural — que ferramentas diferentes podem empatar em base mas divergir muito em junção — sim.
 
+### `srivastava2020alignment` — Tier 1
+**Srivastava A, Malik L, Sarkar H, Zakeri M, Almodaresi F, Soneson C, Love MI, Kingsford C, Patro R.** (2020). Alignment and mapping methodology influence transcript abundance estimation. `Genome Biol` 2020;21(1):239.
+
+DOI: [10.1186/s13059-020-02151-8](https://doi.org/10.1186/s13059-020-02151-8) · PMID: [32894187](https://pubmed.ncbi.nlm.nih.gov/32894187/) · PMC: PMC7487471
+**Lido de:** **texto completo** — seções de resultados/discussão
+
+**O que estabelece:** Introduz a indexação decoy-aware do Salmon ("selective alignment", SA/SAF — SAF usa o genoma inteiro como decoy). Reads originários de loci genômicos não-anotados mas parecidos com transcritos anotados são frequentemente atribuídos errado ao transcrito anotado por métodos sem decoy (quasi-mapping); incluir o genoma como decoy permite ao Salmon rejeitar esses reads (tag `XT:A:D`) em vez de atribuí-los errado. Em 109 datasets reais humanos + simulações de camundongo, SAF teve a maior correlação com um alinhamento "oráculo" (Bowtie2+STAR reconciliados) e a menor taxa de chamadas de DE "isoladas" (não confirmadas por nenhum outro método, provável falso-positivo) entre os métodos baseados em mapeamento.
+
+**Onde entra:** FASE 3 (`docs/07_analise_rnaseq.md` §4) — justifica indexar o Salmon com decoy (genoma `GCF_050436995.1` inteiro) em vez do modo `--type quasi` sem decoy usado no módulo reaproveitável `RNA-Seq-not-model/modules/quantification.nf` (desatualizado).
+
+**Ressalva:** Todo o corpus experimental é humano e camundongo (ALS, HSV-1, Zika; simulações com genoma de camundongo GRCm38) — nenhum genoma de inseto ou não-modelo foi testado. A transferência do ganho de acurácia para *A. gemmatalis* (genoma automaticamente anotado, não-modelo) é extrapolação razoável, não fato estabelecido para esta espécie.
+
+### `zytnicki2017mmquant` — Tier 1
+**Zytnicki M.** (2017). mmquant: how to count multi-mapping reads?. `BMC Bioinformatics` 2017;18(1):411.
+
+DOI: [10.1186/s12859-017-1816-4](https://doi.org/10.1186/s12859-017-1816-4) · PMID: [28915787](https://pubmed.ncbi.nlm.nih.gov/28915787/) · PMC: PMC5603007
+**Lido de:** **texto completo** — seções de resultados/discussão
+
+**O que estabelece:** Declara textualmente que a estratégia padrão do featureCounts descarta reads multi-mapeados, e que habilitar `-M -O --fraction` para "resgatar" esses reads (atribuindo peso normalizado a cada gene que bate) **"quase sempre produz resultados enviesados"**. Benchmark em humano (transtorno bipolar), camundongo e levedura: as diferentes regras de featureCounts/htseq-count/mmquant para reads multi-mapeados/multi-sobrepostos produziram contagens de genes DE substancialmente diferentes (734 htseq-count vs. 835 featureCounts vs. 763 mmquant não-mesclado no dataset humano); tratar corretamente reads multi-mapeados via modelagem de "genes mesclados" recuperou até ~25% de genes DE adicionais envolvendo loci duplicados que as ferramentas padrão descartam.
+
+**Onde entra:** FASE 3 (`docs/07_analise_rnaseq.md` §4) — justifica **não** usar `-M -O --fraction` no featureCounts de produção (Bloco C), e é a citação para a tensão declarada, não resolvida: a família multigênica de serino-proteases (hipótese secundária H1) tem parálogos próximos que podem mapear ambiguamente, e o featureCounts padrão vai descartar/subcontar esses reads exatamente nos genes de interesse mecanístico — mas habilitar as flags de resgate "quase sempre" piora, não melhora, segundo esta referência.
+
+**Ressalva:** Benchmark em humano/camundongo/levedura — busca dirigida por um benchmark equivalente em inseto ou família multigênica não encontrou nada (busca honesta, sem forçar citação); o mais próximo é Kwon 2015 (PMID 26112470, *Xenopus*, genes duplicados, só abstract), que não é inseto e não resolve a lacuna, só é a evidência mais próxima disponível.
+
 ### `froussios2019well` — Tier 2
 **Froussios K, Schurch NJ, Mackinnon K, Gierliński M, Duc C, Simpson GG, Barton GJ.** (2019). How well do RNA-Seq differential gene expression tools perform in a complex eukaryote? A case study in Arabidopsis thaliana. `Bioinformatics` 2019;35(18):3372-3377.
 

@@ -1,0 +1,15 @@
+Status	bam/star/ID-1.bam	bam/star/ID-2.bam	bam/star/ID-3.bam	bam/star/ID-5.bam	bam/star/ID-7.bam	bam/star/ID-8.bam	bam/star/ID-9.bam	bam/star/ID-10.bam	bam/star/ID-12.bam	bam/star/ID-14.bam	bam/star/ID-15.bam	bam/star/ID-16.bam	bam/star/ID-18.bam
+Assigned	49490372	42853489	41380380	40358578	26885749	35991041	39414946	31730010	52661159	41524596	45541101	44665805	51917334
+Unassigned_Unmapped	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Read_Type	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Singleton	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Chimera	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_FragmentLength	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_MultiMapping	13699690	14641730	7141153	7454880	6106783	10008559	9340015	8303384	8124616	5663082	6450307	5015420	6707562
+Unassigned_Secondary	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_NonSplit	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_NoFeatures	1459751	2038693	2479984	1271371	2777724	1525050	2645555	2095309	3165639	2311468	2580460	2685677	3140455
+Unassigned_Overlapping_Length	0	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Ambiguity	1313836	1558254	463499	665374	508404	1362416	791218	746062	681121	603542	520864	553625	349232

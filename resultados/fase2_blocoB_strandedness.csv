@@ -1,0 +1,5 @@
+sample,strand_tested,reads_assigned,reads_total,pct_assigned
+ID-1,forward (-s 1),193052,65963649,0.29
+ID-1,reverse (-s 2),49490372,65963649,75.03
+ID-8,forward (-s 1),159763,48887066,0.33
+ID-8,reverse (-s 2),35991041,48887066,73.62

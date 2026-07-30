@@ -30,7 +30,11 @@ cd ~/rnaseq-Anticarsia-GORE3
 
 mkdir -p qc/fase2_blocoB_strandcheck
 
-GTF=genome_annotation/GCF_050436995.1_RS_2026_04.gtf
+# GTF CORRIGIDO (FASE 3 Bloco A, fix_gtf_missing_geneid.sh): o GTF original
+# tinha 330 linhas (118 genes "LOC" nao-caracterizados, sem mRNA no GFF3
+# original) sem o atributo gene_id, o que faz featureCounts recusar o
+# arquivo inteiro ("failed to find the gene identifier attribute").
+GTF=genome_annotation/GCF_050436995.1_RS_2026_04.fixed.gtf
 SAMPLES="ID-1 ID-8"
 
 for s in $SAMPLES; do

@@ -10,8 +10,12 @@
 > vs. HISAT2 decidiu por STAR (Bloco A), e as 13 bibliotecas completas
 > foram alinhadas com sucesso nas duas vias — STAR (expressão gênica) e
 > Subread (splicing), 13/13 cada uma, todas acima do limiar de 80% de
-> mapeamento (§3.9). Ver `docs/07_analise_rnaseq.md` para o plano completo
-> das fases seguintes (FASE 3, quantificação, ainda não iniciada).
+> mapeamento (§3.9). **FASE 3 (Blocos A-F) completa**: quantificação por
+> gene (featureCounts, via prioritária) e por transcrito (Salmon
+> decoy-aware + tximport, apoio à hipótese H1), verificadas cruzadamente
+> (concordância Spearman 0,98–0,99, §3.11). Ver `docs/07_analise_rnaseq.md`
+> para o plano completo das fases seguintes (FASE 4/5, correção de lote
+> condicional + DESeq2, ainda não iniciadas).
 >
 > **Versão em inglês:** `artigo.md` (mantida em paralelo, sincronizada a
 > cada atualização — esta é a tradução fiel, não um resumo).
@@ -225,6 +229,94 @@ mostrou que rodar os dois jobs de 16 threads simultaneamente no servidor
 causou falhas de segmentação num subconjunto de amostras em ambas as
 ferramentas (§3.9, §5 item 9) — um achado operacional/de agendamento, não
 uma propriedade dos dados de sequenciamento.
+
+### 2.6 Quantificação em nível de gene e transcrito (FASE 3)
+
+O objetivo da FASE 3 é alimentar os contrastes de grupo (GORE3 vs.
+Controle, GORE3 vs. Benzamidina, GORE3 vs. SKTI — o entregável central do
+estudo, §6.1 do documento de planejamento) com uma matriz de contagem de
+genes de produção; a via de transcrito/isoforma é uma análise secundária,
+de apoio à hipótese H1 (troca de isoformas de tripsina), não o objetivo
+principal desta fase.
+
+**Confirmação da orientação da biblioteca.** Os dois scripts escritos mas
+ainda não executados no momento da redação da FASE 2
+(`codigo/fase2_blocoB/check_strandedness.sh`, `analyze_strandedness.py`)
+foram executados contra os BAMs do STAR de ID-1 e ID-8: featureCounts foi
+rodado duas vezes por amostra (`-s 1` vs. `-s 2`) contra o GTF real, e a
+configuração que atribuiu a maior fração de reads a genes foi tomada como
+vencedora. Reverse-stranded (`-s 2` / `--libType ISR` do Salmon) venceu de
+forma decisiva e consistente nas duas amostras (§3.11), substituindo a
+inferência provisória baseada no nome do kit. Código:
+`codigo/fase3_blocoA/decide_libtype.py` formaliza isso como a fonte única
+de verdade (`resultados/fase3_blocoA_strand_decision.csv`) lida por todo
+script seguinte.
+
+**Um defeito de GTF não planejado, encontrado e corrigido.** Rodar o
+featureCounts pela primeira vez falhou com "failed to find the gene
+identifier attribute in the 9th column." A inspeção encontrou 330 das
+515.035 linhas do GTF (118 genes, todos loci "LOC" não caracterizados, sem
+registro de mRNA no GFF3 de origem) com `transcript_id` mas sem `gene_id`
+— o gffread (usado na FASE 2) não propaga `gene_id` quando um gene do
+GFF3 não tem hierarquia explícita gene→mRNA→exon. A correção
+(`codigo/fase3_blocoA/fix_gtf_missing_geneid.sh`) é exata, não
+aproximada: para essas 330 linhas, o valor de `transcript_id` já existente
+é exatamente o que `gene_id` deveria ser (mesma convenção
+`"gene-<nome>"` usada no resto do arquivo, confirmada sem exceção nas 330
+linhas antes de aplicar a correção), então a correção adiciona `gene_id`
+usando dado já presente na mesma linha, não um valor fabricado. Nenhum
+dos 118 genes afetados é uma tripsina/serino-protease conhecida. A FASE 2
+(STAR) não precisa ser refeita, já que o uso do GTF pelo STAR (guia de
+splice sites) não depende de `gene_id`; toda a FASE 3 em diante usa o GTF
+corrigido (`GCF_050436995.1_RS_2026_04.fixed.gtf`).
+
+**Quantificação em nível de gene (via prioritária).** featureCounts
+v2.1.1 foi rodado uma única vez sobre os 13 BAMs do STAR, GTF real
+corrigido, strand reverso confirmado, `-p -g gene_id -t exon` — código:
+`codigo/fase3_blocoC/run_featurecounts_genelevel.sh`. **Deliberadamente
+não usado: `-M -O --fraction`** (resgate de reads multi-mapeados/
+multi-sobrepostos). Zytnicki (2017, PMID 28915787, "mmquant: how to count
+multi-mapping reads?") declara diretamente que habilitar essas flags
+"quase sempre produz resultados enviesados." Isso cria uma tensão real,
+não declarada como resolvida, específica deste projeto: a hipótese
+secundária H1 trata de uma família multigênica de serino-proteases tipo
+tripsina, onde reads de parálogos próximos podem mapear ambiguamente, e o
+featureCounts padrão vai descartar/subcontar esses reads exatamente
+nesses genes. Isso não afeta o entregável principal da fase (contrastes
+de grupo inteiros); fica em aberto para a FASE 9 (curadoria manual da
+família de serino-proteases) revisitar especificamente para esse conjunto
+de genes, não resolvido aqui. Uma busca dirigida por um benchmark
+equivalente em insetos ou famílias multigênicas não encontrou nada
+diretamente no ponto; a evidência mais próxima disponível, Kwon (2015,
+PMID 26112470, quantificação de genes duplicados em *Xenopus*, acesso só
+ao abstract), não é em insetos e não é citada como resolvendo essa
+lacuna — só como o análogo mais próximo disponível.
+
+**Quantificação em nível de transcrito (Blocos D-E, apoio a H1).** O
+Salmon 1.10.3 foi indexado em modo decoy-aware ("selective alignment",
+genoma inteiro como decoy), não no modo `--type quasi` sem decoy,
+desatualizado, usado no módulo reaproveitável
+(`RNA-Seq-not-model/modules/quantification.nf`). Srivastava et al. (2020,
+PMID 32894187, *Genome Biology*) estabeleceram que a indexação
+decoy-aware reduz atribuição espúria de reads em relação ao mapeamento
+sem decoy, validado em 109 datasets reais humanos + simulações de
+camundongo — **nenhum genoma de inseto ou não-modelo foi testado nesse
+benchmark**; o achado estrutural (decoys reduzem atribuição errada) é uma
+extrapolação razoável para *A. gemmatalis*, não um fato estabelecido para
+esta espécie, no mesmo padrão da ressalva de Coxe et al. (2024,
+planta→inseto) já declarada no §2.5. Construção do índice:
+`codigo/fase3_blocoD/build_salmon_decoy_index.sh` (transcriptoma extraído
+via `gffread` + decoy do genoma inteiro, `k=31`, default do próprio
+Salmon, não ajustado para este genoma). Quantificação:
+`codigo/fase3_blocoD/run_salmon_quant_full.sh` (`--libType ISR`,
+`--validateMappings --gcBias`, sem alteração em relação ao pipeline
+irmão). Adaptação do tximport (`codigo/fase3_blocoE/build_tx2gene.py`,
+`00_tximport_gore3.R`): a única mudança real em relação a
+`RNA-Seq-not-model/scripts/00_tximport.R` é ler um `tx2gene.tsv`
+construído direto dos atributos `transcript_id`/`gene_id` do GTF real, em
+vez de um `gene_trans_map` do Trinity que não existe neste desenho
+genoma-guiado; a chamada `tximport()` em si, justificada por
+`soneson2015differential` (já citada, §2.5), não muda.
 
 ---
 
@@ -726,6 +818,142 @@ réplicas de Benzamidine) ficam abaixo dele, pelo motivo declarado acima.
 Arquivo: `figuras/Figure5_fase2_blocoB_mapping_rates.png`; código:
 `codigo/fase2_blocoB/analyze_blocoB2_alignment.py`.
 
+### 3.11 Quantificação em nível de gene e transcrito: as duas vias concluídas, verificadas mutuamente
+
+**Contagens em nível de gene (via de produção).** O featureCounts atribuiu
+70,2–84,4% dos reads a genes nas 13 bibliotecas (Tabela 8;
+`resultados/fase3_blocoC_featurecounts_summary.csv`), sem outlier
+específico de amostra — a faixa é consistente com as categorias residuais
+de não-atribuídos já caracterizadas na FASE 2 §3.10 (reads derivados de
+inserto curto/adapter-dimer que mapeiam mas não caem limpo dentro de um
+éxon). Este é o entregável que alimenta os contrastes de grupo na FASE 5.
+
+**Tabela 8 | Taxa de atribuição a genes pelo featureCounts, 13 bibliotecas.**
+
+| Amostra | Atribuído (%) |
+|---|---:|
+| GORE3_R3 | 84,40 |
+| FatBody | 83,58 |
+| GORE3_R1 | 82,88 |
+| GORE3_R2 | 82,66 |
+| SKTI_R3 | 81,48 |
+| Benzamidine_R1 | 81,12 |
+| Control_R3 | 80,40 |
+| SKTI_R1 | 75,52 |
+| Control_R1 | 75,03 |
+| Benzamidine_R2 | 74,11 |
+| SKTI_R2 | 74,01 |
+| Benzamidine_R3 | 73,62 |
+| Control_R2 | 70,15 |
+
+**Figura 6 | Taxa de atribuição a genes pelo featureCounts, 13 bibliotecas.**
+Porcentagem de pares de reads atribuídos a um gene pelo featureCounts
+(parâmetros de produção, §2.6), por amostra, ordenado por grupo de
+tratamento e réplica. Arquivo:
+`figuras/Figure6_fase3_blocoC_featurecounts_assigned.png`; código:
+`codigo/fase3_blocoC/analyze_featurecounts.py`.
+
+**Quantificação em nível de transcrito (via de apoio a H1).** O índice
+decoy-aware do Salmon quantificou as 13 bibliotecas com taxas de
+mapeamento de 80,3–91,2%, dentro de ±5,7 pontos percentuais da taxa
+combinada do STAR em toda amostra (Tabela 9;
+`resultados/fase3_blocoD_salmon_mapping_summary.csv`) — confortavelmente
+dentro da banda de consistência de ±10pp declarada antecipadamente
+(§2.6), dado que os dois métodos são estruturalmente diferentes
+(alinhamento genômico vs. alinhamento seletivo decoy-aware contra
+transcriptoma).
+
+**Tabela 9 | Taxa de mapeamento Salmon vs. STAR, 13 bibliotecas.**
+
+| Amostra | Salmon (%) | STAR (%) | Diferença (pp) |
+|---|---:|---:|---:|
+| Control_R1 | 91,09 | 90,25 | +0,84 |
+| Control_R2 | 88,83 | 83,12 | +5,71 |
+| Control_R3 | 85,19 | 87,95 | −2,76 |
+| Benzamidine_R1 | 91,18 | 87,30 | +3,88 |
+| Benzamidine_R2 | 80,27 | 83,85 | −3,58 |
+| Benzamidine_R3 | 88,26 | 86,24 | +2,02 |
+| SKTI_R1 | 86,99 | 89,95 | −2,96 |
+| SKTI_R2 | 87,31 | 89,76 | −2,45 |
+| SKTI_R3 | 87,75 | 91,79 | −4,04 |
+| GORE3_R1 | 86,80 | 90,07 | −3,27 |
+| GORE3_R2 | 85,55 | 88,76 | −3,21 |
+| GORE3_R3 | 86,73 | 90,49 | −3,76 |
+| FatBody | 88,78 | 90,68 | −1,90 |
+
+**Figura 7 | Taxa de mapeamento Salmon vs. STAR, 13 bibliotecas.** Gráfico
+de barras agrupadas, STAR (azul) vs. Salmon decoy-aware (verde), por
+biblioteca. Arquivo:
+`figuras/Figure7_fase3_blocoD_salmon_vs_star_mapping.png`; código:
+`codigo/fase3_blocoD/analyze_salmon_mapping.py`.
+
+**Nota sobre o tximport (menor, divulgada):** o índice do Salmon foi
+construído sem `--keepDuplicates`, então 811 dos 25.840 transcritos
+extraídos via gffread com sequência idêntica byte-a-byte a outro
+transcrito foram colapsados num único representante durante a indexação
+(comportamento padrão do Salmon, não um erro específico deste projeto).
+Isso deixa 14.973 dos 15.773 genes anotados com pelo menos um transcrito
+diretamente quantificável na tabela de genes do tximport
+(`resultados/fase3_blocoE_salmon_gene_counts.tsv`) — os ~800 genes
+restantes tinham seu(s) único(s) transcrito(s) idêntico(s) em sequência a
+um transcrito de outro gene, absorvido na contagem desse outro
+transcrito. Isso afeta só a via secundária de apoio de transcrito/
+isoforma (§2.6), não o entregável prioritário da FASE 3 (Tabela 8,
+contagens de gene do featureCounts, que conta sobreposição de éxon
+genômico diretamente e não é afetado por duplicação de sequência de
+transcrito).
+
+**Uma armadilha de parsing do R, não relacionada, encontrada e corrigida
+antes desta tabela ser gerada:** a primeira rodada do `tximport` reportou
+"3.263 transcripts missing from tx2gene" — rastreado até o tratamento
+padrão de aspas do `read.table()` do R interpretar um apóstrofo literal no
+nome de um gene RefSeq (`beta'COP`, subunidade do complexo coatômero,
+ID de gene `gene-beta'COP`) como abertura de aspas nunca fechada,
+truncando silenciosamente as 25.840 linhas do `tx2gene.tsv` para 22.305
+linhas sem erro (só um aviso "EOF within quoted string" fácil de não
+notar). Adicionar `quote = ""` à chamada `read.table()`
+(`codigo/fase3_blocoE/00_tximport_gore3.R`) resolveu completamente (0
+transcritos ausentes, confirmado diretamente antes e depois da correção).
+
+**Verificação entre quantificadores (Bloco F).** Três checagens, todas
+passando (`resultados/fase3_blocoF_crosscheck.csv`;
+`codigo/fase3_blocoF/analyze_fase3_consistency.py`): **(i)** a contagem
+`Assigned` do featureCounts nunca supera a contagem estimada de reads
+unicamente mapeados do STAR em nenhuma amostra, consistente com o
+featureCounts (sem `-M`) só contando reads de alinhamento único. **(ii)**
+As taxas de mapeamento do Salmon e do STAR concordam dentro da banda
+pré-declarada de ±10pp nas 13 amostras (Tabela 9). **(iii)** As contagens
+em nível de gene das duas vias de quantificação independentes
+(featureCounts, Tabela 8; Salmon+tximport, acima) são forte e
+uniformemente concordantes — Spearman ρ = 0,983–0,988 nas 13 amostras
+(Tabela 10, Fig. 8), apesar dos dois métodos usarem lógica
+estruturalmente diferente de atribuição de reads (contagem de
+sobreposição de éxon vs. EM probabilístico em nível de transcrito com
+correção de viés de GC, agregado a nível de gene).
+
+**Tabela 10 | Concordância em nível de gene entre featureCounts e Salmon+tximport, 13 bibliotecas.**
+
+| Amostra | Spearman ρ |
+|---|---:|
+| ID-1 | 0,987 |
+| ID-2 | 0,985 |
+| ID-3 | 0,986 |
+| ID-5 | 0,988 |
+| ID-7 | 0,983 |
+| ID-8 | 0,985 |
+| ID-9 | 0,986 |
+| ID-10 | 0,984 |
+| ID-12 | 0,986 |
+| ID-14 | 0,985 |
+| ID-15 | 0,986 |
+| ID-16 | 0,985 |
+| ID-18 | 0,988 |
+
+**Figura 8 | Concordância em nível de gene: featureCounts vs. Salmon+tximport.**
+Correlação de Spearman por amostra entre as duas matrizes independentes
+de contagem de genes. Arquivo:
+`figuras/Figure8_fase3_blocoF_featurecounts_vs_salmon_concordance.png`.
+
 ---
 
 ## 4. Discussão
@@ -864,6 +1092,27 @@ sinalizar (FASE 2 em diante):**
    já tinha terminado. As taxas de mapeamento do STAR por amostra
    (Tabela 6) estão exportadas em
    `resultados/fase2_blocoB_star_mapping_summary.csv`.
+10. **O featureCounts padrão (sem `-M -O --fraction`) vai descartar/
+    subcontar reads ambíguos especificamente na família multigênica de
+    serino-proteases tipo tripsina (FASE 3, §2.6).** Zytnicki (2017, PMID
+    28915787) reporta que habilitar o resgate de multi-mapping/
+    multi-sobreposição "quase sempre produz resultados enviesados", então
+    não é usado — mas a família que a hipótese secundária H1 deste
+    projeto trata é exatamente a mais exposta a esse conservadorismo
+    padrão (parálogos próximos, atribuição ambígua de reads). **Não
+    resolvido aqui** — adiado para a FASE 9 (curadoria manual da família
+    de serino-proteases) para esse conjunto específico de genes. Nenhum
+    benchmark em inseto ou família multigênica foi encontrado numa busca
+    dirigida de literatura; Kwon (2015, PMID 26112470, *Xenopus*, só
+    abstract) é a evidência mais próxima disponível, não uma solução.
+11. **A indexação decoy-aware do Salmon (FASE 3, §2.6) é validada só em
+    humano e camundongo.** Srivastava et al. (2020, PMID 32894187)
+    testaram 109 datasets reais humanos + simulações de camundongo —
+    nenhum genoma de inseto ou não-modelo. O benefício esperado (redução
+    de atribuição espúria de reads) é uma extrapolação razoável para
+    *A. gemmatalis*, não um fato estabelecido para esta espécie — mesma
+    estrutura de ressalva da transferência planta→inseto de Coxe et al.
+    (2024) já declarada acima.
 
 ---
 
@@ -884,6 +1133,14 @@ analysis results for multiple tools and samples in a single report.
 
 Coxe, K. et al. Benchmarking short-read RNA-seq alignment and assembly
 tools for splicing analysis. (2024). PMID 38475429.
+
+Srivastava, A., Malik, L., Sarkar, H., Zakeri, M., Almodaresi, F., Soneson,
+C., Love, M. I., Kingsford, C. & Patro, R. Alignment and mapping
+methodology influence transcript abundance estimation. *Genome Biology*
+**21**, 239 (2020).
+
+Zytnicki, M. mmquant: how to count multi-mapping reads? *BMC
+Bioinformatics* **18**, 411 (2017).
 
 ---
 
@@ -914,4 +1171,12 @@ tools for splicing analysis. (2024). PMID 38475429.
 | Verificação entre fases, estatísticas completas STAR/Subread, geração da Fig. 5 (Tabela 7) | `codigo/fase2_blocoB/analyze_blocoB2_alignment.py` → `resultados/fase2_blocoB_star_full_stats.csv`, `resultados/fase2_blocoB_subread_stats.csv` |
 | Figura 5 (PNG 300 dpi) | `figuras/Figure5_fase2_blocoB_mapping_rates.png` |
 | Scripts de alinhamento do lote completo (STAR + Subread) | `codigo/fase2_blocoB/` (`run_alignment_full.sh`, `run_subread_align_full.sh`, `check_strandedness.sh`, `analyze_strandedness.py`) |
-| BAMs e logs do STAR/Subread (13 bibliotecas, em andamento) | servidor: `~/rnaseq-Anticarsia-GORE3/{bam/star,bam/subread,qc/fase2_blocoB_star,qc/fase2_blocoB_subread}/` (não versionado — dado grande) |
+| BAMs e logs do STAR/Subread (13 bibliotecas, concluído) | servidor: `~/rnaseq-Anticarsia-GORE3/{bam/star,bam/subread,qc/fase2_blocoB_star,qc/fase2_blocoB_subread}/` (não versionado — dado grande) |
+| Correção do GTF (gene_id ausente) + decisão de strand (FASE 3 Bloco A) | `codigo/fase3_blocoA/fix_gtf_missing_geneid.sh`, `decide_libtype.py` → `resultados/fase3_blocoA_strand_decision.csv` |
+| Auditoria de ferramentas (FASE 3 Bloco B) | `codigo/fase3_blocoB/check_tools.sh` → `resultados/fase3_blocoB_env_check.txt` |
+| Contagem de genes de produção (FASE 3 Bloco C) | `codigo/fase3_blocoC/run_featurecounts_genelevel.sh`, `analyze_featurecounts.py` → `resultados/fase3_blocoC_featurecounts_summary.csv`, `resultados/fase3_blocoC_gene_counts.txt` |
+| Figura 6 (PNG 300 dpi) | `figuras/Figure6_fase3_blocoC_featurecounts_assigned.png` |
+| Índice Salmon decoy-aware + quant (FASE 3 Bloco D) | `codigo/fase3_blocoD/build_salmon_decoy_index.sh`, `run_salmon_quant_full.sh`, `analyze_salmon_mapping.py` |
+| Adaptação do tximport (FASE 3 Bloco E) | `codigo/fase3_blocoE/build_tx2gene.py`, `build_samplesheet.py`, `00_tximport_gore3.R` |
+| Verificação cruzada entre quantificadores (FASE 3 Bloco F) | `codigo/fase3_blocoF/analyze_fase3_consistency.py` → `resultados/fase3_blocoF_crosscheck.csv` |
+| Índice/quant do Salmon, saídas do tximport (grande) | servidor: `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy,salmon}/` (não versionado — dado grande) |

@@ -356,3 +356,31 @@ inseto, e um único sistema.
 explicitamente a limitação de amostragem ao interpretar a MD, e (ii) avaliar se
 alguma estratégia de amostragem melhorada cabe no orçamento de GPU antes de
 tratar 3 × 100 ns como suficiente para testar H6.
+
+---
+
+## 10. Inconsistência bib × ficha corrigida (30/07/2026, planejamento FASE 3)
+
+Ao planejar a FASE 3 (quantificação), uma auditoria de literatura encontrou
+três entradas em `docs/referencias.bib` com o campo `note` declarando
+`acesso: texto completo`, enquanto a ficha correspondente em
+`literatura/02_rnaseq.md` — fonte da verdade por convenção do próprio
+projeto ("**Lido de** declara o que foi efetivamente lido ao escrever a
+ficha") — registrava `Lido de: abstract` para as mesmas três:
+`patro2017salmon`, `soneson2015differential`, `chisanga2022impact`.
+
+`soneson2015differential` tinha ainda um terceiro ponto de inconsistência:
+`docs/07_analise_rnaseq.md` §4 (prosa) também afirmava "lido em texto
+completo" para essa citação.
+
+**Correção aplicada:** os três campos `note` do bib foram alterados para
+`acesso: abstract` (batendo com a ficha), e a prosa de
+`docs/07_analise_rnaseq.md` §4 foi corrigida para "lido do abstract". As
+fichas em si não precisaram de alteração — já estavam corretas; o bib e a
+prosa é que estavam desatualizados/errados.
+
+**Causa provável:** o campo `note` do bib provavelmente foi preenchido com
+um valor padrão/otimista numa etapa de importação em lote, sem conferência
+individual contra a ficha correspondente — não investigado a fundo, já que
+a correção em si (usar a ficha como fonte da verdade) resolve o problema
+prático sem precisar reconstruir o histórico exato do erro.

@@ -1,0 +1,14 @@
+sample,condition,replicate
+ID-1,Control,1
+ID-2,Control,2
+ID-3,Control,3
+ID-5,Benzamidine,1
+ID-7,Benzamidine,2
+ID-8,Benzamidine,3
+ID-9,SKTI,1
+ID-10,SKTI,2
+ID-12,SKTI,3
+ID-14,GORE3,1
+ID-15,GORE3,2
+ID-16,GORE3,3
+ID-18,FatBody,
