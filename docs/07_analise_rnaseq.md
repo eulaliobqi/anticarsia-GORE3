@@ -123,6 +123,34 @@ triagem inicial.
 
 ## 3. FASE 2 — Alinhamento genoma-guiado
 
+**Atualização 30/07/2026 — em execução no servidor (`~/rnaseq-Anticarsia-GORE3/`):**
+
+**Bloco A (piloto, decisão STAR vs. HISAT2) — concluído.** Testado em 5
+amostras (ID-1, ID-7, ID-8, ID-9, ID-10) com índice anotado, sem escrever BAM
+(`--outSAMtype None`). Resultado (`resultados/fase2_blocoA_star_vs_hisat2.csv`,
+script `codigo/fase2_blocoA/analyze_fase2_blocoA.py`): STAR venceu HISAT2 nas
+5/5 amostras por 9,33–13,02pp (83,49–90,86% STAR vs. 74,15–78,59% HISAT2
+anotado); **STAR atinge o critério de aprovação de >80% (§2) em todas, HISAT2
+em nenhuma.** Critério combinado com o usuário (diferença ≥2pp decide o
+alinhador único): **decisão = rodar só STAR** nas 13 bibliotecas completas,
+não os dois.
+
+**Bloco B (13 bibliotecas completas) — em andamento.**
+
+- *Via STAR* (`codigo/fase2_blocoB/run_alignment_full.sh`, screen
+  `fase2_blocoB_star_retry`): **6/13 concluídas** (ID-1, ID-2, ID-8, ID-9,
+  ID-16, ID-18), **ID-3 em processamento**, 6 restantes (ID-5, ID-7, ID-10,
+  ID-12, ID-14, ID-15). Primeira tentativa teve 5 amostras com "Falha de
+  segmentação" por concorrência de threads — este script e o de Subread
+  foram lançados juntos, cada um pedindo 16 threads; script reescrito para
+  pular amostras já concluídas (`Log.final.out` como marcador) e não usar
+  `set -e`, para que uma falha isolada não interrompa as demais.
+- *Via Subread* (`codigo/fase2_blocoB/run_subread_align_full.sh`, splicing,
+  §3b): **12/13 concluídas com sucesso** (BAM + índice + `.indel.vcf`
+  íntegros para ID-2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 18). **ID-1 falhou**
+  (mesma causa de concorrência de threads — BAM de 0 bytes); pendente
+  re-executar isoladamente, sem o STAR rodando em paralelo.
+
 **Duas vias, propositalmente redundantes**, porque nenhum alinhador único é
 ótimo para os dois objetivos deste projeto (expressão gênica e detecção de
 splicing):

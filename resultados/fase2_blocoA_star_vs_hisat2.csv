@@ -1,0 +1,6 @@
+id,label,star_mapping_pct,hisat2_annotated_mapping_pct,hisat2_pilot_no_annotation_pct,annotation_gain_pp,star_vs_hisat2_diff_pp,star_meets_80pct,hisat2_meets_80pct
+ID-1,Control_R1 (limpa),90.46,77.44,78.01,-0.57,13.02,True,False
+ID-7,Benzamidine_R2,83.49,74.15,74.83,-0.68,9.34,True,False
+ID-8,Benzamidine_R3,86.91,77.58,78.45,-0.87,9.33,True,False
+ID-9,SKTI_R1,90.86,78.54,79.36,-0.82,12.32,True,False
+ID-10,SKTI_R2,90.59,78.59,79.22,-0.63,12.0,True,False
