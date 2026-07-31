@@ -508,3 +508,89 @@ DOI: [10.1038/s41467-026-71615-5](https://doi.org/10.1038/s41467-026-71615-5) ·
 **Onde entra:** Tema 2, fronteira — relevante para a **hipótese H5**: se aparecer splicing alternativo em tripsinas, este trabalho é o argumento de que nem todo evento não-triplete é ruído, e o alerta de que NMD precisa ser considerado na interpretação.
 
 **Ressalva:** *C. elegans*, não inseto. Só o abstract foi lido; não extraí as três classes nem a prevalência quantificada.
+
+## 2E — Expressão diferencial e visualização (FASE 5: DESeq2/PyDESeq2)
+
+### `zhu2019heavy` — Tier 1
+**Zhu A, Ibrahim JG, Love MI.** (2019). Heavy-tailed prior distributions for sequence count data: removing the noise and preserving large differences. `Bioinformatics` 2019;35(12):2084-2092.
+
+DOI: [10.1093/bioinformatics/bty895](https://doi.org/10.1093/bioinformatics/bty895) · PMID: [30395178](https://pubmed.ncbi.nlm.nih.gov/30395178/) · PMC: PMC6581436
+**Lido de:** **texto completo** (manual de referência do pacote `apeglm` + man page `lfcShrink` do DESeq2, lidos diretamente)
+
+**O que estabelece:** Introduz o `apeglm`, estimador de encolhimento (*shrinkage*) de log2FoldChange com prior Student-t de cauda pesada, adaptativo por empirical Bayes (`apeAdapt=TRUE` é o default do `lfcShrink`, sem necessidade de ajuste manual do usuário).
+
+**Onde entra:** FASE 5 (`docs/07_analise_rnaseq.md` §6) — método de encolhimento usado nos 3 contrastes iniciais (Benzamidina/SKTI/GORE3 × Controle), via `lfcShrink(coef=..., type="apeglm")`.
+
+**Ressalva:** `apeglm` só aceita `coef=`, não `contrast=` — funciona direto para contrastes contra o nível de referência (Controle), mas exige releveling do fator para contrastes cabeça-a-cabeça futuros (confirmado em thread do próprio Michael Love, support.bioconductor.org/p/123247 e /p/111685).
+
+### `stephens2017false` — Tier 2
+**Stephens M.** (2017). False discovery rates: a new deal. `Biostatistics` 2017;18(2):275-294.
+
+DOI: [10.1093/biostatistics/kxw041](https://doi.org/10.1093/biostatistics/kxw041) · PMID: [27756721](https://pubmed.ncbi.nlm.nih.gov/27756721/) · PMC: PMC5379932
+**Lido de:** **texto completo** (README do pacote `ashr`, github.com/stephens999/ashr, lido diretamente)
+
+**O que estabelece:** Método `ashr` de encolhimento adaptativo (*adaptive shrinkage*) assumindo distribuição unimodal dos efeitos verdadeiros; aceita `contrast=` arbitrário, ao contrário do `apeglm`.
+
+**Onde entra:** FASE 5 — reservado para os contrastes cabeça-a-cabeça futuros (GORE3×Benzamidina, GORE3×SKTI), que não têm o Controle como referência e por isso não funcionam com `apeglm` sem releveling. Não usado nos 3 contrastes iniciais.
+
+**Ressalva:** O DESeq2 fixa internamente `mixcompdist="normal"` ao chamar o `ashr` via `lfcShrink(type="ashr")` — não a variante assimétrica `halfuniform` que o pacote também oferece.
+
+### `bourgon2010independent` — Tier 1
+**Bourgon R, Gentleman R, Huber W.** (2010). Independent filtering increases detection power for high-throughput experiments. `PNAS` 2010;107(21):9546-9551.
+
+DOI: [10.1073/pnas.0914005107](https://doi.org/10.1073/pnas.0914005107) · PMID: [20460310](https://pubmed.ncbi.nlm.nih.gov/20460310/) · PMC: PMC2906865
+**Lido de:** **texto completo** (citado verbatim na vinheta do DESeq2, `bioconductor.org/.../DESeq2.Rmd`, linha 2633: "We refer to [@Bourgon:2010:PNAS] for further discussion of this topic.")
+
+**O que estabelece:** Filtrar genes de baixa contagem média **antes** da correção de múltiplos testes (não depois) aumenta o poder de detecção, sem inflar falso-positivo, porque o filtro é independente da estatística de teste sob a hipótese nula.
+
+**Onde entra:** FASE 5 — é a citação-base do próprio `results()` do DESeq2 para `independentFiltering=TRUE` (default, mantido).
+
+**Ressalva:** Nenhuma específica a este projeto — é o mesmo racional já embutido como default da ferramenta.
+
+### `muzellec2023pydeseq2` — Tier 1
+**Muzellec B, Telenczuk M, Cabeli V, Andreux M.** (2023). PyDESeq2: a python package for bulk RNA-seq differential expression analysis. `Bioinformatics` 2023;39(9):btad547.
+
+DOI: [10.1093/bioinformatics/btad547](https://doi.org/10.1093/bioinformatics/btad547) · PMID: [37669147](https://pubmed.ncbi.nlm.nih.gov/37669147/) · PMC: PMC10502239
+**Lido de:** **texto completo**
+
+**O que estabelece:** Reimplementação em Python do método estatístico do DESeq2 (hoje mantida por `scverse`, mesmo ecossistema do scanpy/anndata — ativamente mantida, release mais recente jan/2026). Suporta design multi-fator, contrastes arbitrários, shrinkage via `apeglm`, filtragem independente ligada por padrão. **Comparação com o DESeq2 original em 8 datasets do TCGA é só qualitativa** ("muito semelhantes", 3 vias discordantes no total) — **não há benchmark numérico de concordância** (correlação, % de concordância de genes DE) no próprio artigo.
+
+**Onde entra:** FASE 5 — segunda implementação independente dos 3 contrastes iniciais, rodada em paralelo ao DESeq2 em R (pedido explícito do usuário: "não use somente R, explore também o python"). A concordância entre os dois motores neste dataset é achado empírico próprio do projeto, não algo já garantido pela literatura.
+
+**Ressalva:** Sem equivalente ao `ashr` (só `apeglm`); suporte a LRT (likelihood-ratio test) era trabalho futuro declarado no artigo, não confirmado se já chegou na versão atual (v0.5.4).
+
+### `yang2021umap` — Tier 2
+**Yang Y, et al.** (2021). Dimensionality reduction by UMAP reinforces sample heterogeneity analysis in bulk transcriptomic data. `Cell Rep` 2021;36(4):109442.
+
+DOI: [10.1016/j.celrep.2021.109442](https://doi.org/10.1016/j.celrep.2021.109442) · PMID: [34320340](https://pubmed.ncbi.nlm.nih.gov/34320340/)
+**Lido de:** **texto completo**
+
+**O que estabelece:** Benchmark de PCA/MDS/t-SNE/UMAP em 71 datasets de transcriptoma **bulk** (não só single-cell) — recomenda UMAP como reforço, não substituto, da PCA para reforçar a análise de heterogeneidade amostral.
+
+**Onde entra:** FASE 5 — justifica gerar UMAP ao lado da PCA (não em vez dela) nas figuras de diagnóstico amostral.
+
+**Ressalva:** Nenhuma específica — é exatamente o caso de uso (bulk RNA-Seq, não single-cell).
+
+### `gu2016complexheatmaps` — Tier 2
+**Gu Z, Eils R, Schlesner M.** (2016). Complex heatmaps reveal patterns and correlations in multidimensional genomic data. `Bioinformatics` 2016;32(18):2847-2849.
+
+DOI: [10.1093/bioinformatics/btw313](https://doi.org/10.1093/bioinformatics/btw313) · PMID: [27207943](https://pubmed.ncbi.nlm.nih.gov/27207943/)
+**Lido de:** **abstract**
+
+**O que estabelece:** Pacote `ComplexHeatmap` (R/Bioconductor) para heatmaps com múltiplas faixas de anotação — hoje padrão de facto para visualizar dado genômico multidimensional com covariáveis anotadas lado a lado.
+
+**Onde entra:** FASE 5 — heatmap dos genes DE top, com faixas de anotação para grupo de tratamento e o flag de lote de sequenciamento separado (ID-8).
+
+**Ressalva:** Só o abstract foi lido; o uso prático segue a documentação do pacote, não o texto completo do artigo.
+
+### `conway2017upsetr` — Tier 2
+**Conway JR, Lex A, Gehlenborg N.** (2017). UpSetR: an R package for the visualization of intersecting sets and their properties. `Bioinformatics` 2017;33(18):2938-2940.
+
+DOI: [10.1093/bioinformatics/btx364](https://doi.org/10.1093/bioinformatics/btx364) · PMID: [28645171](https://pubmed.ncbi.nlm.nih.gov/28645171/) · PMC: PMC5870712
+**Lido de:** **abstract**
+
+**O que estabelece:** Pacote `UpSetR` para visualizar interseções entre múltiplos conjuntos — substitui diagrama de Venn quando há mais de 3 conjuntos (aqui: genes DE de cada contraste).
+
+**Onde entra:** FASE 5 — interseção dos genes DE dos 3 contrastes iniciais (Benzamidina/SKTI/GORE3 × Controle); equivalente Python real e mantido usado quando aplicável: `UpSetPlot` (github.com/jnothman/UpSetPlot).
+
+**Ressalva:** Só o abstract foi lido. Não é a referência original do conceito UpSet (essa é Lex et al., IEEE TVCG 2014, não indexada no PubMed) — esta é especificamente a citação do pacote R.

@@ -511,7 +511,76 @@ O `.docx` propõe padj < 0,01; a versão anterior deste documento recomendava
 confirmado:** `schurch2016many` recomenda escalonar o limiar de fold-change
 pelo número de réplicas (0,1 ≤ T ≤ 0,5 em log2 para poucas réplicas, não
 |log2FC| ≥ 1 fixo). Usar padj < 0,05 **e** declarar o limiar de fold-change
-como decisão explícita, não copiado de outro desenho.
+como decisão explícita, não copiado de outro desenho. **Decidido em
+30/07/2026: log2FC = 0,25** (meio da faixa, confirmado com o usuário).
+
+### 6.3 Execução — status em 30/07/2026 (Blocos A-B concluídos, C-H pendentes)
+
+**Foco inicial confirmado com o usuário:** os 3 contrastes contra o
+Controle (#1 GORE3, #4 SKTI, #5 Benzamidina) primeiro — os cabeça-a-cabeça
+(#2, #3/H4, #6) ficam para depois.
+
+**Decisão de import, reabrindo parte da FASE 3:** a vinheta oficial do
+tximport é normativa, não sugestiva — *"Do not manually pass the original
+gene-level counts to downstream methods without an offset... is not
+recommended by the tximport package authors."* Por isso o DESeq2 desta
+fase usa `DESeqDataSetFromTximport` (contagens Salmon+tximport com o
+offset de comprimento de transcrito), não o featureCounts bruto — o
+featureCounts fica como checagem de robustez secundária (ρ=0,98-0,99 já
+verificado na FASE 3 Bloco F). Isso **refina, não contradiz**, a decisão
+de ênfase científica da FASE 3 (contrastes de grupo são o objetivo
+central, tripsinas são consequência) — é só a via técnica de entrada do
+DESeq2.
+
+**Bloco A (bibliografia) — concluído.** 7 citações novas verificadas com
+PMID/DOI, adicionadas a `docs/referencias.bib` + ficha em
+`literatura/02_rnaseq.md` §2E + Zotero, **antes** de qualquer execução
+técnica (pedido explícito do usuário, para não deixar pendência de
+citação "para trás"): `zhu2019heavy` (apeglm), `stephens2017false`
+(ashr), `bourgon2010independent` (filtragem independente),
+`muzellec2023pydeseq2` (PyDESeq2), `yang2021umap`, `gu2016complexheatmaps`,
+`conway2017upsetr` (figuras).
+
+**Bloco B (import) — concluído e verificado.** Índice Salmon reconstruído
+com `--keepDuplicates` (fecha a lacuna dos 811 transcritos colapsados na
+FASE 3), requant das 13 amostras, tximport rerodado: **cobertura de
+100% dos 15.773 genes anotados** (14.973/15.773, 94,9%, na FASE 3 sem
+essa flag) — `resultados/fase5_blocoB_keepdup_coverage.csv`,
+`figuras/Figure9_fase5_blocoB_keepdup_coverage.png`. Checagem de
+consistência automatizada (`codigo/fase5_blocoB/analyze_keepdup_coverage.py`):
+cobertura não pode ter piorado, sem valores negativos/NaN — ambas OK.
+`DESeqDataSetFromTximport` construído (12 amostras, ID-18/FatBody
+removido, `condition` com Controle como referência) — salvo em
+`dds_raw.rds` no servidor (não versionado, grande demais).
+
+**Achado técnico real durante a preparação do PyDESeq2, corrigido antes de
+qualquer execução:** um teste-piloto com dado sintético (não dado real do
+projeto) revelou dois erros na primeira versão do script Python
+(`codigo/fase5_blocoC/run_pydeseq2.py`): (1) o parâmetro `ref_level=` do
+`DeseqDataSet` está **depreciado** na versão instalada (0.5.4) — "no
+longer has any effect"; o nível de referência é controlado pela ordem das
+categorias do fator, que já estava correta; (2) a nomenclatura de
+coeficiente do PyDESeq2 é `condition[T.Benzamidine]` (estilo
+formulaic/patsy), **não** `condition_Benzamidine_vs_Control` como no R —
+o `lfc_shrink(coeff=...)` teria falhado silenciosamente ou com erro se
+não corrigido. Ambos corrigidos no script antes de rodar sobre dado real
+(ainda não rodado — Bloco C/D pendentes).
+
+**Achado técnico real, declarado não escondido:** o PyDESeq2 **não tem
+equivalente ao offset de comprimento de transcrito** do tximport —
+verificado direto no código-fonte (`pydeseq2/ds.py`): só existe
+`log(size_factors)`, um escalar por amostra, não uma matriz gene×amostra.
+A via Python (Bloco C2, ainda não executada) vai rodar sobre as mesmas
+contagens de gene do tximport, mas **sem** a correção de viés que a via R
+aplica — assimetria real entre os dois motores, que precisa ser
+declarada na comparação (Bloco E), não escondida.
+
+**Pendente (Blocos C-H):** ajuste do modelo DESeq2 em R e PyDESeq2 em
+Python sobre o dado real, extração dos 3 contrastes, verificação cruzada
+R×Python, checagem de sensibilidade ID-8 (compromisso da FASE 4), figuras
+modernas (PCA+UMAP, heatmap anotado, UpSet), documentação final.
+**Nenhum resultado de expressão diferencial existe ainda** — nada disso
+deve ser antecipado/projetado no artigo até rodar de fato.
 
 ---
 

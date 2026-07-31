@@ -17,8 +17,12 @@
 > nenhuma correção formal de lote — o confundimento de amostra única
 > (ID-8) torna o ComBat-seq inaplicável (a própria ferramenta recusa
 > rodar), decisão justificada por literatura + código-fonte (§4); checagem
-> de sensibilidade planejada para a FASE 5. Ver `docs/07_analise_rnaseq.md`
-> para o plano completo (FASE 5, DESeq2, ainda não iniciada).
+> de sensibilidade planejada para a FASE 5. **FASE 5 em andamento**
+> (30/07/2026): Blocos A (bibliografia) e B (import via tximport, índice
+> Salmon reconstruído com `--keepDuplicates`, cobertura 100% dos 15.773
+> genes) concluídos e verificados (§2.7). **Blocos C-H (modelo DESeq2 em
+> R+Python, contrastes, figuras) ainda não rodados — nenhum resultado de
+> expressão diferencial existe neste documento ainda.**
 >
 > **Versão em inglês:** `artigo.md` (mantida em paralelo, sincronizada a
 > cada atualização — esta é a tradução fiel, não um resumo).
@@ -320,6 +324,69 @@ construído direto dos atributos `transcript_id`/`gene_id` do GTF real, em
 vez de um `gene_trans_map` do Trinity que não existe neste desenho
 genoma-guiado; a chamada `tximport()` em si, justificada por
 `soneson2015differential` (já citada, §2.5), não muda.
+
+### 2.7 Expressão diferencial: import e construção do modelo (FASE 5, em andamento)
+
+*[Parcial — só Blocos A-B; nenhum resultado de DE existe ainda. Não deve
+ser projetado/antecipado abaixo até os Blocos C-H rodarem de fato.]*
+
+**A estratégia de import revisita a escolha técnica da FASE 3, não sua
+ênfase.** A documentação do tximport é normativa, não sugestiva: *"Do not
+manually pass the original gene-level counts to downstream methods
+without an offset... Passing uncorrected gene-level counts without an
+offset is not recommended by the tximport package authors."*
+Consequentemente, o import do DESeq2 nesta fase usa
+`DESeqDataSetFromTximport` (contagens Salmon+tximport com o offset de
+comprimento de transcrito), não as contagens brutas do featureCounts; o
+featureCounts continua como checagem de robustez secundária (já ρ =
+0,983–0,988 concordante com as contagens de gene do tximport, §3.11).
+Isso refina a entrada técnica da FASE 3, não sua ênfase científica
+declarada (contrastes de grupo continuam o alvo principal; o ângulo das
+tripsinas continua secundário).
+
+**Uma lacuna real de cobertura, fechada.** O índice Salmon da FASE 3 foi
+construído sem `--keepDuplicates`, colapsando silenciosamente 811 dos
+25.840 transcritos com sequência idêntica byte-a-byte num único
+representante, deixando ~800 dos 15.773 genes sem nenhum transcrito
+diretamente quantificável na tabela de genes do tximport. Reconstruir o
+índice com `--keepDuplicates` (mesmo transcriptoma/decoy, ~7 minutos de
+reindexação) e requantificar as 13 bibliotecas fechou essa lacuna por
+completo: **15.773/15.773 genes (100%)**, de 14.973/15.773 (94,9%) na
+FASE 3 (Fig. 9). Uma checagem de consistência automatizada
+(`codigo/fase5_blocoB/analyze_keepdup_coverage.py`) confirmou que a
+cobertura não regrediu e que nenhum valor de contagem é negativo ou NaN
+antes desta matriz ser usada adiante.
+
+**Construção do dataset.** O `DESeqDataSetFromTximport` foi construído a
+partir do objeto `txi` requantificado, `condition` como fator de 4
+níveis (`Control`/`Benzamidine`/`SKTI`/`GORE3`, Controle como nível de
+referência), excluindo ID-18 (corpo gorduroso, sem grupo/réplica — já
+estabelecido na FASE 1 §13.1) do `colData` antes da construção, não
+depois. Código: `codigo/fase5_blocoB/build_dds_tximport.R`.
+
+**Plano de dupla implementação, e uma assimetria divulgada encontrada ao
+prepará-lo.** Por instrução explícita de não depender só de R, o modelo
+estatístico vai ser ajustado independentemente em R (DESeq2) e Python
+(PyDESeq2 — Muzellec et al. 2023, PMID 37669147, ativamente mantido sob a
+organização scverse). Um teste-piloto com dado sintético (não dado real
+do projeto) pegou dois erros reais de script antes de qualquer rodada com
+dado real: o argumento `ref_level` do PyDESeq2 está depreciado na versão
+instalada (0.5.4, "no longer has any effect" — o nível de referência é
+controlado pela ordem das categorias do fator, já correta), e sua
+convenção de nomenclatura de coeficiente de shrinkage é do estilo
+`condition[T.Benzamidine]` (formulaic/patsy), não
+`condition_Benzamidine_vs_Control` como no R — ambos corrigidos em
+`codigo/fase5_blocoC/run_pydeseq2.py` antes de rodar sobre dado real
+(§3.12, quando disponível). Separadamente, e divulgado em vez de
+suavizado: **o PyDESeq2 não tem equivalente ao offset de comprimento de
+transcrito** do tximport — confirmado direto no seu código-fonte
+(`pydeseq2/ds.py`: só existe um termo escalar por amostra
+`log(size_factors)`, não uma matriz gene×amostra). A rodada em Python vai,
+portanto, usar as mesmas contagens de gene derivadas do tximport que o
+modelo em R, mas sem a correção de viés de comprimento que o modelo em R
+aplica — uma assimetria real, divulgada, entre as entradas dos dois
+motores, a ter em mente ao interpretar a concordância entre eles (§3.12),
+não tratada como comparação perfeitamente equivalente.
 
 ---
 
@@ -1253,3 +1320,10 @@ effects in high-throughput data. *Nat. Rev. Genet.* **11**, 733–739
 | Verificação cruzada entre quantificadores (FASE 3 Bloco F) | `codigo/fase3_blocoF/analyze_fase3_consistency.py` → `resultados/fase3_blocoF_crosscheck.csv` |
 | Reverificação de assimetria de profundidade pós-quantificação (Tabela 11) | `codigo/fase3_blocoF/recheck_depth_asymmetry.py` → `resultados/fase3_blocoF_depth_asymmetry_recheck.csv` |
 | Índice/quant do Salmon, saídas do tximport (grande) | servidor: `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy,salmon}/` (não versionado — dado grande) |
+| Rebuild do índice com --keepDuplicates + requant (FASE 5 Bloco B) | `codigo/fase5_blocoB/build_salmon_index_keepdup.sh`, `run_salmon_quant_keepdup.sh` |
+| Rebuild do tximport + construção do DESeqDataSet (FASE 5 Bloco B) | `codigo/fase5_blocoB/build_dds_tximport.R` |
+| Checagem de consistência de cobertura + Figura 9 | `codigo/fase5_blocoB/analyze_keepdup_coverage.py` → `resultados/fase5_blocoB_keepdup_coverage.csv` |
+| Figura 9 (PNG 300 dpi) | `figuras/Figure9_fase5_blocoB_keepdup_coverage.png` |
+| Modelo DESeq2 em R (Bloco C1, ainda não rodado sobre dado real) | `codigo/fase5_blocoC/run_deseq2.R` |
+| Modelo PyDESeq2 em Python (Bloco C2, ainda não rodado sobre dado real) | `codigo/fase5_blocoC/run_pydeseq2.py` |
+| Índice Salmon --keepDuplicates/quant, export de contagens do tximport (grande) | servidor: `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy_keepdup,salmon_keepdup}/` (não versionado — dado grande) |

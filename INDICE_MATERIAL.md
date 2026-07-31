@@ -4,7 +4,7 @@ Função: mapa único de tudo que existe hoje (figuras, tabelas, texto,
 código, dado-fonte), para uso na geração futura do artigo em Word e da
 apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 — é o índice de orquestração que aponta pra eles.
-Última atualização: 30/07/2026 (FASE 3 completa, Blocos A-F).
+Última atualização: 30/07/2026 (FASE 5 em andamento, Blocos A-B concluídos).
 ---
 
 # Índice de material — Pós-doc GORE3 / RNA-Seq
@@ -30,7 +30,14 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | FASE 3 | E — tximport adaptado (tx2gene do GTF real) | ✅ concluído | §4, §3.11 |
 | FASE 3 | F — verificação cruzada entre quantificadores | ✅ concluído (ρ=0,983–0,988) | §4, §3.11 |
 | FASE 4 | Decisão de correção de lote — NÃO aplicar ComBat-seq (lote de amostra única) | ✅ decidido | §4 (Discussão), §5 item 12 |
-| FASE 5–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
+| FASE 5 | A — bibliografia + Zotero (7 citações, antes da execução) | ✅ concluído | §2.7 |
+| FASE 5 | B — rebuild Salmon --keepDuplicates + tximport (cobertura 100%) | ✅ concluído | §2.7 |
+| FASE 5 | C — modelo DESeq2 (R) + PyDESeq2 (Python) | ⏳ pendente | §2.7 |
+| FASE 5 | D — extrair 3 contrastes vs. Controle, R+Python | ⏳ pendente | — |
+| FASE 5 | E — verificação cruzada R×Python | ⏳ pendente | — |
+| FASE 5 | F — checagem de sensibilidade ID-8 | ⏳ pendente | — |
+| FASE 5 | G — figuras modernas (PCA+UMAP, heatmap, UpSet) | ⏳ pendente | — |
+| FASE 6–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
 
 ## Figuras
 
@@ -44,6 +51,7 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | 6 | `figuras/Figure6_fase3_blocoC_featurecounts_assigned.png` | % de reads atribuídos a genes (featureCounts), 13 bibliotecas | §3.11 | `codigo/fase3_blocoC/analyze_featurecounts.py` | `resultados/fase3_blocoC_featurecounts_summary.csv` |
 | 7 | `figuras/Figure7_fase3_blocoD_salmon_vs_star_mapping.png` | Taxa de mapeamento Salmon vs. STAR, 13 bibliotecas | §3.11 | `codigo/fase3_blocoD/analyze_salmon_mapping.py` | `resultados/fase3_blocoD_salmon_mapping_summary.csv` |
 | 8 | `figuras/Figure8_fase3_blocoF_featurecounts_vs_salmon_concordance.png` | Concordância Spearman gene-a-gene, featureCounts vs. Salmon+tximport | §3.11 | `codigo/fase3_blocoF/analyze_fase3_consistency.py` | `resultados/fase3_blocoF_crosscheck.csv` |
+| 9 | `figuras/Figure9_fase5_blocoB_keepdup_coverage.png` | Cobertura gênica do tximport antes/depois de --keepDuplicates (94,9%→100%) | §2.7 | `codigo/fase5_blocoB/analyze_keepdup_coverage.py` | `resultados/fase5_blocoB_keepdup_coverage.csv` |
 
 Todas em PNG 300 dpi, legenda 100% em inglês no `artigo.md` (padrão
 Nature: `**Figure N |** frase-título...`), traduzida fielmente no
@@ -92,6 +100,8 @@ acima — nenhum número foi digitado à mão sem conferência contra a fonte
 | `codigo/fase3_blocoD/` | Índice Salmon decoy-aware (`build_salmon_decoy_index.sh`), quant resumível 13 amostras (`run_salmon_quant_full.sh`), resumo+Fig.7 (`analyze_salmon_mapping.py`) |
 | `codigo/fase3_blocoE/` | tx2gene do GTF real (`build_tx2gene.py`), samplesheet (`build_samplesheet.py`), tximport adaptado (`00_tximport_gore3.R`) |
 | `codigo/fase3_blocoF/` | Verificação cruzada featureCounts×Salmon+tximport+STAR, 3 checagens+Fig.8 (`analyze_fase3_consistency.py`); reverificação de assimetria de profundidade pós-quantificação, Tabela 11 (`recheck_depth_asymmetry.py`) |
+| `codigo/fase5_blocoB/` | Rebuild do índice Salmon com `--keepDuplicates` (`build_salmon_index_keepdup.sh`), requant 13 amostras (`run_salmon_quant_keepdup.sh`), rebuild tximport + `DESeqDataSetFromTximport` (`build_dds_tximport.R`), checagem de consistência+Fig.9 (`analyze_keepdup_coverage.py`) |
+| `codigo/fase5_blocoC/` | Modelo DESeq2 em R (`run_deseq2.R`) e PyDESeq2 em Python (`run_pydeseq2.py`) — escritos e corrigidos (achados de teste-piloto), **ainda não rodados sobre dado real** |
 
 Todo comando, incluindo os que falharam parcialmente (flag `-d` do
 FastQC na FASE 1; falha de segmentação por concorrência de threads na
@@ -114,6 +124,8 @@ original.
 | Índice HISAT2 piloto (Bloco C, sem anotação de splice sites) | `~/rnaseq-Anticarsia-GORE3/genome_index_pilot/` | ~590 MB | específico do teste de equilíbrio de trimagem; a FASE 2 formal precisa de índice próprio, com anotação |
 | BAMs STAR + Subread (13 amostras cada, FASE 2 Bloco B) | `~/rnaseq-Anticarsia-GORE3/bam/{star,subread}/` | ~35–70 GB estimado | grande demais para git — os logs-texto (`Log.final.out`, `.subread_align.log`) que sustentam as Tabelas 6-7 **foram copiados e versionados** em `qc/fase2_blocoB_{star,subread}/` (260 KB total), suficiente para reproduzir a análise sem acesso ao servidor |
 | Índice Salmon decoy-aware + saídas `quant.sf` (13 amostras, FASE 3 Bloco D) | `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy,salmon}/` | índice ~1–2 GB estimado | grande demais para git — os logs de mapeamento (`salmon_quant.log`) que sustentam a Tabela 9/Fig.7 **foram copiados e versionados** em `qc/fase3_blocoD_salmon_logs/`, e as tabelas de contagem/TPM do tximport (pequenas, ~2,4 MB) já estão versionadas em `resultados/fase3_blocoE_salmon_gene_{counts,tpm}.tsv` |
+| Índice Salmon `--keepDuplicates` + `quant.sf` (13 amostras, FASE 5 Bloco B) | `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy_keepdup,salmon_keepdup}/` | índice ~1–2 GB estimado | grande demais para git — a matriz de contagens completa (100% cobertura, 15.773 genes × 12 amostras) já está versionada em `resultados/fase5_blocoB_txi_counts_for_python.csv` (~870 KB), suficiente para reproduzir o modelo estatístico sem acesso ao servidor |
+| `DESeqDataSet` ajustado (R, `.rds`) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase5_blocoB/dds_raw.rds` | pequeno mas binário/R-específico | não versionado por ser objeto R serializado, não CSV portável — reconstruível a partir de `resultados/fase5_blocoB_txi_counts_for_python.csv` + `codigo/fase5_blocoB/build_dds_tximport.R` |
 
 **Risco declarado, não escondido:** os links de download da Macrogen já
 expiraram (`docs/07_analise_rnaseq.md` §13.1) — se o servidor for limpo,
