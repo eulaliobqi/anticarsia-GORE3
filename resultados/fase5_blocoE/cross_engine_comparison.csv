@@ -1,0 +1,4 @@
+contraste,genes_comparados,genes_so_no_R,genes_so_no_python,pearson_r_log2fc,pearson_p,spearman_rho_log2fc,spearman_p,n_sig_R,n_sig_python,n_sig_intersecao,jaccard_sig
+Benzamidine_vs_Control,11833,0,0,0.9893824547633842,0.0,0.9918569539109792,0.0,255,185,180,0.6923076923076923
+SKTI_vs_Control,11833,0,0,0.9981917111704356,0.0,0.9992184537006062,0.0,3985,3986,3845,0.9318952981095492
+GORE3_vs_Control,11833,0,0,0.9993908856287613,0.0,0.9994652099146561,0.0,4164,4214,4053,0.9371098265895954

@@ -514,7 +514,7 @@ pelo número de réplicas (0,1 ≤ T ≤ 0,5 em log2 para poucas réplicas, não
 como decisão explícita, não copiado de outro desenho. **Decidido em
 30/07/2026: log2FC = 0,25** (meio da faixa, confirmado com o usuário).
 
-### 6.3 Execução — status em 30/07/2026 (Blocos A-B concluídos, C-H pendentes)
+### 6.3 Execução — Blocos A-G concluídos em 31/07/2026 (Bloco H em andamento)
 
 **Foco inicial confirmado com o usuário:** os 3 contrastes contra o
 Controle (#1 GORE3, #4 SKTI, #5 Benzamidina) primeiro — os cabeça-a-cabeça
@@ -575,12 +575,116 @@ contagens de gene do tximport, mas **sem** a correção de viés que a via R
 aplica — assimetria real entre os dois motores, que precisa ser
 declarada na comparação (Bloco E), não escondida.
 
-**Pendente (Blocos C-H):** ajuste do modelo DESeq2 em R e PyDESeq2 em
-Python sobre o dado real, extração dos 3 contrastes, verificação cruzada
-R×Python, checagem de sensibilidade ID-8 (compromisso da FASE 4), figuras
-modernas (PCA+UMAP, heatmap anotado, UpSet), documentação final.
-**Nenhum resultado de expressão diferencial existe ainda** — nada disso
-deve ser antecipado/projetado no artigo até rodar de fato.
+**Bloco C (modelo estatístico, R+Python) — concluído.** `DESeq(dds)` (Wald,
+`fitType="parametric"`, `betaPrior=FALSE`) e `DeseqDataSet.deseq2()`
+(PyDESeq2 0.5.4) rodados sobre `dds_raw.rds`/`txi_counts_for_python.csv`
+(Bloco B). Filtro `rowSums(counts) >= 10` (ou soma equivalente por gene em
+Python) reduz **15.773 → 11.833 genes** nos dois motores, mesmo número —
+primeira confirmação de que a mesma matriz de entrada produz o mesmo
+universo de genes testáveis. Os 3 coeficientes esperados
+(`condition_Benzamidine_vs_Control`, `condition_SKTI_vs_Control`,
+`condition_GORE3_vs_Control`) confirmados em `resultsNames(dds)` antes de
+qualquer extração (checagem programática, não suposta).
+
+**Bloco D (extração dos 3 contrastes, shrinkage apeglm, log2FC=0,25) —
+concluído.** `codigo/fase5_blocoD/extract_contrasts_deseq2.R` (R,
+`lfcShrink(coef=..., type="apeglm")`) e `apply_threshold_pydeseq2.py`
+(Python, mesmo limiar sobre o log2FC já encolhido pelo `run_pydeseq2.py`
+no Bloco C). Genes DE (padj<0,05, |log2FC|>0,25):
+
+| Contraste | DE — R/DESeq2 | DE — Python/PyDESeq2 |
+|---|---|---|
+| Benzamidina vs. Controle | 255 (183 up / 72 down) | 185 (130 up / 55 down) |
+| SKTI vs. Controle | 3.985 (1.902 up / 2.083 down) | 3.986 (1.891 up / 2.095 down) |
+| GORE3 vs. Controle | 4.164 (2.020 up / 2.144 down) | 4.214 (2.037 up / 2.177 down) |
+
+**Achado real, não suavizado:** SKTI e GORE3 têm um número de DEGs muito
+maior (~34-35% de todos os genes testados) que Benzamidina (~2%). Isso é
+**consistente com**, mas não provado por, a assimetria de poder
+estatístico já registrada na FASE 1 (Benzamidina perde 2/3 réplicas a
+profundidade reduzida) — não fabricar uma interpretação biológica
+definitiva a partir disso sem a checagem de sensibilidade (Bloco F,
+abaixo).
+
+**Bloco E (verificação cruzada R×Python) — concluído,
+`codigo/fase5_blocoE/compare_r_python.py`.** Concordância muito alta de
+log2FC encolhido nos 3 contrastes (Pearson/Spearman, todos os 11.833
+genes, sem gene exclusivo de nenhum motor):
+
+| Contraste | Pearson r | Spearman ρ | Jaccard (DE sig.) |
+|---|---|---|---|
+| Benzamidina vs. Controle | 0,989 | 0,992 | 0,692 |
+| SKTI vs. Controle | 0,998 | 0,999 | 0,932 |
+| GORE3 vs. Controle | 0,999 | 0,999 | 0,937 |
+
+**Achado real:** a concordância de log2FC é excelente nos 3 contrastes,
+mas a concordância da **lista de genes significativos** é visivelmente
+menor em Benzamidina (Jaccard 0,69 vs. ≥0,93 nos outros dois) — esperado
+dado que é o contraste com menos DEGs totais (mais sensível a chamadas de
+significância na fronteira, onde a assimetria de offset entre os motores,
+já declarada no Bloco C2, pesa mais). Resultado do dataset, não citação da
+literatura (o próprio artigo do PyDESeq2 não reporta esse número).
+
+**Bloco F (checagem de sensibilidade ID-8, compromisso da FASE 4) —
+concluído, `codigo/fase5_blocoF/sensitivity_id8.R`.** Rerodado
+Benzamidina×Controle com n=2 (ID-5, ID-7, excluindo ID-8) vs. o n=3
+completo (Bloco D). **Achado real e marcante, não suavizado:** DE cai de
+255 (n=3) para **apenas 6 genes** (n=2) — interseção de 4 genes, **Jaccard
+= 0,0156**. Nos 4 genes DE em ambos os cenários, direção do efeito
+concorda 4/4. **Interpretação, declarada com a devida cautela:** essa
+queda é muito maior do que se espera só pela perda de 1 réplica (n=3→n=2
+reduz poder, mas normalmente não elimina >95% dos DEGs) — combinado com o
+PCA/UMAP do Bloco G (abaixo), onde ID-8 se separa visualmente de ID-5/ID-7
+dentro do próprio grupo Benzamidina, o resultado é consistente com boa
+parte do sinal "Benzamidina vs. Controle" (n=3) ser **impulsionado por
+ID-8 especificamente**, não pelo efeito do grupo como um todo. Isso não
+prova que ID-8 é artefato técnico puro (pode ser variação biológica real
+de um único indivíduo) — mas é uma fragilidade real do contraste
+Benzamidina que deve ser lida com essa ressalva em toda interpretação
+downstream, não escondida.
+
+**Bloco G (figuras) — concluído.** Paleta categórica validada via skill
+`dataviz` deste ambiente (`validate_palette.js --pairs all`, 4 categorias:
+Controle=azul `#2a78d6`, Benzamidina=laranja `#eb6834`, SKTI=aqua
+`#1baf7a`, GORE3=violeta `#4a3aa7` — a 4ª cor padrão da paleta, amarelo,
+falha o piso de visão normal contra o laranja sob `--pairs all` e foi
+trocada por violeta, que passa todos os checks). Figuras em
+`figuras/fase5_blocoG/`:
+
+- `fig_pca.pdf/png` — PCA (VST, `blind=FALSE`), PC1=51%/PC2=11%. Controle
+  se agrupa à esquerda, SKTI+GORE3 à direita; Benzamidina se divide — ID-7
+  próximo do Controle, ID-5/ID-8 mais centrais. ID-8 marcado com contorno
+  preto (lote único).
+- `fig_umap.pdf/png` — reforço não-linear da PCA (`yang2021umap`).
+  **Confirma visualmente o achado do Bloco F:** ID-8 aparece isolado, longe
+  de ID-5/ID-7 (que clusterizam entre si e perto do Controle) — apoio
+  visual direto à fragilidade do contraste Benzamidina.
+- `fig_volcano_*.pdf/png`, `fig_ma_*.pdf/png` — por contraste (3), sem
+  rótulo individual de gene (15,7 mil IDs "LOC", ilegível em volume).
+- `fig_dispersion_estimates.pdf` — diagnóstico `plotDispEsts(dds)`.
+- `fig_heatmap_top_de.pdf` — união dos top 30 DE por contraste (77 genes
+  únicos), anotado por Grupo + Lote (LH00688 único vs. LH00129).
+- `fig_upset_de_genes.pdf/png` — interseção dos 3 conjuntos de DEGs
+  (`conway2017upsetr`, `upsetplot` Python). **Achado real:** a maior barra
+  (3.053 genes) é a interseção exclusiva SKTI∩GORE3 (excluindo
+  Benzamidina) — os dois inibidores conhecidos por compensação
+  proteolítica (SKTI) e o peptídeo em teste (GORE3) convergem numa
+  assinatura transcricional ampla e compartilhada; Benzamidina contribui
+  pouco a qualquer interseção, refletindo seu número total menor de DEGs.
+  **Não interpretar como prova de mecanismo compartilhado** sem
+  enriquecimento funcional (FASE 7, ainda não rodada) — é um padrão de
+  conjunto de genes, não de vias.
+
+**Achado de compatibilidade real (não do código do projeto):**
+`upsetplot 0.9.0` com `show_counts=True` quebra sob `matplotlib 3.11.1`
+(`TypeError` em `text.py`, confirmado isolando o bug em teste dedicado
+nesta sessão) — contornado com `show_counts=False` +
+`ax.bar_label()` nativo do matplotlib.
+
+**Pendente (Bloco H):** consolidar em `artigo.md`/`artigo_pt.md`,
+`INDICE_MATERIAL.md`, e commit único. Os cabeça-a-cabeça (#2 GORE3×Benzamidina,
+#3 GORE3×SKTI/H4, #6 agrupado) ficam para a próxima rodada da FASE 5, fora
+do escopo desta sessão.
 
 ---
 

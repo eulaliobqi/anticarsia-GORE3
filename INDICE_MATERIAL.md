@@ -4,7 +4,7 @@ Função: mapa único de tudo que existe hoje (figuras, tabelas, texto,
 código, dado-fonte), para uso na geração futura do artigo em Word e da
 apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 — é o índice de orquestração que aponta pra eles.
-Última atualização: 30/07/2026 (FASE 5 em andamento, Blocos A-B concluídos).
+Última atualização: 31/07/2026 (FASE 5 Blocos A-G concluídos, Bloco H em andamento).
 ---
 
 # Índice de material — Pós-doc GORE3 / RNA-Seq
@@ -32,11 +32,13 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | FASE 4 | Decisão de correção de lote — NÃO aplicar ComBat-seq (lote de amostra única) | ✅ decidido | §4 (Discussão), §5 item 12 |
 | FASE 5 | A — bibliografia + Zotero (7 citações, antes da execução) | ✅ concluído | §2.7 |
 | FASE 5 | B — rebuild Salmon --keepDuplicates + tximport (cobertura 100%) | ✅ concluído | §2.7 |
-| FASE 5 | C — modelo DESeq2 (R) + PyDESeq2 (Python) | ⏳ pendente | §2.7 |
-| FASE 5 | D — extrair 3 contrastes vs. Controle, R+Python | ⏳ pendente | — |
-| FASE 5 | E — verificação cruzada R×Python | ⏳ pendente | — |
-| FASE 5 | F — checagem de sensibilidade ID-8 | ⏳ pendente | — |
-| FASE 5 | G — figuras modernas (PCA+UMAP, heatmap, UpSet) | ⏳ pendente | — |
+| FASE 5 | C — modelo DESeq2 (R) + PyDESeq2 (Python) | ✅ concluído (11.833 genes pós-filtro, 3 coeficientes confirmados) | §2.7, §3.12 |
+| FASE 5 | D — extrair 3 contrastes vs. Controle, R+Python (apeglm, log2FC=0,25) | ✅ concluído | §2.7, §3.12 |
+| FASE 5 | E — verificação cruzada R×Python | ✅ concluído (Pearson/Spearman ≥0,989; Jaccard DE 0,69–0,94) | §2.7, §3.13 |
+| FASE 5 | F — checagem de sensibilidade ID-8 | ✅ concluído (⚠️ Benzamidina 255→6 DE sem ID-8) | §2.7, §3.14, §5 item 12 |
+| FASE 5 | G — figuras modernas (PCA+UMAP, volcano, MA, heatmap, UpSet) | ✅ concluído | §2.7, §3.15 |
+| FASE 5 | H — documentação + commit | ⏳ em andamento (esta sessão) | — |
+| FASE 5 | Cabeça-a-cabeça (#2 GORE3×Benzamidina, #3 GORE3×SKTI/H4, #6 agrupado) | ⏳ pendente, próxima rodada | §6.1 |
 | FASE 6–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
 
 ## Figuras
@@ -52,6 +54,11 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | 7 | `figuras/Figure7_fase3_blocoD_salmon_vs_star_mapping.png` | Taxa de mapeamento Salmon vs. STAR, 13 bibliotecas | §3.11 | `codigo/fase3_blocoD/analyze_salmon_mapping.py` | `resultados/fase3_blocoD_salmon_mapping_summary.csv` |
 | 8 | `figuras/Figure8_fase3_blocoF_featurecounts_vs_salmon_concordance.png` | Concordância Spearman gene-a-gene, featureCounts vs. Salmon+tximport | §3.11 | `codigo/fase3_blocoF/analyze_fase3_consistency.py` | `resultados/fase3_blocoF_crosscheck.csv` |
 | 9 | `figuras/Figure9_fase5_blocoB_keepdup_coverage.png` | Cobertura gênica do tximport antes/depois de --keepDuplicates (94,9%→100%) | §2.7 | `codigo/fase5_blocoB/analyze_keepdup_coverage.py` | `resultados/fase5_blocoB_keepdup_coverage.csv` |
+| 10 | `figuras/fase5_blocoG/fig_pca.png` | PCA (VST, blind=FALSE), 4 grupos, ID-8 marcado | §3.15 | `codigo/fase5_blocoG/figures_r.R` | `resultados_server/fase5_blocoG/vst_normalized_matrix.csv` (servidor) |
+| 11 | `figuras/fase5_blocoG/fig_umap.png` | UMAP, mesma matriz VST, reforço não-linear da PCA | §3.15 | `codigo/fase5_blocoG/figures_python.py` | idem |
+| 12 | `figuras/fase5_blocoG/fig_volcano_*.png` + `fig_ma_*.png` (3 contrastes cada) | Volcano e MA plot por contraste, log2FC encolhido | §3.15 | `codigo/fase5_blocoG/figures_r.R` | `resultados/fase5_blocoD/deseq2_*_all.csv` |
+| 13 | `figuras/fase5_blocoG/fig_upset_de_genes.png` | Interseção dos 3 conjuntos de DEGs (SKTI∩GORE3=3.053) | §3.15 | `codigo/fase5_blocoG/figures_python.py` | `resultados/fase5_blocoD/deseq2_*_sig.csv` |
+| — | `figuras/fase5_blocoG/fig_heatmap_top_de.pdf`, `fig_dispersion_estimates.pdf` | Heatmap top DE anotado (Grupo+Lote) e diagnóstico de dispersão DESeq2 | §3.15 | `codigo/fase5_blocoG/figures_r.R` | idem |
 
 Todas em PNG 300 dpi, legenda 100% em inglês no `artigo.md` (padrão
 Nature: `**Figure N |** frase-título...`), traduzida fielmente no
@@ -73,6 +80,8 @@ reprocessamento.
 | 9 | Salmon vs. STAR mapping rate, 13 bibliotecas | §3.11 | `resultados/fase3_blocoD_salmon_mapping_summary.csv` |
 | 10 | Gene-level concordance featureCounts vs. Salmon+tximport, 13 bibliotecas | §3.11 | `resultados/fase3_blocoF_crosscheck.csv` |
 | 11 | Group-level assigned-read depth, post-quantification recheck | §4 (Discussion) | `resultados/fase3_blocoF_depth_asymmetry_recheck.csv` |
+| 12 | Differentially expressed genes, R/DESeq2 vs. Python/PyDESeq2, 3 contrastes | §3.12 | `resultados/fase5_blocoD/{deseq2,pydeseq2}_*_sig.csv` |
+| 13 | Cross-engine (R×Python) concordance: Pearson/Spearman de log2FC, Jaccard de DE | §3.13 | `resultados/fase5_blocoE/cross_engine_comparison.csv` |
 
 Todas as tabelas do artigo são texto Markdown gerado a partir dos CSVs
 acima — nenhum número foi digitado à mão sem conferência contra a fonte
@@ -101,7 +110,11 @@ acima — nenhum número foi digitado à mão sem conferência contra a fonte
 | `codigo/fase3_blocoE/` | tx2gene do GTF real (`build_tx2gene.py`), samplesheet (`build_samplesheet.py`), tximport adaptado (`00_tximport_gore3.R`) |
 | `codigo/fase3_blocoF/` | Verificação cruzada featureCounts×Salmon+tximport+STAR, 3 checagens+Fig.8 (`analyze_fase3_consistency.py`); reverificação de assimetria de profundidade pós-quantificação, Tabela 11 (`recheck_depth_asymmetry.py`) |
 | `codigo/fase5_blocoB/` | Rebuild do índice Salmon com `--keepDuplicates` (`build_salmon_index_keepdup.sh`), requant 13 amostras (`run_salmon_quant_keepdup.sh`), rebuild tximport + `DESeqDataSetFromTximport` (`build_dds_tximport.R`), checagem de consistência+Fig.9 (`analyze_keepdup_coverage.py`) |
-| `codigo/fase5_blocoC/` | Modelo DESeq2 em R (`run_deseq2.R`) e PyDESeq2 em Python (`run_pydeseq2.py`) — escritos e corrigidos (achados de teste-piloto), **ainda não rodados sobre dado real** |
+| `codigo/fase5_blocoC/` | Modelo DESeq2 em R (`run_deseq2.R`) e PyDESeq2 em Python (`run_pydeseq2.py`) — rodados sobre dado real (11.833 genes pós-filtro, 3 coeficientes confirmados) |
+| `codigo/fase5_blocoD/` | Extração dos 3 contrastes com shrinkage apeglm (`extract_contrasts_deseq2.R`) e aplicação do mesmo limiar (log2FC=0,25) sobre o log2FC já encolhido do PyDESeq2 (`apply_threshold_pydeseq2.py`) |
+| `codigo/fase5_blocoE/` | Verificação cruzada R×Python — Pearson/Spearman + Jaccard (`compare_r_python.py`) |
+| `codigo/fase5_blocoF/` | Checagem de sensibilidade ID-8, refit n=2 vs. n=3 (`sensitivity_id8.R`) |
+| `codigo/fase5_blocoG/` | Figuras: PCA+dispersão+volcano+MA+heatmap em R (`figures_r.R`), UMAP+UpSet em Python (`figures_python.py`) — paleta validada via skill `dataviz` |
 
 Todo comando, incluindo os que falharam parcialmente (flag `-d` do
 FastQC na FASE 1; falha de segmentação por concorrência de threads na
@@ -126,6 +139,9 @@ original.
 | Índice Salmon decoy-aware + saídas `quant.sf` (13 amostras, FASE 3 Bloco D) | `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy,salmon}/` | índice ~1–2 GB estimado | grande demais para git — os logs de mapeamento (`salmon_quant.log`) que sustentam a Tabela 9/Fig.7 **foram copiados e versionados** em `qc/fase3_blocoD_salmon_logs/`, e as tabelas de contagem/TPM do tximport (pequenas, ~2,4 MB) já estão versionadas em `resultados/fase3_blocoE_salmon_gene_{counts,tpm}.tsv` |
 | Índice Salmon `--keepDuplicates` + `quant.sf` (13 amostras, FASE 5 Bloco B) | `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy_keepdup,salmon_keepdup}/` | índice ~1–2 GB estimado | grande demais para git — a matriz de contagens completa (100% cobertura, 15.773 genes × 12 amostras) já está versionada em `resultados/fase5_blocoB_txi_counts_for_python.csv` (~870 KB), suficiente para reproduzir o modelo estatístico sem acesso ao servidor |
 | `DESeqDataSet` ajustado (R, `.rds`) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase5_blocoB/dds_raw.rds` | pequeno mas binário/R-específico | não versionado por ser objeto R serializado, não CSV portável — reconstruível a partir de `resultados/fase5_blocoB_txi_counts_for_python.csv` + `codigo/fase5_blocoB/build_dds_tximport.R` |
+| `DESeqDataSet` já rodado (`DESeq()`, R, `.rds`) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase5_blocoC/dds_fit.rds` | pequeno mas binário/R-específico | idem — reconstruível a partir de `dds_raw.rds` + `codigo/fase5_blocoC/run_deseq2.R` |
+| Matriz VST normalizada (genes×amostras) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase5_blocoG/vst_normalized_matrix.csv` | ~2,6 MB | não versionada por tamanho, mas pequena o bastante para copiar se necessário; reconstruível a partir de `dds_fit.rds` (`vst(dds, blind=FALSE)`) |
+| Todos os `_all.csv` (genes não-significativos incluídos, 3 contrastes × 2 motores) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase5_blocoD/*_all.csv` | ~2,7 MB total | só os `_sig.csv` (genes DE) foram versionados em `resultados/fase5_blocoD/` — os `_all.csv` completos (11.833 genes cada) ficam no servidor, reconstruíveis via `codigo/fase5_blocoD/` |
 
 **Risco declarado, não escondido:** os links de download da Macrogen já
 expiraram (`docs/07_analise_rnaseq.md` §13.1) — se o servidor for limpo,

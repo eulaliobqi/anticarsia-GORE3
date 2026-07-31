@@ -17,12 +17,18 @@
 > nenhuma correção formal de lote — o confundimento de amostra única
 > (ID-8) torna o ComBat-seq inaplicável (a própria ferramenta recusa
 > rodar), decisão justificada por literatura + código-fonte (§4); checagem
-> de sensibilidade planejada para a FASE 5. **FASE 5 em andamento**
-> (30/07/2026): Blocos A (bibliografia) e B (import via tximport, índice
-> Salmon reconstruído com `--keepDuplicates`, cobertura 100% dos 15.773
-> genes) concluídos e verificados (§2.7). **Blocos C-H (modelo DESeq2 em
-> R+Python, contrastes, figuras) ainda não rodados — nenhum resultado de
-> expressão diferencial existe neste documento ainda.**
+> de sensibilidade planejada para a FASE 5. **FASE 5 (Blocos A-G)
+> concluída em 31/07/2026:** modelo DESeq2 (R) e PyDESeq2 (Python)
+> ajustados sobre a mesma matriz tximport (11.833 genes pós-filtro),
+> 3 contrastes vs. Controle extraídos com shrinkage apeglm (log2FC=0,25,
+> §3.12), verificação cruzada R×Python com concordância alta de log2FC
+> mas mais fraca na fronteira de significância para Benzamidina (§3.13),
+> checagem de sensibilidade ID-8 mostrando o contraste Benzamidina como
+> **frágil e dependente de uma única amostra** (255→6 DE genes sem ID-8,
+> §3.14), e figuras (PCA+UMAP, volcano, MA, heatmap, UpSet — SKTI∩GORE3
+> compartilham 3.053 genes DE, §3.15). Os contrastes cabeça-a-cabeça
+> (GORE3×Benzamidina, GORE3×SKTI/H4, agrupado) e o Bloco H (commit)
+> ficam para a próxima rodada.
 >
 > **Versão em inglês:** `artigo.md` (mantida em paralelo, sincronizada a
 > cada atualização — esta é a tradução fiel, não um resumo).
@@ -325,10 +331,7 @@ vez de um `gene_trans_map` do Trinity que não existe neste desenho
 genoma-guiado; a chamada `tximport()` em si, justificada por
 `soneson2015differential` (já citada, §2.5), não muda.
 
-### 2.7 Expressão diferencial: import e construção do modelo (FASE 5, em andamento)
-
-*[Parcial — só Blocos A-B; nenhum resultado de DE existe ainda. Não deve
-ser projetado/antecipado abaixo até os Blocos C-H rodarem de fato.]*
+### 2.7 Expressão diferencial: import, modelo e dupla implementação (FASE 5, Blocos A-G concluídos)
 
 **A estratégia de import revisita a escolha técnica da FASE 3, não sua
 ênfase.** A documentação do tximport é normativa, não sugestiva: *"Do not
@@ -387,6 +390,49 @@ modelo em R, mas sem a correção de viés de comprimento que o modelo em R
 aplica — uma assimetria real, divulgada, entre as entradas dos dois
 motores, a ter em mente ao interpretar a concordância entre eles (§3.12),
 não tratada como comparação perfeitamente equivalente.
+
+**Ajuste do modelo e extração dos contrastes.** Os dois motores foram
+ajustados sobre o mesmo filtro de baixa contagem
+(`rowSums(counts) >= 10`, ou soma equivalente por gene em Python) para os
+3 contrastes contra o Controle (Benzamidina, SKTI, GORE3). O shrinkage de
+log2 fold-change usou **apeglm** (Zhu, Ibrahim & Love 2019, PMID
+30395178) via coeficiente direto do modelo (sem releveling, Controle já
+sendo a referência nos dois motores), no limiar pré-declarado **log2FC =
+0,25**, padj < 0,05 (filtragem independente ligada por padrão — Bourgon,
+Gentleman & Huber 2010, PMID 20460310). Código:
+`codigo/fase5_blocoD/extract_contrasts_deseq2.R` (R) e
+`apply_threshold_pydeseq2.py` (Python, aplicado sobre o log2FC já
+encolhido que `run_pydeseq2.py`, Bloco C2, exportou).
+
+**Verificação cruzada entre motores** (achado empírico deste dataset, não
+um benchmark da literatura — o próprio artigo do PyDESeq2 não reporta uma
+figura de concordância quantitativa contra R/DESeq2): correlação
+Pearson/Spearman do log2FC encolhido e sobreposição de Jaccard dos
+conjuntos de genes significativos, por contraste. Código:
+`codigo/fase5_blocoE/compare_r_python.py`.
+
+**Checagem de sensibilidade ID-8** (compromisso assumido na decisão de
+lote da FASE 4, §4): o modelo Benzamidina×Controle foi reajustado sobre o
+`DESeqDataSet` bruto do tximport (FASE 5 Bloco B), subconjuntado para n=2
+(ID-5, ID-7, excluindo ID-8), com os níveis não usados do fator
+descartados antes do reajuste, e comparado contra o resultado n=3
+completo quanto à sobreposição de genes DE e concordância de direção do
+efeito. Código: `codigo/fase5_blocoF/sensitivity_id8.R`.
+
+**Figuras.** Paleta categórica validada com o validador da skill
+`dataviz` deste ambiente (`validate_palette.js`, `--pairs all`, 4
+categorias): Controle = azul `#2a78d6`, Benzamidina = laranja `#eb6834`,
+SKTI = aqua `#1baf7a`, GORE3 = violeta `#4a3aa7`. O 4º slot categórico
+padrão da paleta (amarelo) falha o piso de visão normal contra o laranja
+sob comparação all-pairs e foi trocado por violeta, que passa todos os
+checks para este conjunto de 4 categorias. A PCA (`plotPCA` sobre VST,
+`blind=FALSE`) foi pareada com UMAP como reforço não-linear, não
+substituto (Yang et al. 2021, PMID 34320340), computado sobre a mesma
+matriz VST exportada do R. As interseções entre os conjuntos de genes DE
+dos 3 contrastes foram visualizadas com um UpSet plot (Conway, Lex &
+Gehlenborg 2017, PMID 28645171) em vez de diagrama de Venn. Código:
+`codigo/fase5_blocoG/figures_r.R` (PCA, diagnóstico de dispersão,
+volcano, MA, heatmap anotado) e `figures_python.py` (UMAP, UpSet).
 
 ---
 
@@ -1024,6 +1070,102 @@ Correlação de Spearman por amostra entre as duas matrizes independentes
 de contagem de genes. Arquivo:
 `figuras/Figure8_fase3_blocoF_featurecounts_vs_salmon_concordance.png`.
 
+### 3.12 Expressão diferencial: três contrastes, dois motores independentes
+
+Os dois motores foram ajustados sobre o mesmo conjunto filtrado de genes
+(15.773 → 11.833 genes, `rowSums(counts) >= 10`) e expuseram os mesmos 3
+coeficientes esperados do modelo antes de qualquer contraste ser extraído
+(§2.7). Genes significativos (padj < 0,05, |log2FC| > 0,25, encolhido por
+apeglm) por contraste:
+
+**Tabela 12 | Genes diferencialmente expressos, R/DESeq2 vs. Python/PyDESeq2.**
+
+| Contraste | DE — R/DESeq2 | DE — Python/PyDESeq2 |
+|---|---:|---:|
+| Benzamidina vs. Controle | 255 (183 up / 72 down) | 185 (130 up / 55 down) |
+| SKTI vs. Controle | 3.985 (1.902 up / 2.083 down) | 3.986 (1.891 up / 2.095 down) |
+| GORE3 vs. Controle | 4.164 (2.020 up / 2.144 down) | 4.214 (2.037 up / 2.177 down) |
+
+SKTI e GORE3 movem cerca de um terço de todos os genes testáveis
+(34-35%); Benzamidina move ~2%. Essa assimetria é consistente com, mas
+não provada pela, assimetria de profundidade já estabelecida para
+Benzamidina (§3.7, Tabela 11) — §3.14 testa isso diretamente, em vez de
+apenas afirmar.
+
+### 3.13 Concordância entre motores é alta para o tamanho do efeito, menor na fronteira de significância
+
+**Tabela 13 | Concordância R×Python do log2FC encolhido e dos conjuntos de genes DE.**
+
+| Contraste | Pearson *r* | Spearman *ρ* | Jaccard (conjuntos DE) |
+|---|---:|---:|---:|
+| Benzamidina vs. Controle | 0,989 | 0,992 | 0,692 |
+| SKTI vs. Controle | 0,998 | 0,999 | 0,932 |
+| GORE3 vs. Controle | 0,999 | 0,999 | 0,937 |
+
+A correlação de tamanho de efeito (log2FC) é excelente nos 3 contrastes.
+A concordância sobre *quais* genes cruzam o limiar de significância é
+visivelmente mais fraca para Benzamidina (Jaccard 0,69) que para
+SKTI/GORE3 (≥0,93) — esperado para o contraste com menos genes DE totais,
+onde mais chamadas ficam na fronteira de significância e por isso mais
+sensíveis à assimetria de offset já divulgada entre os motores (§2.7).
+Este é um achado empírico deste dataset, não uma cifra de benchmark
+publicada (Muzellec et al. 2023 não reportam número quantitativo de
+concordância R-vs-Python).
+
+### 3.14 O resultado de Benzamidina depende desproporcionalmente de uma única amostra (ID-8)
+
+Reajustar Benzamidina×Controle com n=2 (excluindo ID-8, o lote de corrida
+única estabelecido em §3.3) derruba a contagem de genes DE de 255 para
+**6** (interseção = 4 genes; Jaccard = 0,016). A concordância de direção
+do efeito nesses 4 genes compartilhados é completa (4/4). Uma queda de
+n=3 para n=2 é esperada para reduzir poder, mas uma perda de >95% das
+chamadas de DE é muito maior do que a perda de poder típica de uma
+réplica a menos, e a visualização PCA/UMAP (Fig. 10-11, §3.15) mostra
+ID-8 posicionado separado de ID-5 e ID-7 dentro do próprio grupo
+Benzamidina, nas duas projeções. Em conjunto, isso é consistente com boa
+parte do sinal "Benzamidina vs. Controle" (n=3) sendo impulsionado
+especificamente por ID-8, não pelo grupo como um todo — **não** é prova
+de que ID-8 seja um artefato técnico puro (pode refletir variação
+biológica genuína de um único indivíduo), mas é uma fragilidade real
+deste contraste específico que deve qualificar qualquer interpretação
+posterior dele, não ser absorvida silenciosamente no resultado n=3.
+
+### 3.15 Estrutura em nível de amostra e sobreposição de conjuntos DE (Figuras 10-13)
+
+**Figura 10 | PCA das contagens normalizadas por VST (`blind=FALSE`).**
+PC1 (51% da variância) separa Controle (negativo) de SKTI+GORE3
+(positivo); Benzamidina se divide, com ID-7 mais próximo do Controle e
+ID-5/ID-8 mais centrais. ID-8 tem contorno preto. Arquivo:
+`figuras/fase5_blocoG/fig_pca.png`.
+
+**Figura 11 | UMAP (reforço não-linear da PCA, mesma matriz VST).** ID-8
+fica separado de ID-5/ID-7, que se agrupam entre si perto do Controle —
+apoio visual direto ao §3.14. Arquivo: `figuras/fase5_blocoG/fig_umap.png`.
+
+**Figura 12 | Volcano e MA plots por contraste (log2FC encolhido por
+apeglm).** Arquivos: `figuras/fase5_blocoG/fig_volcano_*.png`,
+`figuras/fase5_blocoG/fig_ma_*.png`.
+
+**Figura 13 | UpSet plot dos conjuntos de genes DE dos 3 contrastes.** O
+maior conjunto (3.053 genes) é a interseção exclusiva SKTI∩GORE3
+(excluindo Benzamidina) — SKTI (indutor conhecido de compensação
+proteolítica) e GORE3 compartilham uma assinatura transcricional ampla à
+qual Benzamidina, com muito menos DEGs totais, contribui pouco. Este é um
+padrão de sobreposição de conjunto de genes, não evidência de mecanismo
+compartilhado — enriquecimento funcional (FASE 7, ainda não rodada) é
+necessário antes de qualquer alegação em nível de via. Arquivo:
+`figuras/fase5_blocoG/fig_upset_de_genes.png`. Um bug real de
+compatibilidade de software foi encontrado e contornado ao construir esta
+figura: `upsetplot` 0.9.0 com `show_counts=True` lança um `TypeError` sob
+`matplotlib` 3.11.1 (isolado em teste dedicado nesta sessão); os rótulos
+de contagem foram adicionados com `bar_label()` nativo do matplotlib.
+
+Um heatmap anotado da união dos top 30 genes DE de cada contraste (77
+genes únicos, faixas de anotação Grupo + Lote) e um diagnóstico de
+dispersão `plotDispEsts` também estão disponíveis
+(`figuras/fase5_blocoG/fig_heatmap_top_de.pdf`,
+`fig_dispersion_estimates.pdf`) mas não são reproduzidos aqui.
+
 ---
 
 ## 4. Discussão
@@ -1130,13 +1272,18 @@ para ID-8, absorvendo silenciosamente toda a variação daquela amostra
 sob aparência de correção. **Decisão:** nenhum ajuste formal de lote; o
 confundimento é divulgado aqui em vez de escondido, seguindo o piso
 mínimo de `leek2010tackling` (PMID 20838408) de reportar o grupo de
-processamento junto com as variáveis biológicas. **Verificação planejada
-(FASE 5, ainda não rodada):** rerrodar os contrastes que envolvem
-Benzamidina (#2, #5) com e sem ID-8 e reportar se a conclusão muda —
-prática geral razoável de análise de sensibilidade, não um protocolo
-nominal validado na literatura para este cenário exato de confundimento
-de amostra única (uma busca dirigida não encontrou artigo nesse sentido —
-reportado como decisão analítica própria, não como citação).
+processamento junto com as variáveis biológicas. **Verificação rodada
+(FASE 5, §3.14):** rerrodar Benzamidina×Controle com e sem ID-8 mostra
+que a conclusão muda drasticamente — genes DE caem de 255 (n=3) para 6
+(n=2), Jaccard 0,016 — confirmando que este confundimento não é uma
+ressalva menor para este contraste específico. Os contrastes
+cabeça-a-cabeça que também envolvem Benzamidina (#2, GORE3 vs.
+Benzamidina) herdam essa fragilidade e ainda não foram rodados — aplicada
+aqui uma prática geral razoável de análise de sensibilidade, não um
+protocolo nominal validado na literatura para este cenário exato de
+confundimento de amostra única (uma busca dirigida não encontrou artigo
+nesse sentido — reportado como decisão analítica própria, não como
+citação).
 
 ---
 
@@ -1234,16 +1381,40 @@ reportado como decisão analítica própria, não como citação).
     estrutura de ressalva da transferência planta→inseto de Coxe et al.
     (2024) já declarada acima.
 12. **Nenhuma correção formal de lote é aplicada para o confundimento de
-    amostra única do ID-8 (Benzamidine_R3, §4).** O ComBat-seq —
+    amostra única do ID-8 (Benzamidine_R3, §4), e a checagem de
+    sensibilidade agora mostra que isso importa muito.** O ComBat-seq —
     ferramenta de correção de lote já citada neste projeto — recusa
     rodar num desenho com uma amostra num nível de lote (verificado
     diretamente no código-fonte); a alternativa de covariável no design
     se comportaria como intercepto individual para essa amostra. Nenhuma
-    correção formal é aplicada; o confundimento é divulgado aqui em vez
-    de escondido. Uma checagem de sensibilidade (contrastes envolvendo
-    Benzamidina com e sem ID-8) está planejada para a FASE 5 mas ainda
-    não foi rodada — **ainda não resolvido**, é uma decisão sobre *como*
-    proceder, não uma correção já validada.
+    correção formal é aplicada; o confundimento é divulgado aqui em vez de
+    escondido. A checagem de sensibilidade planejada (§3.14) já rodou:
+    excluir ID-8 derruba os genes DE de Benzamidina×Controle de 255 para
+    6 (Jaccard 0,016). Isso não prova que ID-8 seja um artefato técnico em
+    vez de variação biológica genuína, mas significa que o resultado de
+    Benzamidina relatado (n=3) deve ser lido como **frágil e
+    desproporcionalmente dependente de uma única amostra**, não como um
+    efeito robusto em nível de grupo — isso qualifica qualquer uso
+    posterior do contraste Benzamidina, incluindo qualquer comparação
+    cabeça-a-cabeça futura contra GORE3 (#2 na matriz de contrastes,
+    §6.1).
+13. **A concordância entre motores (R/DESeq2 vs. Python/PyDESeq2) no
+    log2 fold change é excelente (Pearson/Spearman ≥ 0,989 nos 3
+    contrastes, §3.13), mas a concordância sobre quais genes cruzam o
+    limiar de significância é visivelmente mais fraca para Benzamidina
+    (Jaccard 0,69) que para SKTI/GORE3 (≥0,93).** Isso é esperado dado o
+    número muito menor de genes DE totais de Benzamidina (mais chamadas
+    na fronteira) combinado com a assimetria de offset já divulgada entre
+    os motores (§2.7) — não uma contradição da alta concordância de
+    tamanho de efeito, mas um lembrete de que "os dois motores
+    concordam" é uma afirmação graduada, não binária, e é mais fraca
+    justamente onde a Limitação 12 já sinaliza fragilidade.
+14. **A assinatura de genes DE compartilhada entre SKTI e GORE3 (3.053
+    genes, Fig. 13) é uma sobreposição de conjunto de genes, não
+    evidência de via ou mecanismo compartilhado.** Nenhum enriquecimento
+    funcional foi rodado ainda (FASE 7); atribuir essa sobreposição a
+    qualquer processo biológico específico antes dessa análise seria
+    especulação, não um resultado.
 
 ---
 
@@ -1280,6 +1451,26 @@ downstream analyses. *Biostatistics* **17**, 29–39 (2016).
 Leek, J. T. et al. Tackling the widespread and critical impact of batch
 effects in high-throughput data. *Nat. Rev. Genet.* **11**, 733–739
 (2010).
+
+Zhu, A., Ibrahim, J. G. & Love, M. I. Heavy-tailed prior distributions for
+sequence count data: removing the noise and preserving large differences.
+*Bioinformatics* **35**, 2084–2092 (2019). PMID 30395178.
+
+Bourgon, R., Gentleman, R. & Huber, W. Independent filtering increases
+detection power for high-throughput experiments. *PNAS* **107**,
+9546–9551 (2010). PMID 20460310.
+
+Muzellec, B., Teleńczuk, M., Cabeli, V. & Andreux, M. PyDESeq2: a python
+package for bulk RNA-seq differential expression analysis.
+*Bioinformatics* **39**, btad547 (2023). PMID 37669147.
+
+Yang, Y. et al. Dimensionality reduction by UMAP reinforces sample
+heterogeneity analysis in bulk transcriptomic data. *Cell Rep.* **36**,
+109442 (2021). PMID 34320340.
+
+Conway, J. R., Lex, A. & Gehlenborg, N. UpSetR: an R package for the
+visualization of intersecting sets and their properties. *Bioinformatics*
+**33**, 2938–2940 (2017). PMID 28645171.
 
 ---
 
@@ -1324,6 +1515,12 @@ effects in high-throughput data. *Nat. Rev. Genet.* **11**, 733–739
 | Rebuild do tximport + construção do DESeqDataSet (FASE 5 Bloco B) | `codigo/fase5_blocoB/build_dds_tximport.R` |
 | Checagem de consistência de cobertura + Figura 9 | `codigo/fase5_blocoB/analyze_keepdup_coverage.py` → `resultados/fase5_blocoB_keepdup_coverage.csv` |
 | Figura 9 (PNG 300 dpi) | `figuras/Figure9_fase5_blocoB_keepdup_coverage.png` |
-| Modelo DESeq2 em R (Bloco C1, ainda não rodado sobre dado real) | `codigo/fase5_blocoC/run_deseq2.R` |
-| Modelo PyDESeq2 em Python (Bloco C2, ainda não rodado sobre dado real) | `codigo/fase5_blocoC/run_pydeseq2.py` |
+| Modelo DESeq2 em R (Bloco C1) | `codigo/fase5_blocoC/run_deseq2.R` |
+| Modelo PyDESeq2 em Python (Bloco C2) | `codigo/fase5_blocoC/run_pydeseq2.py` |
 | Índice Salmon --keepDuplicates/quant, export de contagens do tximport (grande) | servidor: `~/rnaseq-Anticarsia-GORE3/{salmon_index_decoy_keepdup,salmon_keepdup}/` (não versionado — dado grande) |
+| Extração dos contrastes, shrinkage apeglm (Bloco D) | `codigo/fase5_blocoD/extract_contrasts_deseq2.R`, `apply_threshold_pydeseq2.py` → `resultados/fase5_blocoD/*_sig.csv` |
+| Comparação entre motores (Bloco E) | `codigo/fase5_blocoE/compare_r_python.py` → `resultados/fase5_blocoE/cross_engine_comparison.csv` |
+| Checagem de sensibilidade ID-8 (Bloco F) | `codigo/fase5_blocoF/sensitivity_id8.R` → `resultados/fase5_blocoF/sensitivity_id8_summary.csv` |
+| Figuras — PCA, dispersão, volcano, MA, heatmap (Bloco G, R) | `codigo/fase5_blocoG/figures_r.R` |
+| Figuras — UMAP, UpSet (Bloco G, Python) | `codigo/fase5_blocoG/figures_python.py` |
+| Figuras 10-13 (PDF + PNG 300 dpi) | `figuras/fase5_blocoG/` |
