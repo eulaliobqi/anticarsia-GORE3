@@ -1,0 +1,4 @@
+contraste,n_sig_R_clusterProfiler,n_sig_Python_gseapy,n_intersecao,jaccard,pct_R_confirmado_em_Python
+Benzamidine_vs_Control,55,70,53,0.7361,96.4
+SKTI_vs_Control,874,1641,874,0.5326,100.0
+GORE3_vs_Control,321,937,321,0.3426,100.0

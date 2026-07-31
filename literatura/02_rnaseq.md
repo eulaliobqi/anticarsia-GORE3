@@ -594,3 +594,89 @@ DOI: [10.1093/bioinformatics/btx364](https://doi.org/10.1093/bioinformatics/btx3
 **Onde entra:** FASE 5 — interseção dos genes DE dos 3 contrastes iniciais (Benzamidina/SKTI/GORE3 × Controle); equivalente Python real e mantido usado quando aplicável: `UpSetPlot` (github.com/jnothman/UpSetPlot).
 
 **Ressalva:** Só o abstract foi lido. Não é a referência original do conceito UpSet (essa é Lex et al., IEEE TVCG 2014, não indexada no PubMed) — esta é especificamente a citação do pacote R.
+
+## 2F — Anotação funcional multi-fonte e enriquecimento (FASE 7)
+
+### `blum2026interproscan6` — Tier 1
+**Blum M, Hobbs E, Florentino L, Bateman A.** (2026). InterProScan 6: a modern large-scale protein function annotation pipeline. `Bioinformatics advances` 2026;6(1):vbag141.
+
+DOI: [10.1093/bioadv/vbag141](https://doi.org/10.1093/bioadv/vbag141) · PMID: [42222668](https://pubmed.ncbi.nlm.nih.gov/42222668/) · PMC: PMC13221978
+**Lido de:** **texto completo**
+
+**O que estabelece:** Reimplementação completa do InterProScan como pipeline Nextflow, com desacoplamento entre código e dados de assinatura, suporte nativo a container, gerenciamento de dados sob demanda e um serviço de lookup por checksum (Matches API) que resolve sequências já conhecidas contra anotações InterPro pré-computadas — evita o download local pesado das bases de member-databases que a v5 exigia. Reproduz os resultados da v5 com precisão/sensibilidade quase idênticas em 9 proteomas de referência, com speedup de ~2× em proteomas eucarióticos grandes.
+
+**Onde entra:** FASE 7 (`docs/07_analise_rnaseq.md` §8) — ferramenta escolhida para anotação ampla de domínio/assinatura (PROSITE, PRINTS, SMART, PANTHER, Pfam via IPR, etc.) sobre o proteoma de *A. gemmatalis*, em vez da v5 (cujo pacote conda em cache no servidor nunca foi implantado e está desatualizado). Superset de `jones2014interproscan` (v5, já fichado em §2A) — mantido como referência histórica do método, não descartado.
+
+**Ressalva:** Publicado em 2026, ferramenta muito recente — sem histórico de uso extenso na comunidade ainda além do próprio benchmark do artigo.
+
+### `blum2025interpro` — Tier 1
+**Blum M, Andreeva A, Florentino LC, et al.** (2025). InterPro: the protein sequence classification resource in 2025. `Nucleic Acids Research` 2025;53(D1):D444-D456.
+
+DOI: [10.1093/nar/gkae1082](https://doi.org/10.1093/nar/gkae1082) · PMID: [39565202](https://pubmed.ncbi.nlm.nih.gov/39565202/)
+**Lido de:** **abstract**
+
+**O que estabelece:** Estado atual do banco InterPro (integra PROSITE, PRINTS, SMART, PANTHER, Pfam, TIGRFAM, CDD, SUPERFAMILY etc.) — a base de dados que o InterProScan classifica.
+
+**Onde entra:** FASE 7 — citada **junto com** `blum2026interproscan6`, por instrução explícita dos próprios autores no README do pacote (`github.com/ebi-pf-team/interproscan6`, seção "Citation": lista as duas publicações).
+
+**Ressalva:** Só o abstract foi lido.
+
+### `mistry2021pfam` — Tier 1
+**Mistry J, Chuguransky S, Williams L, Qureshi M, Salazar GA, Sonnhammer ELL, Tosatto SCE, Paladin L, Raj S, Richardson LJ, Finn RD, Bateman A.** (2021). Pfam: The protein families database in 2021. `Nucleic Acids Research` 2021;49(D1):D412-D419.
+
+DOI: [10.1093/nar/gkaa913](https://doi.org/10.1093/nar/gkaa913) · PMID: [33125078](https://pubmed.ncbi.nlm.nih.gov/33125078/) · PMC: PMC7779014
+**Lido de:** **abstract**
+
+**O que estabelece:** Última atualização publicada do banco Pfam (release 33.1 na época) — classificação de sequências proteicas em famílias/domínios via HMM.
+
+**Onde entra:** FASE 7 — citação do banco `Pfam-A.hmm` já disponível em `/home/eulalio/databases/pfam/` no servidor (pressado, pronto para `hmmscan`), usado para anotação de domínio do proteoma de *A. gemmatalis*.
+
+**Ressalva:** Só o abstract foi lido. É a citação padrão do Pfam mesmo com releases mais recentes do banco em si — não há paper dedicado mais novo até a data desta ficha.
+
+### `eddy2011accelerated` — Tier 1
+**Eddy SR.** (2011). Accelerated Profile HMM Searches. `PLoS Computational Biology` 2011;7(10):e1002195.
+
+DOI: [10.1371/journal.pcbi.1002195](https://doi.org/10.1371/journal.pcbi.1002195) · PMID: [22039361](https://pubmed.ncbi.nlm.nih.gov/22039361/) · PMC: PMC3197634
+**Lido de:** **abstract**
+
+**O que estabelece:** Algoritmo de aceleração (MSV) por trás do HMMER3 — 100-1000× mais rápido que HMMER2, com sensibilidade equivalente a busca de perfil-HMM não acelerada.
+
+**Onde entra:** FASE 7 — citação da ferramenta `hmmscan`/`hmmpress` (ambiente `annotation` do servidor) usada para rodar o Pfam-A sobre o proteoma.
+
+**Ressalva:** Só o abstract foi lido.
+
+### `sledzieski2024philharmonic` — Tier 2
+**Sledzieski S, Versavel C, Singh R, Ocitti F, Devkota K, Kumar L, Shpilker P, Roger L, Yang J, Lewinski N, Putnam H, Klein-Seetharaman J, Berger B, Cowen L.** (2024/2025). Decoding the Functional Interactome of Non-Model Organisms with PHILHARMONIC. `bioRxiv` (preprint).
+
+DOI: [10.1101/2024.10.25.620267](https://doi.org/10.1101/2024.10.25.620267) · PMID: [39553947](https://pubmed.ncbi.nlm.nih.gov/39553947/) · PMC: PMC11565725
+**Lido de:** **abstract**
+
+**O que estabelece:** Método computacional que combina inferência de rede de interação proteína-proteína por deep learning (`dscript`) com clustering espectral não-supervisionado e homologia remota, para "iluminar" a organização funcional de qualquer organismo não-modelo a partir só do proteoma sequenciado. Validado em coral construtor de recife e seu simbionte algal.
+
+**Onde entra:** FASE 7, Bloco E — **proposto como adição exploratória/opcional**, não parte do escopo "padrão ouro" original do projeto. Relevante porque *A. gemmatalis* é não-modelo e o método foi desenhado especificamente para esse cenário.
+
+**⚠️ Ressalva crítica, declarada não escondida:** confirmado via WebFetch em 31/07/2026 que **este é um preprint no bioRxiv, ainda não revisado por pares** ("This is a preprint. It has not yet been peer reviewed by a journal."), apesar de indexado no PubMed com PMID próprio. Se usado no artigo, citar explicitamente como preprint, não como publicação peer-reviewed — reverificar status de publicação antes de qualquer submissão final do artigo.
+
+### `fang2023gseapy` — Tier 1
+**Fang Z, Liu X, Peltz G.** (2023). GSEApy: a comprehensive package for performing gene set enrichment analysis in Python. `Bioinformatics` 2023;39(1):btac757.
+
+DOI: [10.1093/bioinformatics/btac757](https://doi.org/10.1093/bioinformatics/btac757) · PMID: [36426870](https://pubmed.ncbi.nlm.nih.gov/36426870/) · PMC: PMC9805564
+**Lido de:** **abstract**
+
+**O que estabelece:** Pacote Python para GSEA/enriquecimento por sobre-representação (via API do Enrichr), reimplementado em Rust para desempenho — equivalente Python funcional ao `clusterProfiler`.
+
+**Onde entra:** FASE 7 — segunda implementação independente (Python) do enriquecimento GO/KEGG, ao lado do `clusterProfiler` em R, mesmo padrão de dupla implementação já estabelecido na FASE 5 (DESeq2/PyDESeq2).
+
+**Ressalva:** Só o abstract foi lido. Ao contrário do `clusterProfiler::enricher()`, a via nativa de conjunto-de-genes customizado (GMT) precisa ser confirmada na documentação atual do pacote antes de assumir paridade de recursos com o R.
+
+### `yu2012clusterprofiler` — Tier 1
+**Yu G, Wang LG, Han Y, He QY.** (2012). clusterProfiler: an R package for comparing biological themes among gene clusters. `OMICS` 2012;16(5):284-287.
+
+DOI: [10.1089/omi.2011.0118](https://doi.org/10.1089/omi.2011.0118) · PMID: [22455463](https://pubmed.ncbi.nlm.nih.gov/22455463/) · PMC: PMC3339379
+**Lido de:** **abstract**
+
+**O que estabelece:** Artigo original do `clusterProfiler`, incluindo a função `compareCluster()` — comparação automatizada de classificação/enriquecimento de termos biológicos entre múltiplos clusters de genes (aqui: os 3 contrastes de tratamento).
+
+**Onde entra:** FASE 7, Bloco I — base da figura comparativa moderna (dotplot de `compareCluster()`) entre os 3 tratamentos, a peça central do pedido do usuário ("similaridade, divergências").
+
+**Ressalva:** Só o abstract foi lido. É complementar a `wu2021clusterprofiler` (já fichado em §2A) — o de 2012 é o pacote original/`compareCluster`, o de 2021 é a atualização do ecossistema `clusterProfiler` 4.0 com suporte a organismos sem `org.*.db`.

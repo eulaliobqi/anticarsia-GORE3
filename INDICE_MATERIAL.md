@@ -4,7 +4,7 @@ Função: mapa único de tudo que existe hoje (figuras, tabelas, texto,
 código, dado-fonte), para uso na geração futura do artigo em Word e da
 apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 — é o índice de orquestração que aponta pra eles.
-Última atualização: 31/07/2026 (FASE 5 Blocos A-G concluídos, Bloco H em andamento).
+Última atualização: 31/07/2026 (FASE 5 A-H e FASE 7 A-K concluídos e commitados).
 ---
 
 # Índice de material — Pós-doc GORE3 / RNA-Seq
@@ -37,9 +37,20 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | FASE 5 | E — verificação cruzada R×Python | ✅ concluído (Pearson/Spearman ≥0,989; Jaccard DE 0,69–0,94) | §2.7, §3.13 |
 | FASE 5 | F — checagem de sensibilidade ID-8 | ✅ concluído (⚠️ Benzamidina 255→6 DE sem ID-8) | §2.7, §3.14, §5 item 12 |
 | FASE 5 | G — figuras modernas (PCA+UMAP, volcano, MA, heatmap, UpSet) | ✅ concluído | §2.7, §3.15 |
-| FASE 5 | H — documentação + commit | ⏳ em andamento (esta sessão) | — |
-| FASE 5 | Cabeça-a-cabeça (#2 GORE3×Benzamidina, #3 GORE3×SKTI/H4, #6 agrupado) | ⏳ pendente, próxima rodada | §6.1 |
-| FASE 6–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
+| FASE 5 | H — documentação + commit | ✅ concluído (commit `1daaf72`) | — |
+| FASE 5 | Cabeça-a-cabeça (#2 GORE3×Benzamidina, #3 GORE3×SKTI/H4, #6 agrupado) | ⏳ escopo movido para outro artigo (decisão do usuário) | §6.1 |
+| FASE 7 | A — bibliografia + Zotero (8 citações, antes da execução) | ✅ concluído (PHILHARMONIC identificado como preprint) | §2.8 |
+| FASE 7 | B — proteoma representativo + Pfam/HMMER | ✅ concluído (14.238 genes, 83,1% com domínio) | §2.8, §3.16 |
+| FASE 7 | C — eggNOG-mapper (GO/KEGG) | ✅ concluído (94,8% hit, 60,7% GO, 56,8% KEGG) | §2.8, §3.16 |
+| FASE 7 | D — InterProScan 6 (Nextflow, Docker) | ✅ concluído (95,2% hit, 74,9% GO) | §2.8, §3.16 |
+| FASE 7 | E — PHILHARMONIC (opcional) | ⏳ não rodado (preprint, escopo/tempo) | §5 item 17 |
+| FASE 7 | F — consolidação multi-fonte (união GO) | ✅ concluído (80,1% cobertura combinada, Jaccard 0,692) | §2.8, §3.16 |
+| FASE 7 | G — enriquecimento GO/KEGG/Pfam, dois motores | ✅ concluído | §2.8, §3.17 |
+| FASE 7 | H — verificação cruzada R×Python (GO) | ✅ concluído (⚠️ gseapy sistematicamente mais permissivo) | §2.8, §3.17 |
+| FASE 7 | I — comparação entre tratamentos (compareCluster, Venn, UpSet) | ✅ concluído (86% termos GORE3 também em SKTI) | §2.8, §3.18 |
+| FASE 7 | J — figuras finais | ✅ concluído (geradas junto ao Bloco I) | §3.18 |
+| FASE 7 | K — documentação + commit | ✅ concluído (esta sessão) | — |
+| FASE 6, 8–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
 
 ## Figuras
 
@@ -59,6 +70,10 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | 12 | `figuras/fase5_blocoG/fig_volcano_*.png` + `fig_ma_*.png` (3 contrastes cada) | Volcano e MA plot por contraste, log2FC encolhido | §3.15 | `codigo/fase5_blocoG/figures_r.R` | `resultados/fase5_blocoD/deseq2_*_all.csv` |
 | 13 | `figuras/fase5_blocoG/fig_upset_de_genes.png` | Interseção dos 3 conjuntos de DEGs (SKTI∩GORE3=3.053) | §3.15 | `codigo/fase5_blocoG/figures_python.py` | `resultados/fase5_blocoD/deseq2_*_sig.csv` |
 | — | `figuras/fase5_blocoG/fig_heatmap_top_de.pdf`, `fig_dispersion_estimates.pdf` | Heatmap top DE anotado (Grupo+Lote) e diagnóstico de dispersão DESeq2 | §3.15 | `codigo/fase5_blocoG/figures_r.R` | idem |
+| 14 | `figuras/fase7_blocoI/fig_compareCluster_dotplot.png` | Dotplot GO comparativo entre os 3 tratamentos (compareCluster) | §3.18 | `codigo/fase7_blocoI/compare_clusters_r.R` | `resultados/fase7_blocoI/compareCluster_GO_results.csv` |
+| 15 | `figuras/fase7_blocoI/fig_upset_go_terms.png` | UpSet dos termos GO significativos por contraste (não genes) | §3.18 | `codigo/fase7_blocoI/venn_upset_go_python.py` | `resultados/fase7_blocoG/clusterprofiler_GO_*.csv` |
+| 16 | `figuras/fase7_blocoI/fig_venn3_de_genes.png` | Venn de 3 vias dos genes DE (checagem cruzada com UpSet da FASE 5) | §3.18 | `codigo/fase7_blocoI/venn_upset_go_python.py` | `resultados/fase5_blocoD/deseq2_*_sig.csv` |
+| — | `figuras/fase7_blocoI/fig_cnetplot_*.png` (3 contrastes) | Rede gene-conceito, top 10 termos GO por contraste | §3.18 | `codigo/fase7_blocoI/compare_clusters_r.R` | idem |
 
 Todas em PNG 300 dpi, legenda 100% em inglês no `artigo.md` (padrão
 Nature: `**Figure N |** frase-título...`), traduzida fielmente no
@@ -82,6 +97,9 @@ reprocessamento.
 | 11 | Group-level assigned-read depth, post-quantification recheck | §4 (Discussion) | `resultados/fase3_blocoF_depth_asymmetry_recheck.csv` |
 | 12 | Differentially expressed genes, R/DESeq2 vs. Python/PyDESeq2, 3 contrastes | §3.12 | `resultados/fase5_blocoD/{deseq2,pydeseq2}_*_sig.csv` |
 | 13 | Cross-engine (R×Python) concordance: Pearson/Spearman de log2FC, Jaccard de DE | §3.13 | `resultados/fase5_blocoE/cross_engine_comparison.csv` |
+| 14 | Cobertura de anotação funcional por fonte (Pfam, eggNOG, InterProScan6, união) | §3.16 | `resultados/fase7_blocoB/pfam_coverage_summary.csv`, `resultados/fase7_blocoC/eggnog_coverage_summary.csv`, `resultados/fase7_blocoF/annotation_coverage_summary.csv` |
+| 15 | Enriquecimento GO/KEGG/Pfam significativo por contraste e método | §3.17 | `resultados/fase7_blocoG/*.csv` |
+| 16 | Concordância cruzada R×Python (GO), Jaccard por contraste | §3.17 | `resultados/fase7_blocoH/cross_engine_go_comparison.csv` |
 
 Todas as tabelas do artigo são texto Markdown gerado a partir dos CSVs
 acima — nenhum número foi digitado à mão sem conferência contra a fonte
@@ -115,6 +133,12 @@ acima — nenhum número foi digitado à mão sem conferência contra a fonte
 | `codigo/fase5_blocoE/` | Verificação cruzada R×Python — Pearson/Spearman + Jaccard (`compare_r_python.py`) |
 | `codigo/fase5_blocoF/` | Checagem de sensibilidade ID-8, refit n=2 vs. n=3 (`sensitivity_id8.R`) |
 | `codigo/fase5_blocoG/` | Figuras: PCA+dispersão+volcano+MA+heatmap em R (`figures_r.R`), UMAP+UpSet em Python (`figures_python.py`) — paleta validada via skill `dataviz` |
+| `codigo/fase7_blocoB/` | Seleção de proteína representativa por gene (`select_representative_protein.py`), hmmscan+cobertura Pfam (`analyze_pfam_coverage.py`) |
+| `codigo/fase7_blocoC/` | Cobertura GO/KEGG do eggNOG-mapper (`analyze_eggnog_coverage.py`) |
+| `codigo/fase7_blocoF/` | Consolidação multi-fonte da anotação GO (`consolidate_annotation.py`) |
+| `codigo/fase7_blocoG/` | Enriquecimento GO/KEGG em R (`run_enrichment_clusterprofiler.R`) e Python (`run_enrichment_gseapy.py`), Fisher exato de domínios Pfam (`run_pfam_enrichment.py`) |
+| `codigo/fase7_blocoH/` | Verificação cruzada R×Python do enriquecimento GO (`compare_enrichment_r_python.py`) |
+| `codigo/fase7_blocoI/` | compareCluster+dotplot+cnetplot em R (`compare_clusters_r.R`), Venn+UpSet em Python (`venn_upset_go_python.py`) |
 
 Todo comando, incluindo os que falharam parcialmente (flag `-d` do
 FastQC na FASE 1; falha de segmentação por concorrência de threads na
@@ -142,6 +166,10 @@ original.
 | `DESeqDataSet` já rodado (`DESeq()`, R, `.rds`) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase5_blocoC/dds_fit.rds` | pequeno mas binário/R-específico | idem — reconstruível a partir de `dds_raw.rds` + `codigo/fase5_blocoC/run_deseq2.R` |
 | Matriz VST normalizada (genes×amostras) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase5_blocoG/vst_normalized_matrix.csv` | ~2,6 MB | não versionada por tamanho, mas pequena o bastante para copiar se necessário; reconstruível a partir de `dds_fit.rds` (`vst(dds, blind=FALSE)`) |
 | Todos os `_all.csv` (genes não-significativos incluídos, 3 contrastes × 2 motores) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase5_blocoD/*_all.csv` | ~2,7 MB total | só os `_sig.csv` (genes DE) foram versionados em `resultados/fase5_blocoD/` — os `_all.csv` completos (11.833 genes cada) ficam no servidor, reconstruíveis via `codigo/fase5_blocoD/` |
+| Banco de dados InterPro/member-databases (FASE 7 Bloco D) | `~/rnaseq-Anticarsia-GORE3/genome_annotation/interproscan6_data/` | ~28 GB | baixado automaticamente pelo pipeline Nextflow via lookup por checksum + download; reobtível rerodando `nextflow run ebi-pf-team/interproscan6 -r 6.0.1` |
+| Saída completa do InterProScan6 (TSV/GFF3/JSON/JSONL/XML) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase7_blocoD/protein_representative.faa.*` | ~590 MB total (JSON sozinho 247 MB) | grande demais para git — a extração relevante (cobertura, pares gene-GO) já está em `resultados/fase7_blocoB/`, `resultados_server/fase7_blocoF/gene_to_go_consolidated.csv` |
+| Anotações completas do eggNOG-mapper (`.emapper.annotations`) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase7_blocoC/pfam_eggnog_out.emapper.annotations` | 17,4 MB | só o resumo de cobertura + `gene_to_kegg.csv` foram versionados; `gene_to_go.csv` (27,8 MB, todos os pares gene-GO do eggNOG isolado) fica só no servidor |
+| Mapeamento gene→GO consolidado (união eggNOG+InterProScan6) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase7_blocoF/gene_to_go_consolidated.csv` | 36,8 MB | só o resumo de cobertura (`annotation_coverage_summary.csv`) foi versionado; reconstruível via `codigo/fase7_blocoF/consolidate_annotation.py` |
 
 **Risco declarado, não escondido:** os links de download da Macrogen já
 expiraram (`docs/07_analise_rnaseq.md` §13.1) — se o servidor for limpo,

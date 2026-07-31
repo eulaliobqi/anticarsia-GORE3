@@ -1,0 +1,2 @@
+n_genes_total,genes_go_eggnog,pct_go_eggnog,genes_go_interproscan6,pct_go_interproscan6,genes_go_uniao,pct_go_uniao,jaccard_genes_anotados_eggnog_vs_ips6,pares_gene_go_total
+14238,8637,60.66,10663,74.89,11409,80.13,0.6916,1152334

@@ -17,8 +17,8 @@
 > nenhuma correção formal de lote — o confundimento de amostra única
 > (ID-8) torna o ComBat-seq inaplicável (a própria ferramenta recusa
 > rodar), decisão justificada por literatura + código-fonte (§4); checagem
-> de sensibilidade planejada para a FASE 5. **FASE 5 (Blocos A-G)
-> concluída em 31/07/2026:** modelo DESeq2 (R) e PyDESeq2 (Python)
+> de sensibilidade planejada para a FASE 5. **FASE 5 (Blocos A-H) concluída e
+> commitada em 31/07/2026 (`1daaf72`):** modelo DESeq2 (R) e PyDESeq2 (Python)
 > ajustados sobre a mesma matriz tximport (11.833 genes pós-filtro),
 > 3 contrastes vs. Controle extraídos com shrinkage apeglm (log2FC=0,25,
 > §3.12), verificação cruzada R×Python com concordância alta de log2FC
@@ -26,9 +26,18 @@
 > checagem de sensibilidade ID-8 mostrando o contraste Benzamidina como
 > **frágil e dependente de uma única amostra** (255→6 DE genes sem ID-8,
 > §3.14), e figuras (PCA+UMAP, volcano, MA, heatmap, UpSet — SKTI∩GORE3
-> compartilham 3.053 genes DE, §3.15). Os contrastes cabeça-a-cabeça
-> (GORE3×Benzamidina, GORE3×SKTI/H4, agrupado) e o Bloco H (commit)
-> ficam para a próxima rodada.
+> compartilham 3.053 genes DE, §3.15). **Escopo redefinido pelo usuário:**
+> os contrastes cabeça-a-cabeça (GORE3×Benzamidina, GORE3×SKTI/H4,
+> agrupado) ficam para outro artigo — o foco deste é a
+> diversidade/enriquecimento/similaridade entre os 3 contrastes vs.
+> Controle. **FASE 7 (Blocos A-K) concluída em 31/07/2026:** anotação
+> multi-fonte (Pfam/HMMER 83,1%, eggNOG 60,7% GO, InterProScan6 74,9% GO,
+> união 80,1% dos 14.238 genes protein_coding, §3.16), enriquecimento
+> GO/KEGG/Pfam em dois motores (R/clusterProfiler + Python/gseapy, gseapy
+> sistematicamente mais permissivo, §3.17), e comparação funcional entre
+> tratamentos confirmando a convergência SKTI≈GORE3 já vista em genes
+> agora também em termos GO (86% dos termos de GORE3 também
+> significativos em SKTI, §3.18).
 >
 > **Versão em inglês:** `artigo.md` (mantida em paralelo, sincronizada a
 > cada atualização — esta é a tradução fiel, não um resumo).
@@ -433,6 +442,119 @@ dos 3 contrastes foram visualizadas com um UpSet plot (Conway, Lex &
 Gehlenborg 2017, PMID 28645171) em vez de diagrama de Venn. Código:
 `codigo/fase5_blocoG/figures_r.R` (PCA, diagnóstico de dispersão,
 volcano, MA, heatmap anotado) e `figures_python.py` (UMAP, UpSet).
+
+### 2.8 Anotação funcional multi-fonte e enriquecimento (FASE 7, Blocos A-K concluídos)
+
+**Escopo, redefinido pelo usuário nesta sessão.** Os contrastes
+cabeça-a-cabeça planejados na FASE 5 (§6.1: GORE3 vs. Benzamidina, GORE3
+vs. SKTI/H4, GORE3 vs. SKTI+Benzamidina agrupados) ficam para outro
+manuscrito. O escopo deste artigo são os 3 contrastes vs. Controle já
+reportados (§2.7), caracterizados adiante por diversidade de genes,
+enriquecimento funcional e similaridade/divergência entre contrastes — o
+escopo da FASE 7.
+
+**Uma correção real, apontada pelo usuário mid-execução.** O FASTA de
+proteínas do NCBI para `GCF_050436995.1` tem 23.932 proteínas (todas as
+isoformas) para 15.773 genes quantificados. Anotar todas as isoformas e
+agregar para nível de gene depois exigiria uma regra de agregação (união
+dos termos de todas as isoformas? só a mais longa?) decidida
+silenciosamente. Reduzido para **1 proteína representativa por gene
+(isoforma mais longa)** usando o mapeamento gene→mRNA→proteína extraído
+do GFF3 original da NCBI (não o GTF convertido por gffread usado na
+quantificação, que descarta `protein_id`). Resultado: **14.238 proteínas
+representativas** — reconciliado exatamente contra os 15.773 genes
+quantificados (14.238 protein_coding + 1.417 genes de RNA não-codificante
++ 118 genes do fix de hierarquia GTF quebrada já registrado na FASE 3 =
+15.773; RNA não-codificante não tem produto proteico por definição, não é
+lacuna de cobertura). Código:
+`codigo/fase7_blocoB/select_representative_protein.py`.
+
+**Seleção de ferramentas, informada por busca de literatura/GitHub nesta
+sessão.** InterProScan **6** (Blum et al. 2026, PMID 42222668) foi usado
+em vez da v5 — reimplementação completa em Nextflow com serviço de lookup
+por checksum contra matches pré-computados do InterPro, evitando o
+download local de ~15+ GB de member-databases que a v5 exige.
+**PHILHARMONIC** (Sledzieski et al. 2024/2025, PMID 39553947), método de
+deep learning desenhado especificamente para anotação funcional de
+organismos não-modelo, foi avaliado e sinalizado como extensão opcional —
+**confirmado por checagem direta ser um preprint bioRxiv não revisado por
+pares**, não incluído nesta rodada por decisão de escopo/tempo, não por
+um achado contra seu mérito.
+
+**Bloco B (Pfam/HMMER)** — usando o `Pfam-A.hmm` já baixado e já pressado
+no servidor (sem redownload). `hmmscan --cpu 28` sobre as 14.238 proteínas
+representativas. **11.830/14.238 genes (83,1%) têm ≥1 domínio Pfam
+significativo** (E-valor de sequência completa < 1e-5, limiar declarado
+explicitamente, não `--cut_ga` por modelo); 93.363 hits significativos em
+6.264 famílias Pfam distintas.
+
+**Bloco C (eggNOG-mapper)** — usando o banco eggNOG já baixado (~50 GB,
+sem redownload), rodado em paralelo ao Bloco B (os 32 cores do servidor
+comportam os dois). **13.499/14.238 genes (94,8%)** têm qualquer hit
+eggNOG; **8.637 (60,7%)** têm GO term; **8.088 (56,8%)** têm KEGG KO.
+
+**Bloco D (InterProScan 6)** — bloqueio real de infraestrutura, resolvido
+com o usuário. A conta `eulalio` não estava no grupo `docker` (sem acesso
+ao daemon) e não havia Singularity/Apptainer/Podman como alternativa; o
+usuário optou por rodar `sudo usermod -aG docker eulalio` ele mesmo
+(`sudo` exige senha interativa que o agente não tem). **Achado técnico
+real, apontado e corrigido:** a primeira rodada terminou com sucesso mas
+sem `--goterms --pathways` (colunas GO/Pathways vazias na saída,
+verificado diretamente) — rerodado com `-resume` (reaproveitando os 28 GB
+de member-databases já baixados) e as duas flags corretas. Um processo de
+combinação (`REPRESENTATIVE_LOCATIONS`) foi morto por OOM (exit 137) 2×;
+o retry automático do Nextflow com mais memória completou. **13.555/14.238
+proteínas (95,2%) batem em ≥1 dos 16 member-databases** (PANTHER,
+CATH-Gene3D, CDD, SUPERFAMILY, PROSITE, HAMAP, COILS, MobiDBLite,
+AntiFam etc.); 57.025 linhas de hit têm GO term (formato
+`GO:XXXXXXX(Fonte)`, verificado diretamente no TSV real, não suposto).
+
+**Bloco F (consolidação multi-fonte)** — união dos pares gene→GO de
+eggNOG (Bloco C) e InterProScan6 (Bloco D), fonte rastreável por par (não
+um merge cego). **Cobertura real:** eggNOG sozinho 60,7% (8.637 genes),
+InterProScan6 sozinho 74,9% (10.663 genes), **união 80,1%
+(11.409/14.238 genes)**. Sobreposição de Jaccard dos genes anotados entre
+as 2 fontes independentes (independente do termo GO exato) = **0,692** —
+concordância razoável entre métodos com bases de evidência diferentes
+(ortologia por diamond vs. assinatura de domínio por HMM).
+
+**Bloco G (enriquecimento GO/KEGG/Pfam, dois motores)** —
+`clusterProfiler::enricher()` (R, usando o TERM2GENE/TERM2NAME do Bloco
+F, a via já documentada para organismos sem `org.*.db`) e
+`gseapy.enrich()` (Python, mesmo TERM2GENE) para GO; `enrichKEGG(organism
+= "ko")` (R, modo universal de Orthology do KEGG — *A. gemmatalis* não
+tem código de organismo dedicado no KEGG) sobre os KO derivados do
+eggNOG, para vias; teste exato de Fisher (domínios Pfam, DE vs. universo,
+Python/scipy) como complemento em nível de domínio à visão em nível de
+via.
+
+**Bloco H (verificação cruzada entre motores, GO)** — achado real, não
+suavizado: o gseapy é sistematicamente **mais permissivo** que o
+`clusterProfiler::enricher()` no mesmo limiar nominal (padj<0,05). Para
+SKTI e GORE3, **100% dos termos significativos do R também aparecem no
+Python** (o conjunto do R é subconjunto exato do Python) — Jaccard 0,533 e
+0,343 respectivamente, porque o Python encontra muitos termos extras
+além desses. Para Benzamidina, quase subconjunto exato (53/55 termos
+compartilhados, Jaccard 0,736). A causa exata (implementações diferentes
+do teste hipergeométrico/ajuste de FDR entre os dois pacotes) não foi
+isolada — reportado como uma assimetria real observada neste dataset, não
+resolvida a uma única causa, e divulgada em vez de escondida — mesma
+prática da comparação DESeq2/PyDESeq2 (§3.13).
+
+**Bloco I (comparação entre os 3 tratamentos)** —
+`clusterProfiler::compareCluster()` + `enrichplot::dotplot()` (a figura
+comparativa moderna padrão, Yu et al. 2012): confirma, **em nível
+funcional**, o mesmo padrão já visto em nível de gene (FASE 5, Fig. 13) —
+Benzamidina só atinge os termos GO mais genéricos (ribossomo/tradução,
+todos fracamente significativos), enquanto SKTI e GORE3 compartilham um
+padrão muito mais amplo e específico (incluindo termos mitocondriais) com
+significância mais forte. `cnetplot` (rede gene-conceito) gerado por
+contraste. Um **UpSet plot de termos GO significativos** (não de genes
+brutos — resolve a ressalva já deixada na FASE 5, Fig. 13) e um
+**diagrama de Venn de 3 vias** de genes DE (válido nesta escala) também
+foram produzidos. Código: `codigo/fase7_blocoG/` (enriquecimento R+Python),
+`fase7_blocoH/` (comparação entre motores), `fase7_blocoI/` (figuras
+comparativas).
 
 ---
 
@@ -1166,6 +1288,96 @@ dispersão `plotDispEsts` também estão disponíveis
 (`figuras/fase5_blocoG/fig_heatmap_top_de.pdf`,
 `fig_dispersion_estimates.pdf`) mas não são reproduzidos aqui.
 
+### 3.16 Anotação funcional multi-fonte alcança 80% dos genes quantificados
+
+**Tabela 14 | Cobertura de anotação funcional por fonte (14.238 genes protein_coding).**
+
+| Fonte | Genes anotados | % |
+|---|---:|---:|
+| Pfam/HMMER (domínio, E<1e-5) | 11.830 | 83,1% |
+| eggNOG-mapper (GO) | 8.637 | 60,7% |
+| eggNOG-mapper (KEGG KO) | 8.088 | 56,8% |
+| InterProScan6 (qualquer um dos 16 bancos) | 13.555 | 95,2% |
+| InterProScan6 (GO) | 10.663 | 74,9% |
+| **eggNOG ∪ InterProScan6 (GO, consolidado)** | **11.409** | **80,1%** |
+
+Concordância em nível de gene entre as 2 fontes independentes de GO
+(eggNOG, ortologia por diamond; InterProScan6, assinaturas de domínio
+HMM), independente de quais termos GO exatos foram atribuídos: Jaccard =
+0,692.
+
+### 3.17 Enriquecimento GO/KEGG/Pfam por contraste, dois motores
+
+**Tabela 15 | Resultados de enriquecimento significativos por contraste e método (padj<0,05).**
+
+| Contraste | GO (R/clusterProfiler) | GO (Python/gseapy) | KEGG (R, organism="ko") | Domínios Pfam (Fisher) |
+|---|---:|---:|---:|---:|
+| Benzamidina vs. Controle | 55 | 70 | 11 | 8 |
+| SKTI vs. Controle | 874 | 1.641 | 9 | 13 |
+| GORE3 vs. Controle | 321 | 937 | 12 | 0 |
+
+**Concordância entre motores (Tabela 16):** o gseapy é sistematicamente
+mais permissivo que o `clusterProfiler::enricher()` no mesmo limiar
+nominal. Para SKTI e GORE3, o conjunto de termos significativos do R é um
+*subconjunto exato* do Python (Jaccard 0,533 e 0,343); para Benzamidina,
+quase exato (53/55 termos compartilhados, Jaccard 0,736). Esta é uma
+assimetria real, específica deste dataset, entre as duas implementações
+do teste hipergeométrico, não resolvida a uma única causa aqui, e
+divulgada em vez de escondida — mesma prática da comparação
+DESeq2/PyDESeq2 (§3.13).
+
+**Tabela 16 | Concordância entre motores (R×Python) para GO.**
+
+| Contraste | Sig. R | Sig. Python | Interseção | Jaccard |
+|---|---:|---:|---:|---:|
+| Benzamidina vs. Controle | 55 | 70 | 53 | 0,736 |
+| SKTI vs. Controle | 874 | 1.641 | 874 | 0,533 |
+| GORE3 vs. Controle | 321 | 937 | 321 | 0,343 |
+
+### 3.18 SKTI e GORE3 convergem funcionalmente, não só em nível de gene
+
+**Figura 14 | Dotplot comparativo de GO entre os 3 contrastes
+(`compareCluster` + `dotplot`).** Benzamidina só atinge os termos GO mais
+genéricos e fracamente significativos (ribossomo, tradução); SKTI e
+GORE3 compartilham um padrão muito mais amplo e mais fortemente
+significativo, que inclui adicionalmente termos mitocondriais. Arquivo:
+`figuras/fase7_blocoI/fig_compareCluster_dotplot.png`.
+
+**Figura 15 | UpSet plot dos termos GO significativos por contraste**
+(em vez de genes DE brutos, Fig. 13) — SKTI-exclusivo = 592,
+SKTI∩GORE3-exclusivo = 257, GORE3-exclusivo = 45, Benzamidina-exclusivo =
+30, compartilhado pelos 3 = 19, Benzamidina∩SKTI-exclusivo = 6. **86% dos
+termos GO significativos de GORE3 (276/321) também são significativos em
+SKTI** — a contraparte em nível funcional da convergência já reportada em
+nível de gene (§3.15, Fig. 13). Arquivo:
+`figuras/fase7_blocoI/fig_upset_go_terms.png`.
+
+**Figura 16 | Diagrama de Venn de 3 vias dos genes DE** (válido nesta
+escala, segundo a literatura consultada — Venn é desaconselhado acima de
+~5 conjuntos). Reproduz exatamente as contagens já reportadas via UpSet
+na FASE 5 (94 + 29 + 31 + 101 = 255 = total de genes DE de Benzamidina) —
+uma checagem cruzada interna entre as duas figuras geradas
+independentemente, sem discrepância. Arquivo:
+`figuras/fase7_blocoI/fig_venn3_de_genes.png`.
+
+Redes gene-conceito (`cnetplot`) por contraste também estão disponíveis
+(`figuras/fase7_blocoI/fig_cnetplot_*.png`) mas não são reproduzidas
+aqui. **Riqueza funcional por grupo** (número de termos GO significativos
+— a leitura mais próxima disponível de "diversidade de genes" conforme
+pedido pelo usuário, declarada como interpretação, não assumida
+silenciosamente): Benzamidina = 55, SKTI = 874, GORE3 = 321 — acompanha a
+contagem total de genes DE, não fornece um sinal de diversidade
+independente.
+
+**Interpretação, limitada ao que os dados sustentam:** GORE3 e SKTI
+convergem numa assinatura transcricional e funcional ampla e específica
+(mitocondrial/ribossomal), enquanto Benzamidina é consistentemente menor
+e mais genérico. Isso **não é prova de mecanismo compartilhado** entre
+GORE3 e SKTI — exigiria validação experimental dirigida (ex. RT-qPCR dos
+genes-chave da interseção) — mas é um padrão robusto, reproduzido em 3
+linhas de evidência independentes nesta sessão (genes DE, termos GO,
+dotplot comparativo).
+
 ---
 
 ## 4. Discussão
@@ -1410,11 +1622,39 @@ citação).
     concordam" é uma afirmação graduada, não binária, e é mais fraca
     justamente onde a Limitação 12 já sinaliza fragilidade.
 14. **A assinatura de genes DE compartilhada entre SKTI e GORE3 (3.053
-    genes, Fig. 13) é uma sobreposição de conjunto de genes, não
-    evidência de via ou mecanismo compartilhado.** Nenhum enriquecimento
-    funcional foi rodado ainda (FASE 7); atribuir essa sobreposição a
-    qualquer processo biológico específico antes dessa análise seria
-    especulação, não um resultado.
+    genes, Fig. 13) é uma sobreposição de conjunto de genes; o
+    enriquecimento funcional (§3.18) agora mostra a mesma convergência em
+    nível de termo GO (86% dos termos significativos de GORE3 também
+    significativos em SKTI), o que reforça mas não prova um mecanismo
+    compartilhado.** Nenhuma validação experimental dirigida (ex. RT-qPCR
+    dos genes da interseção) foi feita — a convergência é um padrão
+    computacional robusto entre 3 linhas de evidência, não um mecanismo
+    biológico confirmado.
+15. **A cobertura de anotação funcional é real mas incompleta: 80,1% dos
+    genes (união eggNOG + InterProScan6) têm termo GO; 19,9% permanecem
+    sem anotação em nenhuma das 2 fontes (§3.16).** Os dois métodos
+    dependem de homologia com sequências já caracterizadas — genes
+    exclusivos de (ou muito divergentes em) *A. gemmatalis* são
+    sistematicamente sub-representados, e qualquer padrão discutido em
+    §3.18 diz respeito só à fração anotada do genoma, não a todo o
+    conjunto de genes quantificados.
+16. **Os dois motores de enriquecimento GO (clusterProfiler vs. gseapy)
+    discordam no número exato de termos significativos no mesmo limiar
+    nominal, embora o conjunto do R seja consistentemente um
+    quase-subconjunto do Python (§3.17, Tabela 16).** A causa raiz
+    (implementações diferentes do teste hipergeométrico ou ajuste de FDR)
+    não foi isolada. Leitores devem tratar as contagens do motor R como a
+    cifra mais conservadora e cruzadamente verificada, e as contagens do
+    Python como um limite superior mais permissivo, não como dois
+    resultados idênticos confirmados independentemente.
+17. **O PHILHARMONIC, método de deep learning desenhado especificamente
+    para anotação funcional de organismos não-modelo, foi avaliado mas
+    não rodado nesta sessão — e é atualmente um preprint bioRxiv não
+    revisado por pares (Sledzieski et al. 2024/2025), não uma publicação
+    peer-reviewed.** Qualquer uso futuro dele deve ser sinalizado como
+    tal, e suas predições tratadas como exploratórias, não com o mesmo
+    grau de validação dos resultados de eggNOG/InterProScan6 aqui
+    reportados.
 
 ---
 
@@ -1472,6 +1712,31 @@ Conway, J. R., Lex, A. & Gehlenborg, N. UpSetR: an R package for the
 visualization of intersecting sets and their properties. *Bioinformatics*
 **33**, 2938–2940 (2017). PMID 28645171.
 
+Blum, M., Hobbs, E., Florentino, L. & Bateman, A. InterProScan 6: a
+modern large-scale protein function annotation pipeline. *Bioinform.
+Adv.* **6**, vbag141 (2026). PMID 42222668.
+
+Blum, M. et al. InterPro: the protein sequence classification resource
+in 2025. *Nucleic Acids Res.* **53**, D444–D456 (2025). PMID 39565202.
+
+Mistry, J. et al. Pfam: The protein families database in 2021. *Nucleic
+Acids Res.* **49**, D412–D419 (2021). PMID 33125078.
+
+Eddy, S. R. Accelerated Profile HMM Searches. *PLoS Comput. Biol.* **7**,
+e1002195 (2011). PMID 22039361.
+
+Sledzieski, S. et al. Decoding the Functional Interactome of Non-Model
+Organisms with PHILHARMONIC. *bioRxiv* (2024/2025). PMID 39553947.
+**Preprint, não revisado por pares.**
+
+Fang, Z., Liu, X. & Peltz, G. GSEApy: a comprehensive package for
+performing gene set enrichment analysis in Python. *Bioinformatics*
+**39**, btac757 (2023). PMID 36426870.
+
+Yu, G., Wang, L.-G., Han, Y. & He, Q.-Y. clusterProfiler: an R package
+for comparing biological themes among gene clusters. *OMICS* **16**,
+284–287 (2012). PMID 22455463.
+
 ---
 
 ## Reprodutibilidade — localização de código e dados
@@ -1524,3 +1789,15 @@ visualization of intersecting sets and their properties. *Bioinformatics*
 | Figuras — PCA, dispersão, volcano, MA, heatmap (Bloco G, R) | `codigo/fase5_blocoG/figures_r.R` |
 | Figuras — UMAP, UpSet (Bloco G, Python) | `codigo/fase5_blocoG/figures_python.py` |
 | Figuras 10-13 (PDF + PNG 300 dpi) | `figuras/fase5_blocoG/` |
+| Seleção de proteína representativa (FASE 7 Bloco B, pré-requisito) | `codigo/fase7_blocoB/select_representative_protein.py` → `resultados_server/fase7_blocoB/gene_to_representative_protein.tsv` |
+| Varredura de domínio Pfam/HMMER + cobertura (FASE 7 Bloco B) | `codigo/fase7_blocoB/analyze_pfam_coverage.py` → `resultados/fase7_blocoB/pfam_coverage_summary.csv`, `pfam_hits_per_gene.csv` |
+| Cobertura GO/KEGG do eggNOG-mapper (FASE 7 Bloco C) | `codigo/fase7_blocoC/analyze_eggnog_coverage.py` → `resultados/fase7_blocoC/eggnog_coverage_summary.csv`, `gene_to_kegg.csv` |
+| Pipeline Nextflow InterProScan6 (FASE 7 Bloco D) | servidor: `genome_annotation/interproscan6/` (clone de `ebi-pf-team/interproscan6` r6.0.1); saída bruta TSV/GFF3/JSON não versionada (grande) |
+| Consolidação GO multi-fonte (FASE 7 Bloco F) | `codigo/fase7_blocoF/consolidate_annotation.py` → `resultados/fase7_blocoF/annotation_coverage_summary.csv` |
+| Enriquecimento GO/KEGG, R (FASE 7 Bloco G1) | `codigo/fase7_blocoG/run_enrichment_clusterprofiler.R` → `resultados/fase7_blocoG/clusterprofiler_{GO,KEGG}_*.csv` |
+| Enriquecimento GO, Python (FASE 7 Bloco G2) | `codigo/fase7_blocoG/run_enrichment_gseapy.py` → `resultados/fase7_blocoG/gseapy_GO_*.csv` |
+| Teste de Fisher, domínios Pfam (FASE 7 Bloco G3) | `codigo/fase7_blocoG/run_pfam_enrichment.py` → `resultados/fase7_blocoG/pfam_fisher_*.csv` |
+| Comparação GO entre motores (FASE 7 Bloco H) | `codigo/fase7_blocoH/compare_enrichment_r_python.py` → `resultados/fase7_blocoH/cross_engine_go_comparison.csv` |
+| compareCluster, dotplot, cnetplot (FASE 7 Bloco I, R) | `codigo/fase7_blocoI/compare_clusters_r.R` → `resultados/fase7_blocoI/compareCluster_GO_results.csv`, `functional_richness_summary.csv` |
+| Venn (genes) + UpSet (termos GO) (FASE 7 Bloco I, Python) | `codigo/fase7_blocoI/venn_upset_go_python.py` |
+| Figuras 14-16 + cnetplots (PDF + PNG 300 dpi) | `figuras/fase7_blocoI/` |
