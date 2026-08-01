@@ -1,0 +1,15 @@
+# Conteudo integral de artigos cientificos: e obra do editor, nao deve ser
+# versionada nem redistribuida pelo repositorio. Reproduzivel a qualquer
+# momento com literatura/scripts/fetch_literatura.py.
+# Metadados, abstracts e fichas continuam versionados normalmente.
+literatura/pdfs/
+literatura/fulltext/
+
+# Bytecode Python
+__pycache__/
+*.pyc
+
+# Artefatos de ferramentas de sessao (claude-flow, cache) - nao fazem
+# parte do projeto
+.claude/
+.claude-flow/
