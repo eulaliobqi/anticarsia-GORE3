@@ -976,6 +976,33 @@ O teste mecanístico central do projeto, ausente do `.docx` original
    estrutural (`03_metodologia_padrao_ouro.md`, fluxo estrutural) — este é o
    elo de integração que dá originalidade ao projeto.
 
+### 10.1 Execução (01/08/2026) — Blocos A-E concluídos, Bloco F adiado
+
+**⚠️ Decisão de organização:** a partir da FASE 9, todo código/resultado/
+texto vive em `paper-2/` (diretório próprio, novo artigo) — não mais em
+`codigo/`/`resultados/`/`figuras/` da raiz (reservados ao artigo 1, FASE
+1-7). Detalhes completos, métodos e resultados reais em
+`paper-2/artigo2.md`/`paper-2/artigo2_pt.md`.
+
+**Resumo dos itens 1-4 acima, já executados com dado real:** funil de
+curadoria 316 (Pfam PF00089, FASE 7) → 168 (padrões PROSITE PS00134/
+PS00135) → **166 genes curados** (His/Ser confirmados na coluna
+estruturalmente equivalente a 2 referências de tripsina conhecidas, via
+MSA restrita ao domínio — corrigido de uma 1ª tentativa com proteína
+inteira que desalinhava). Filogenia: IQ-TREE3+ModelFinder (Q.PFAM+R7),
+166 genes + 2 referências. Cruzamento com FASE 5/6 (item 4): **45/166
+genes de tripsina curados mudam em GORE3** (41 só nível, 3 só
+identidade/splicing, **1 — `gene-LOC142975421` — nível E identidade**,
+o candidato mais forte a H1 desta rodada); `gene-LOC142980480` (já visto
+na FASE 6, Fig. 19) confirma padrão só-identidade.
+
+**Item 5 (ponte estrutural) ainda não iniciado** — as 4 estruturas antes
+assumidas reutilizáveis (`analise-alosterica/data/protonated/`) foram
+checadas nesta sessão e **não são confirmadas** como *A. gemmatalis*
+(origem: projeto de triagem anterior não relacionado). Escopo do Bloco F
+(quantos genes modelar, AlphaFold3 vs. Boltz-2, docking) fica para
+decidir numa próxima sessão, depois de conferência manual do usuário.
+
 ---
 
 ## 11. FASE 10 (secundária, paralela) — Trinity *de novo*
