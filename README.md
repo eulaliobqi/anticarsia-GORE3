@@ -1,11 +1,11 @@
 # Anticarsia-GORE3
 
-Pós-doutorado de **Eulálio Gutemberg Bonfim dos Santos Jr.** — UFV
+Pós-doutorado de **Eulálio Gutemberg.** — UFV
 (Departamento de Bioquímica e Biologia Molecular, BIOAGRO/INCT-IPP),
 supervisão da Profa. Maria Goreti de Almeida Oliveira.
 
-**Pergunta central:** o peptídeo inibidor de protease GORE3 (pentapeptídeo
-`LALAY`, derivado da própria pró-região da tripsina digestiva do inseto)
+**Pergunta central:** o peptídeo inibidor de protease GORE3 (pentapeptídeo,
+derivado da própria pró-região da tripsina digestiva do inseto)
 altera o transcriptoma do intestino médio de *Anticarsia gemmatalis*
 (lagarta-praga da soja) de forma diferente dos inibidores clássicos já
 conhecidos (Benzamidina, SKTI)? E onde/como o GORE3 se torna mais
