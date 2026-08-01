@@ -535,9 +535,96 @@ diagram** of DE genes (valid at this scale) were also produced. Code:
 
 ---
 
-## 3. Results
+### 2.9 Alternative splicing (Phase 6, Blocks A–F complete)
 
-### 3.1 Library yield and identity confirmed independently of the vendor report
+**Scope.** Same three contrasts as Phases 5 and 7 (Benzamidine, SKTI,
+GORE3, each vs. Control); head-to-head splicing comparisons are deferred
+to the separate manuscript, matching the scope decision already made for
+Phase 7 (§2.8).
+
+**A real technical failure, found and corrected before any splicing
+result existed.** The first attempt ran rMATS-turbo 4.3.0 (Wang et al.
+2024, PMID 38396040; already installed, environment `rnaseq-tools`) over
+the Subread BAM files produced in Phase 2 (`subread-align -t 0`). All
+five event types, in all three contrasts, returned **zero quantified
+events** — not zero *significant* events, zero rows at all, including in
+the pre-statistics raw-count files. Direct inspection of the BAM
+(`samtools view`, CIGAR field) showed **no read in the entire file
+carries an `N` (splice-gap) operator** — only heavy soft-clipping
+(e.g. `16S135M`, `33S118M`). The Subread package ships two aligners:
+`subread-align` (general-purpose, does not report splice junctions
+reliably) and **`subjunc`** (the dedicated splice-aware aligner, same
+index format, reports true spliced alignments with `N` in the CIGAR).
+Coxe et al. (2024) — the citation used in Phase 2 to justify "Subread for
+splice-junction accuracy" — almost certainly benchmarked `subjunc`, not
+`subread-align`; the Phase 2 script's inline comment conflated the two.
+**Corrected:** all 13 libraries were realigned with `subjunc` (same
+prebuilt index, no rebuild needed; code:
+`codigo/fase6_blocoB/run_subjunc_realign.sh`), confirmed by direct CIGAR
+inspection to now contain real spliced alignments (e.g.
+`133M1126N18M`). The original zero-event rMATS output is preserved,
+not deleted, under
+`resultados_server/fase6_blocoB_ATTEMPT1_subread_zero_events/`. A
+secondary real finding from this check: the true read length is **151
+nt**, not the 150 nt figure implied by the vendor's report — used
+directly from the BAM, not the nominal spec.
+
+**rMATS-turbo (Block B)**, re-run on the `subjunc` alignments: paired-end
+mode, `--libType fr-firststrand` (the rMATS-side name for the same
+reverse-stranded protocol already established empirically in Phase 3,
+§2.6), `--readLength 151`. Significance threshold, declared before
+counting: FDR < 0.05 and |IncLevelDifference| ≥ 0.1 (a standard, commonly
+used rMATS cutoff, not a value tuned to this dataset).
+
+**MAJIQ (Block C).** Installation required five independent, unrelated
+fixes before it would build successfully from the academic git
+repository (`bitbucket.org/biociphers/majiq_academic`): (1) an
+`HTSLIB_LIBRARY_DIR`/`HTSLIB_INCLUDE_DIR` environment-variable
+propagation failure through nested SSH invocation, not a MAJIQ defect;
+(2) a missing `liblzma` (installed via conda-forge `xz`); (3)
+`scikit-build-core` resolving to v1.0.3, which turns a previously
+harmless deprecation notice (`cmake.verbose`) into a hard build error —
+pinned to 0.11.1; (4) `--no-build-isolation` requiring `setuptools_scm`
+to already be present in the environment, not auto-supplied as it would
+be under isolated builds; (5) `pybind11` ≥2.13 introducing a
+`static_assert` that rejects a `def_property_readonly` +
+`call_guard` pattern used in MAJIQ's C++ bindings
+(`pySpliceGraphValues.hpp`) — pinned `pybind11=2.12`. With these five
+fixes, `rna_majiq 3.0.23.dev1` built and installed successfully. Academic
+license obtained by the user directly from majiq.biociphers.org (required
+since MAJIQ ≥2.5) and placed in the server `$HOME`, auto-detected by the
+`majiq`/`voila` CLI.
+
+`majiq build` (GFF3 — the original NCBI annotation file, not the
+gffread-converted GTF, since MAJIQ requires GFF3 — already confirmed in
+Phase 7 as the exact RS_2026_04 annotation; `--strandness REVERSE`) was
+run once over all 12 experiments (Control/Benzamidine/SKTI/GORE3, 3
+replicates each; ID-18/fat-body excluded, matching the Phase 5 contrast
+matrix), producing a single splicegraph (114,738 exons, 1,739 introns,
+106,247 junctions, 25,398 annotated transcripts). `majiq psi-coverage`
+combined all 12 experiments into one coverage file (6,410 events, 15,481
+connections); `majiq deltapsi` was then run three times
+(Benzamidine/SKTI/GORE3 vs. Control), selecting group membership by
+experiment prefix from the same combined coverage file. Significance
+threshold, MAJIQ's own standard convention: posterior probability of
+|ΔPSI| > 0.2 (`probability_changing`) ≥ 0.9.
+
+**A real, undisguised version gap, not silently worked around.** The
+outlier down-weighting mechanism cited in this project's original Phase 6
+plan (`majiq weights`, from Norton et al. 2018, PMID 29236961, describing
+MAJIQ v2) **does not exist in this MAJIQ v3 CLI** — verified directly
+against every subcommand's `--help` output, not assumed absent. The
+apparent functional successor is `majiq moccasin` (RUV-style batch/
+confounding-factor correction over PsiCoverage, same author group), which
+has not yet been applied — left as an open item rather than silently
+substituted or ignored (§5).
+
+**Block D (rMATS × MAJIQ convergence)** and **Block E (splicing ×
+differential expression, Phase 5)**: `codigo/fase6_blocoD/` (per-contrast
+significant-gene extraction) and
+`codigo/fase6_blocoE/cross_reference_splicing_de.py` (cross-reference
+against the Phase 5 DESeq2/R sig-gene lists and the Phase 7 Pfam
+PF00089/Trypsin domain annotation — reused directly, not re-annotated).
 
 FastQC-derived read counts matched the vendor-reported totals exactly for
 all 13 samples (e.g., Control_R1: 32,550,688 × 2 = 65,101,376 reads,
@@ -1309,6 +1396,71 @@ RT-qPCR of the key overlap genes) — but it is a robust pattern,
 reproduced across three independent lines of evidence this session (DE
 genes, GO terms, comparative dotplot).
 
+### 3.19 Alternative splicing occurs at similar magnitude across all three treatments, and mostly independently of differential expression
+
+**Table 17 | Significant alternative-splicing events per contrast, two
+independent engines.**
+
+| Contrast | rMATS-turbo (FDR<0.05, \|ΔPSI\|≥0.1) — SE/A5SS/A3SS/MXE/RI | rMATS total | MAJIQ (P(changing)≥0.9), significant connections | MAJIQ distinct genes |
+|---|---|---:|---:|---:|
+| Benzamidine vs. Control | 55/14/24/19/5 | 117 | 163 | 75 |
+| SKTI vs. Control | 74/24/17/24/9 | 148 | 214 | 93 |
+| GORE3 vs. Control | 76/23/30/23/7 | 159 | 201 | 91 |
+
+**Unlike differential expression (§3.12, where Benzamidine's 255 DE genes
+are an order of magnitude below SKTI/GORE3's ~4,000), splicing event
+counts fall within the same range across all three treatments.** This is
+a real pattern in the data, not a reporting artefact — both engines agree
+on the direction (Benzamidine lowest, GORE3/SKTI higher but not
+dramatically so).
+
+**Figure 17 | UpSet plot of genes with significant splicing (rMATS-turbo
+∪ MAJIQ) across the three contrasts.** Each treatment carries a
+substantial exclusive set (Benzamidine 92, SKTI 92, GORE3 96 genes) — the
+splicing response, unlike the DE response, is not dominated by a
+SKTI/GORE3-shared signature; SKTI∩GORE3-exclusive is 66 genes, the
+largest pairwise intersection but well below either treatment's own
+exclusive count. File: `figuras/fase6_blocoF/fig_upset_splicing_genes.png`.
+
+**Cross-tool convergence is low (Jaccard 0.05–0.10 at the gene level:
+0.073 Benzamidine, 0.053 SKTI, 0.101 GORE3)** — consistent with, and
+expected given, Fenn et al. (2023)'s DICAST benchmark finding that no
+splicing-event-detection tool dominates and that different tools disagree
+substantially even on the same input. This is reported as an observed
+property of this dataset with these two tools, not evidence that either
+tool is wrong.
+
+**Figure 18 | Overlap between splicing and differential expression, per
+contrast.** File: `figuras/fase6_blocoF/fig_splicing_vs_de_overlap.png`.
+Genes with significant splicing (rMATS ∪ MAJIQ) that are also
+differentially expressed (Phase 5, DESeq2/R): 10/164 (Benzamidine),
+84/206 (SKTI), 91/208 (GORE3). **This overlap is statistically greater
+than the chance rate expected from each contrast's DE-gene fraction of
+the quantified genome** (hypergeometric test: Benzamidine observed 10 vs.
+2.7 expected, p = 3.4×10⁻⁴; SKTI observed 84 vs. 52.0 expected, p =
+6.6×10⁻⁷; GORE3 observed 91 vs. 54.9 expected, p = 4.1×10⁻⁸) — splicing
+and expression changes are not independent. **At the same time, the
+majority of genes with significant splicing in every contrast are not
+differentially expressed** (154/164 Benzamidine, 122/206 SKTI, 117/208
+GORE3) — most of the splicing signal in this dataset occurs in genes
+whose overall expression level does not change, consistent with
+alternative splicing acting as a regulatory layer at least partly
+independent of transcript abundance, the premise motivating Phase 6 in
+the first place (§1).
+
+**Trypsin/chymotrypsin-clan serine-protease genes (Pfam PF00089, 316
+genes genome-wide per the Phase 7 domain annotation, §3.16) with
+significant splicing:** 4 in Benzamidine (`gene-BAEE`,
+`gene-LOC142975207`, `gene-LOC142977343`, `gene-LOC142985010`), 2 in SKTI
+(`gene-LOC142977339`, `gene-LOC142983873`), 5 in GORE3
+(`gene-LOC142975421`, `gene-LOC142976446`, `gene-LOC142977339`,
+`gene-LOC142980480`, `gene-LOC142983873`). This is a direct, real input
+for the Phase 9 targeted serine-protease-family curation (isoform-switch
+hypothesis H1) — **listed here as a candidate set from the current
+significance thresholds, not as a curated or biologically confirmed
+finding**; two genes (`gene-LOC142977339`, `gene-LOC142983873`) recur in
+both SKTI and GORE3.
+
 ---
 
 ## 4. Discussion
@@ -1565,6 +1717,37 @@ decision, not a citation).
     future use of it should be flagged as such, and its predictions
     treated as exploratory, not as validated as the eggNOG/InterProScan6
     results reported here.
+18. **The Phase 2 Subread alignment track was, in practice, not
+    splice-aware for the entire Phase 2–5 analysis window (§2.9): the
+    `subread-align` binary used never produced a spliced (`N`-CIGAR)
+    alignment.** This has no impact on the gene-level DE results (Phase
+    5), which use the STAR/featureCounts track, but it means any
+    splice-junction-related interpretation drawn from the original Phase
+    2 "Subread track" characterisation (§3.9–3.10) before this session
+    should be understood as applying to `subread-align`'s general-purpose
+    mapping accuracy, not to its (non-existent, in this run) junction
+    detection.
+19. **rMATS-turbo and MAJIQ agree poorly at the gene level (Jaccard
+    0.05–0.10, §3.19) on the same BAM files and the same nominal
+    significance framework.** Neither figure should be read as "the" true
+    splicing-event count; each tool's own declared threshold defines its
+    own set, and the union (used for the DE cross-reference and Pfam
+    trypsin flag) is a deliberately inclusive, not a conservative, choice.
+20. **The MAJIQ outlier down-weighting mechanism (`majiq weights`) planned
+    for this analysis (Norton et al. 2018, MAJIQ v2) is not available in
+    the installed MAJIQ v3 CLI** — verified directly, not assumed. No
+    outlier weighting or batch/confounding correction (e.g. `majiq
+    moccasin`, the closest v3 successor) has been applied to the deltapsi
+    results reported here, despite the same ID-8/Benzamidine confound
+    already characterised for differential expression (Limitation 12).
+    The Benzamidine splicing results in §3.19 should be read with the
+    same caution already attached to the Benzamidine DE results.
+21. **The trypsin/serine-protease splicing candidates listed in §3.19 are
+    a direct read-out of the current significance thresholds (rMATS
+    FDR<0.05/\|ΔPSI\|≥0.1, MAJIQ P≥0.9), not a curated or independently
+    validated gene set.** Formal curation of this family, cross-referenced
+    against the isoform-switch hypothesis (H1), is the explicit scope of
+    Phase 9 and has not yet been performed.
 
 ---
 
@@ -1647,6 +1830,23 @@ Yu, G., Wang, L.-G., Han, Y. & He, Q.-Y. clusterProfiler: an R package
 for comparing biological themes among gene clusters. *OMICS* **16**,
 284–287 (2012). PMID 22455463.
 
+Wang, Y., Xie, Z., Kutschera, E., Adams, J. I., Kadash-Edmondson, K. E. &
+Xing, Y. rMATS-turbo: an efficient and flexible computational tool for
+alternative splicing analysis of large-scale RNA-seq data. *Nat. Protoc.*
+**19**, 1083–1104 (2024). PMID 38396040.
+
+Vaquero-Garcia, J. et al. A new view of transcriptome complexity and
+regulation through the lens of local splicing variations. *eLife* **5**,
+e11752 (2016). PMID 26829591.
+
+Norton, S. S., Vaquero-Garcia, J., Lahens, N. F., Grant, G. R. & Barash,
+Y. Outlier detection for improved differential splicing quantification
+from RNA-Seq experiments with replicates. *Bioinformatics* **34**,
+1488–1497 (2018). PMID 29236961.
+
+Fenn, A. et al. Alternative splicing analysis benchmark with DICAST.
+*NAR Genom. Bioinform.* **5**, lqad044 (2023). PMID 37260511.
+
 ---
 
 ## Reproducibility — code and data locations
@@ -1711,3 +1911,9 @@ for comparing biological themes among gene clusters. *OMICS* **16**,
 | compareCluster, dotplot, cnetplot (Phase 7 Block I, R) | `codigo/fase7_blocoI/compare_clusters_r.R` → `resultados/fase7_blocoI/compareCluster_GO_results.csv`, `functional_richness_summary.csv` |
 | Venn (genes) + UpSet (GO terms) (Phase 7 Block I, Python) | `codigo/fase7_blocoI/venn_upset_go_python.py` |
 | Figures 14–16 + cnetplots (PDF + 300 dpi PNG) | `figuras/fase7_blocoI/` |
+| `subjunc` realignment (Phase 6 Block B prerequisite, corrects the non-spliced Phase 2 Subread track) | `codigo/fase6_blocoB/run_subjunc_realign.sh` → `bam/subjunc/` (server-only) |
+| rMATS-turbo, 3 contrasts (Phase 6 Block B) | `codigo/fase6_blocoB/run_rmats_turbo.sh` → `resultados_server/fase6_blocoB/{contrast}/*.MATS.JC.txt` |
+| MAJIQ build + psi-coverage + deltapsi, 3 contrasts (Phase 6 Block C) | `codigo/fase6_blocoC/experiments.tsv`, `run_majiq_build.sh`, `run_majiq_psi_deltapsi.sh` → `resultados_server/fase6_blocoC/deltapsi/*.deltapsi.tsv` |
+| Significant-gene extraction + rMATS×MAJIQ convergence (Phase 6 Block D) | `resultados/fase6_blocoD/{rmats,majiq}_sig_{contrast}.csv` |
+| Splicing × DE (Phase 5) × Pfam-trypsin (Phase 7) cross-reference (Phase 6 Block E) | `codigo/fase6_blocoE/cross_reference_splicing_de.py` → `resultados/fase6_blocoE/cross_reference_summary.csv` |
+| Figures 17–18 (UpSet splicing genes; splicing × DE overlap) (Phase 6 Block F) | `codigo/fase6_blocoF/figures_splicing.py` → `figuras/fase6_blocoF/` |

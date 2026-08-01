@@ -1,0 +1,4 @@
+contrast,splicing_genes_uniao_rmats_majiq,splicing_genes_intersecao_rmats_majiq,de_genes_fase5,splicing_E_de_ambos,splicing_E_de_esperado_ao_acaso,splicing_E_de_hypergeom_pvalue,splicing_SEM_de_apenas_isoforma,genes_tripsina_com_splicing_sig,genes_tripsina_com_splicing_sig_lista
+Benzamidine_vs_Control,164,12,255,10,2.7,0.0003395288503577815,154,4,gene-BAEE;gene-LOC142975207;gene-LOC142977343;gene-LOC142985010
+SKTI_vs_Control,206,11,3985,84,52.0,6.609734786789425e-07,122,2,gene-LOC142977339;gene-LOC142983873
+GORE3_vs_Control,208,21,4164,91,54.9,4.05562424100658e-08,117,5,gene-LOC142975421;gene-LOC142976446;gene-LOC142977339;gene-LOC142980480;gene-LOC142983873

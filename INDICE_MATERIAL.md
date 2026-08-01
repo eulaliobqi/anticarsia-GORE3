@@ -4,7 +4,7 @@ Função: mapa único de tudo que existe hoje (figuras, tabelas, texto,
 código, dado-fonte), para uso na geração futura do artigo em Word e da
 apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 — é o índice de orquestração que aponta pra eles.
-Última atualização: 31/07/2026 (FASE 5 A-H e FASE 7 A-K concluídos e commitados).
+Última atualização: 01/08/2026 (FASE 6 A-F concluída, ainda não commitada).
 ---
 
 # Índice de material — Pós-doc GORE3 / RNA-Seq
@@ -50,7 +50,13 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | FASE 7 | I — comparação entre tratamentos (compareCluster, Venn, UpSet) | ✅ concluído (86% termos GORE3 também em SKTI) | §2.8, §3.18 |
 | FASE 7 | J — figuras finais | ✅ concluído (geradas junto ao Bloco I) | §3.18 |
 | FASE 7 | K — documentação + commit | ✅ concluído (esta sessão) | — |
-| FASE 6, 8–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
+| FASE 6 | A — bibliografia (4 citações, antes da execução) | ✅ concluído (já tinham bib+ficha, faltava só Zotero) | §2.9 |
+| FASE 6 | B — rMATS-turbo, 3 contrastes | ✅ concluído (⚠️ 1ª tentativa deu 0 eventos — BAM Subread sem splice, corrigido com `subjunc`) | §2.9, §3.19 |
+| FASE 6 | C — MAJIQ build+psi-coverage+deltapsi, 3 contrastes | ✅ concluído (instalação exigiu 5 correções reais; `majiq weights` não existe na v3, `moccasin` não aplicado) | §2.9, §3.19 |
+| FASE 6 | D — convergência rMATS×MAJIQ | ✅ concluído (Jaccard 0,05-0,10, baixa) | §3.19 |
+| FASE 6 | E — cruzamento splicing×DE(FASE5)×Pfam-tripsina(FASE7) | ✅ concluído (sobreposição sig. p<3,4e-4, mas maioria do splicing não é DE) | §3.19 |
+| FASE 6 | F — figuras (UpSet genes splicing, splicing×DE) | ✅ concluído | §3.19 |
+| FASE 8–10 | Ver `docs/07_analise_rnaseq.md` | não iniciado | — |
 
 ## Figuras
 
@@ -74,6 +80,8 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | 15 | `figuras/fase7_blocoI/fig_upset_go_terms.png` | UpSet dos termos GO significativos por contraste (não genes) | §3.18 | `codigo/fase7_blocoI/venn_upset_go_python.py` | `resultados/fase7_blocoG/clusterprofiler_GO_*.csv` |
 | 16 | `figuras/fase7_blocoI/fig_venn3_de_genes.png` | Venn de 3 vias dos genes DE (checagem cruzada com UpSet da FASE 5) | §3.18 | `codigo/fase7_blocoI/venn_upset_go_python.py` | `resultados/fase5_blocoD/deseq2_*_sig.csv` |
 | — | `figuras/fase7_blocoI/fig_cnetplot_*.png` (3 contrastes) | Rede gene-conceito, top 10 termos GO por contraste | §3.18 | `codigo/fase7_blocoI/compare_clusters_r.R` | idem |
+| 17 | `figuras/fase6_blocoF/fig_upset_splicing_genes.png` | UpSet dos genes com splicing significativo (rMATS∪MAJIQ) entre os 3 contrastes | §3.19 | `codigo/fase6_blocoF/figures_splicing.py` | `resultados/fase6_blocoD/{rmats,majiq}_sig_*.csv` |
+| 18 | `figuras/fase6_blocoF/fig_splicing_vs_de_overlap.png` | Sobreposição splicing×DE por contraste (barras empilhadas) | §3.19 | `codigo/fase6_blocoF/figures_splicing.py` | `resultados/fase6_blocoE/cross_reference_summary.csv` |
 
 Todas em PNG 300 dpi, legenda 100% em inglês no `artigo.md` (padrão
 Nature: `**Figure N |** frase-título...`), traduzida fielmente no
@@ -100,6 +108,7 @@ reprocessamento.
 | 14 | Cobertura de anotação funcional por fonte (Pfam, eggNOG, InterProScan6, união) | §3.16 | `resultados/fase7_blocoB/pfam_coverage_summary.csv`, `resultados/fase7_blocoC/eggnog_coverage_summary.csv`, `resultados/fase7_blocoF/annotation_coverage_summary.csv` |
 | 15 | Enriquecimento GO/KEGG/Pfam significativo por contraste e método | §3.17 | `resultados/fase7_blocoG/*.csv` |
 | 16 | Concordância cruzada R×Python (GO), Jaccard por contraste | §3.17 | `resultados/fase7_blocoH/cross_engine_go_comparison.csv` |
+| 17 | Eventos de splicing significativos por contraste, rMATS-turbo vs. MAJIQ | §3.19 | `resultados/fase6_blocoD/{rmats,majiq}_sig_*.csv` |
 
 Todas as tabelas do artigo são texto Markdown gerado a partir dos CSVs
 acima — nenhum número foi digitado à mão sem conferência contra a fonte
@@ -139,6 +148,11 @@ acima — nenhum número foi digitado à mão sem conferência contra a fonte
 | `codigo/fase7_blocoG/` | Enriquecimento GO/KEGG em R (`run_enrichment_clusterprofiler.R`) e Python (`run_enrichment_gseapy.py`), Fisher exato de domínios Pfam (`run_pfam_enrichment.py`) |
 | `codigo/fase7_blocoH/` | Verificação cruzada R×Python do enriquecimento GO (`compare_enrichment_r_python.py`) |
 | `codigo/fase7_blocoI/` | compareCluster+dotplot+cnetplot em R (`compare_clusters_r.R`), Venn+UpSet em Python (`venn_upset_go_python.py`) |
+| `codigo/fase6_blocoB/` | Realinhamento `subjunc` corrigindo a via Subread sem splice da FASE 2 (`run_subjunc_realign.sh`), rMATS-turbo 3 contrastes (`run_rmats_turbo.sh`) |
+| `codigo/fase6_blocoC/` | Samplesheet MAJIQ (`experiments.tsv`), build do splicegraph (`run_majiq_build.sh`), psi-coverage+deltapsi 3 contrastes (`run_majiq_psi_deltapsi.sh`) |
+| `codigo/fase6_blocoD/` (via `extract_sig_genes_fase6.py`, servidor) | Extração de genes significativos por contraste (rMATS/MAJIQ) + convergência (Jaccard) |
+| `codigo/fase6_blocoE/` | Cruzamento splicing×DE(FASE5)×Pfam-tripsina(FASE7), com teste hipergeométrico de enriquecimento (`cross_reference_splicing_de.py`) |
+| `codigo/fase6_blocoF/` | Figuras UpSet + splicing×DE, paleta reaproveitada da FASE 5/7 (`figures_splicing.py`) |
 
 Todo comando, incluindo os que falharam parcialmente (flag `-d` do
 FastQC na FASE 1; falha de segmentação por concorrência de threads na
@@ -170,6 +184,9 @@ original.
 | Saída completa do InterProScan6 (TSV/GFF3/JSON/JSONL/XML) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase7_blocoD/protein_representative.faa.*` | ~590 MB total (JSON sozinho 247 MB) | grande demais para git — a extração relevante (cobertura, pares gene-GO) já está em `resultados/fase7_blocoB/`, `resultados_server/fase7_blocoF/gene_to_go_consolidated.csv` |
 | Anotações completas do eggNOG-mapper (`.emapper.annotations`) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase7_blocoC/pfam_eggnog_out.emapper.annotations` | 17,4 MB | só o resumo de cobertura + `gene_to_kegg.csv` foram versionados; `gene_to_go.csv` (27,8 MB, todos os pares gene-GO do eggNOG isolado) fica só no servidor |
 | Mapeamento gene→GO consolidado (união eggNOG+InterProScan6) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase7_blocoF/gene_to_go_consolidated.csv` | 36,8 MB | só o resumo de cobertura (`annotation_coverage_summary.csv`) foi versionado; reconstruível via `codigo/fase7_blocoF/consolidate_annotation.py` |
+| BAMs `subjunc` (13 amostras, FASE 6 Bloco B, substitui o Subread sem splice da FASE 2) | `~/rnaseq-Anticarsia-GORE3/bam/subjunc/` | 32 GB | grande demais para git — os `*.MATS.JC.txt` (rMATS) e `.sj`/splicegraph (MAJIQ) que sustentam a Tabela 17/Figs. 17-18 **foram copiados e resumidos** em `resultados/fase6_blocoD/`; reobtível rerodando `codigo/fase6_blocoB/run_subjunc_realign.sh` a partir dos FASTQ trimados (se ainda existirem no servidor) |
+| Saída completa MAJIQ build (splicegraph + `.sj` por experimento) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase6_blocoC/build/` | 33 MB | reobtível via `codigo/fase6_blocoC/run_majiq_build.sh` a partir dos BAMs `subjunc` |
+| Saída zero-evento da 1ª tentativa rMATS (Subread sem splice, achado técnico preservado por transparência) | `~/rnaseq-Anticarsia-GORE3/resultados_server/fase6_blocoB_ATTEMPT1_subread_zero_events/` | 35 MB | não apagada de propósito — evidência do achado declarado em `artigo.md` §2.9/Limitação 18 |
 
 **Risco declarado, não escondido:** os links de download da Macrogen já
 expiraram (`docs/07_analise_rnaseq.md` §13.1) — se o servidor for limpo,
@@ -190,6 +207,9 @@ perdidos.
 5. Desvio de comando do FastQC (`-d` falhou) — documentado, sem consequência nos resultados.
 6. Assimetria de poder estatístico por contraste (Tabela 4) — caracterizada, plano de resolução declarado, **ainda não resolvida**.
 7. Corte de cor >10% na Fig. 3 é escolha visual post-hoc, não limiar pré-declarado como na Fig. 1.
+8. `majiq weights` (ponderação de outlier, planejada na FASE 4/6 para o confundimento ID-8) não existe no MAJIQ v3 instalado — sucessor aparente `majiq moccasin` ainda não aplicado.
+9. Candidatos de splicing em genes de tripsina (FASE 6, §3.19) são leitura direta de limiar, não curadoria — curadoria formal é a FASE 9, não iniciada.
+10. Causa raiz de por que `subread-align` (não `subjunc`) foi usado na FASE 2 original não é maliciosa nem negligente — era a leitura razoável do comentário do próprio Subread na época, só corrigida ao ver o resultado zero-evento do rMATS na FASE 6.
 
 ## Para quando for gerar o Word/PowerPoint
 

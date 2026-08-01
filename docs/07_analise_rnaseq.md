@@ -723,6 +723,80 @@ genuinamente nova a construir, sem precedente local direto. Estrutura
 proposta: `modules/splicing.nf` com processos `RMATS_TURBO`, `MAJIQ_BUILD`,
 `MAJIQ_PSI`, `MAJIQ_DELTAPSI`.
 
+**Decisão de execução (01/08/2026):** mantido o padrão bash+Python por
+bloco (não migrado para Nextflow) — consistente com a FASE 2 em diante,
+sem custo de construir infraestrutura nova para uma fase só.
+
+### 7.1 FASE 6 (Blocos A-F) concluída — resultados reais
+
+**Achado técnico crítico, encontrado e corrigido antes de qualquer
+resultado existir:** o BAM "Subread" da FASE 2 (`subread-align -t 0`)
+**nunca alinhou junção exon-exon** — confirmado via `samtools view`
+direto no CIGAR: zero reads com operador `N` em todo o arquivo, só
+soft-clip pesado. rMATS-turbo rodado sobre esse BAM produziu **zero
+eventos quantificados** nos 5 tipos × 3 contrastes (não zero
+*significativos*, zero linhas de dado mesmo antes de qualquer filtro
+estatístico). O pacote Subread tem dois alinhadores — `subread-align`
+(geral, sem junção confiável) e **`subjunc`** (dedicado a RNA-Seq/junção,
+mesmo índice) — e `coxe2024benchmarking` quase certamente testou
+`subjunc`, não `subread-align`. **Corrigido:** as 13 amostras foram
+realinhadas com `subjunc` (`codigo/fase6_blocoB/run_subjunc_realign.sh`,
+mesmo índice `genome_index_subread/ilAntGemm2`, sem reconstrução),
+confirmado por CIGAR real (`133M1126N18M` etc.). Saída zero-evento da 1ª
+tentativa preservada, não apagada, em
+`resultados_server/fase6_blocoB_ATTEMPT1_subread_zero_events/`. Achado
+secundário: leitura real é **151nt**, não 150nt.
+
+**Instalação do MAJIQ — 5 correções reais em sequência** (nenhuma delas
+um defeito do MAJIQ em si): variável `HTSLIB_*` não chegava ao build por
+escaping quebrado em SSH aninhado; faltava `liblzma` (pacote `xz`);
+`scikit-build-core` 1.0.3 tornou fatal um aviso que na 0.11.1 era só
+warning; `--no-build-isolation` exigia `setuptools_scm` pré-instalado;
+`pybind11` ≥2.13 introduziu `static_assert` incompatível com
+`def_property_readonly`+`call_guard` usado no código C++ do MAJIQ
+(`pySpliceGraphValues.hpp`) — fixado `pybind11=2.12`. Com as 5 correções,
+`rna_majiq 3.0.23.dev1` instalado com sucesso. Licença acadêmica obtida
+pelo usuário (majiq.biociphers.org) e colocada no `$HOME` do servidor.
+
+**Achado de lacuna de versão, não escondido:** o MAJIQ instalado é a
+linha **v3** (pipeline `build → psi-coverage → psi/deltapsi/heterogen/
+moccasin`), reescrita completa em relação à v2 citada em
+`norton2018outlier`. **O flag `majiq weights` não existe mais nesta
+versão** — verificado direto no `--help` de todos os subcomandos, não
+assumido. O sucessor funcional aparente é `majiq moccasin` (correção de
+confundimento via RUV sobre PsiCoverage), ainda não aplicado — item em
+aberto, não substituído silenciosamente.
+
+**Resultados reais, 3 contrastes vs. Controle:**
+
+| Contraste | rMATS sig. (FDR<0,05, \|ΔPSI\|≥0,1) | MAJIQ sig. (P≥0,9) | Genes MAJIQ | Jaccard rMATS×MAJIQ (genes) |
+|---|---:|---:|---:|---:|
+| Benzamidina | 117 | 163 | 75 | 0,073 |
+| SKTI | 148 | 214 | 93 | 0,053 |
+| GORE3 | 159 | 201 | 91 | 0,101 |
+
+Ao contrário da FASE 5 (DE), onde Benzamidina é uma ordem de grandeza
+menor que SKTI/GORE3, em splicing os 3 contrastes ficam na mesma faixa —
+achado real, não suavizado. Convergência rMATS×MAJIQ é baixa (Jaccard
+0,05-0,10), coerente com `fenn2023alternative` (DICAST): nenhuma
+ferramenta domina.
+
+**Cruzamento com FASE 5 (DE) e Pfam-tripsina (FASE 7):** sobreposição
+splicing×DE é estatisticamente maior que o acaso nos 3 contrastes
+(hipergeométrica, p entre 3,4×10⁻⁴ e 4×10⁻⁸), mas a maioria dos genes com
+splicing significativo (117-154 por contraste) **não** é DE — splicing
+como camada regulatória parcialmente independente da expressão. Genes com
+domínio Pfam de tripsina (PF00089, 316 no genoma) com splicing
+significativo: 4 (Benzamidina), 2 (SKTI), 5 (GORE3) — insumo direto para
+a FASE 9 (H1), não curadoria ainda.
+
+Código: `codigo/fase6_blocoB/` (subjunc + rMATS), `codigo/fase6_blocoC/`
+(MAJIQ build/psi-coverage/deltapsi), `codigo/fase6_blocoD/` (extração +
+convergência), `codigo/fase6_blocoE/` (cruzamento DE+Pfam),
+`codigo/fase6_blocoF/` (figuras). Detalhes completos, com números
+adicionais e ressalvas, em `artigo.md`/`artigo_pt.md` §2.9/§3.19 e
+Limitações 18-21.
+
 ---
 
 ## 8. FASE 7 — Anotação funcional multi-fonte e enriquecimento (Blocos A-K concluídos, 31/07/2026)
