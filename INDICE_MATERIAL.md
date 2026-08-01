@@ -4,7 +4,7 @@ Função: mapa único de tudo que existe hoje (figuras, tabelas, texto,
 código, dado-fonte), para uso na geração futura do artigo em Word e da
 apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 — é o índice de orquestração que aponta pra eles.
-Última atualização: 01/08/2026 (FASE 6 A-F concluída, ainda não commitada).
+Última atualização: 01/08/2026 (FASE 6 A-F concluída, incluindo sashimi plots).
 ---
 
 # Índice de material — Pós-doc GORE3 / RNA-Seq
@@ -82,6 +82,7 @@ apresentação em PowerPoint. Nada aqui substitui `artigo.md`/`artigo_pt.md`
 | — | `figuras/fase7_blocoI/fig_cnetplot_*.png` (3 contrastes) | Rede gene-conceito, top 10 termos GO por contraste | §3.18 | `codigo/fase7_blocoI/compare_clusters_r.R` | idem |
 | 17 | `figuras/fase6_blocoF/fig_upset_splicing_genes.png` | UpSet dos genes com splicing significativo (rMATS∪MAJIQ) entre os 3 contrastes | §3.19 | `codigo/fase6_blocoF/figures_splicing.py` | `resultados/fase6_blocoD/{rmats,majiq}_sig_*.csv` |
 | 18 | `figuras/fase6_blocoF/fig_splicing_vs_de_overlap.png` | Sobreposição splicing×DE por contraste (barras empilhadas) | §3.19 | `codigo/fase6_blocoF/figures_splicing.py` | `resultados/fase6_blocoE/cross_reference_summary.csv` |
+| 19 | `figuras/fase6_blocoF/sashimi/{Benzamidine_LOC142983135,SKTI_LOC142974193,GORE3_LOC142980480}_top_SE.png` | Sashimi plot do evento SE mais significativo por contraste (GORE3 cai em gene de tripsina PF00089) | §3.19 | `codigo/fase6_blocoF/run_sashimi.sh` | `resultados_server/fase6_blocoB/{contraste}/SE.MATS.JC.txt`, `bam/subjunc/` |
 
 Todas em PNG 300 dpi, legenda 100% em inglês no `artigo.md` (padrão
 Nature: `**Figure N |** frase-título...`), traduzida fielmente no
@@ -152,7 +153,7 @@ acima — nenhum número foi digitado à mão sem conferência contra a fonte
 | `codigo/fase6_blocoC/` | Samplesheet MAJIQ (`experiments.tsv`), build do splicegraph (`run_majiq_build.sh`), psi-coverage+deltapsi 3 contrastes (`run_majiq_psi_deltapsi.sh`) |
 | `codigo/fase6_blocoD/` (via `extract_sig_genes_fase6.py`, servidor) | Extração de genes significativos por contraste (rMATS/MAJIQ) + convergência (Jaccard) |
 | `codigo/fase6_blocoE/` | Cruzamento splicing×DE(FASE5)×Pfam-tripsina(FASE7), com teste hipergeométrico de enriquecimento (`cross_reference_splicing_de.py`) |
-| `codigo/fase6_blocoF/` | Figuras UpSet + splicing×DE, paleta reaproveitada da FASE 5/7 (`figures_splicing.py`) |
+| `codigo/fase6_blocoF/` | Figuras UpSet + splicing×DE, paleta reaproveitada da FASE 5/7 (`figures_splicing.py`); sashimi plot do evento SE mais significativo por contraste via `rmats2sashimiplot` (`run_sashimi.sh`) |
 
 Todo comando, incluindo os que falharam parcialmente (flag `-d` do
 FastQC na FASE 1; falha de segmentação por concorrência de threads na

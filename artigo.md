@@ -1461,6 +1461,20 @@ significance thresholds, not as a curated or biologically confirmed
 finding**; two genes (`gene-LOC142977339`, `gene-LOC142983873`) recur in
 both SKTI and GORE3.
 
+**Figure 19 | Sashimi plots of the single most significant skipped-exon
+(SE) event per contrast** (lowest FDR, ties broken by largest |ΔPSI|,
+same threshold as the rest of §3.19; `rmats2sashimiplot`, three
+replicates per arm, `bam/subjunc/`). Files:
+`figuras/fase6_blocoF/sashimi/{Benzamidine_LOC142983135,
+SKTI_LOC142974193, GORE3_LOC142980480}_top_SE.png`. **GORE3's top event
+falls in `gene-LOC142980480`, one of the five Pfam-PF00089
+trypsin-domain genes flagged above** — inclusion level drops from 1.00 in
+all three Control replicates to 0.71/0.00/0.00 in the three GORE3
+replicates, i.e. near-complete skipping of the middle exon in two of
+three GORE3 libraries. This single-event picture is illustrative, not a
+population-level statistic — it is exactly the kind of candidate the
+Phase 9 curation is meant to follow up on, not a substitute for it.
+
 ---
 
 ## 4. Discussion
@@ -1917,3 +1931,4 @@ Fenn, A. et al. Alternative splicing analysis benchmark with DICAST.
 | Significant-gene extraction + rMATS×MAJIQ convergence (Phase 6 Block D) | `resultados/fase6_blocoD/{rmats,majiq}_sig_{contrast}.csv` |
 | Splicing × DE (Phase 5) × Pfam-trypsin (Phase 7) cross-reference (Phase 6 Block E) | `codigo/fase6_blocoE/cross_reference_splicing_de.py` → `resultados/fase6_blocoE/cross_reference_summary.csv` |
 | Figures 17–18 (UpSet splicing genes; splicing × DE overlap) (Phase 6 Block F) | `codigo/fase6_blocoF/figures_splicing.py` → `figuras/fase6_blocoF/` |
+| Figure 19 (sashimi plots, top SE event per contrast) (Phase 6 Block F) | `codigo/fase6_blocoF/run_sashimi.sh` → `figuras/fase6_blocoF/sashimi/` |
